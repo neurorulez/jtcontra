@@ -9,8 +9,10 @@
 #     shift
 # done
 
-ln -sf ../../rom/contra.rom rom.bin
-bin2hex <rom.bin >sdram.hex
+if [ ! -e sdram.hex ]; then
+    ln -sf ../../rom/contra.rom rom.bin
+    bin2hex <rom.bin >sdram.hex
+fi
 
 export GAME_ROM_PATH=rom.bin
 export MEM_CHECK_TIME=210_000_000

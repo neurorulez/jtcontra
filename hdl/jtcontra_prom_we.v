@@ -25,7 +25,8 @@ module jtcontra_prom_we(
     output reg [21:0]    prog_addr,
     output reg [ 7:0]    prog_data,
     output reg [ 1:0]    prog_mask, // active low
-    output reg           prog_we
+    output reg           prog_we,
+    input                sdram_ack
 );
 
 always @(posedge clk) begin
@@ -36,7 +37,7 @@ always @(posedge clk) begin
         prog_mask <= ioctl_addr[0] ? 2'b10 : 2'b01;            
     end
     else begin
-        prog_we  <= 1'b0;
+        if(!downloading || sdram_ack) prog_we  <= 1'b0;
     end
 end
 

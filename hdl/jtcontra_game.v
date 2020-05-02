@@ -127,9 +127,11 @@ jtcontra_prom_we u_prom(
     .prog_addr      ( prog_addr     ),
     .prog_data      ( prog_data     ),
     .prog_mask      ( prog_mask     ), // active low
-    .prog_we        ( prog_we       )
+    .prog_we        ( prog_we       ),
+    .sdram_ack      ( sdram_ack     )
 );
 
+`ifndef NOMAIN
 jtcontra_main u_main(
     .clk            ( clk24         ),        // 24 MHz
     .rst            ( rst           ),
@@ -148,7 +150,7 @@ jtcontra_main u_main(
     .coin_input     ( coin_input    ),
     .joystick1      ( joystick1     ),
     .joystick2      ( joystick2     ),
-    .service        ( service       ),
+    .service        ( 1'b1          ),
     // GFX
     .cpu_addr       ( cpu_addr      ),
     .cpu_dout       ( cpu_dout      ),
@@ -169,6 +171,7 @@ jtcontra_main u_main(
     .dipsw_b        ( dipsw_b       ),
     .dipsw_c        ( dipsw_c       )
 );
+`endif
 
 jtcontra_video u_video(
     .rst        ( rst       ),
