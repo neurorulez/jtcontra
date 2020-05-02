@@ -87,7 +87,7 @@ wire [ 3:0] dipsw_c;
 
 wire [12:0] cpu_addr;
 wire        gfx_irqn, gfx1_cs, gfx2_cs, gfx1_cfg_cs, gfx2_cfg_cs, pal_cs;
-wire        cpu_cen, cpu_rnw;
+wire        cpu_cen, cpu_rnw, cpu_irqn;
 wire [ 7:0] gfx1_dout, gfx2_dout, pal_dout, cpu_dout;
 
 assign prog_rd    = 0;
@@ -155,7 +155,7 @@ jtcontra_main u_main(
     .cpu_addr       ( cpu_addr      ),
     .cpu_dout       ( cpu_dout      ),
     .cpu_rnw        ( cpu_rnw       ),
-    .gfx_irqn       ( gfx_irqn      ),
+    .gfx_irqn       ( cpu_irqn      ),
     .gfx1_cs        ( gfx1_cs       ),
     .gfx2_cs        ( gfx2_cs       ),
     .gfx1_cfg_cs    ( gfx1_cfg_cs   ),
@@ -186,6 +186,7 @@ jtcontra_video u_video(
     .HS         ( HS        ),
     .VS         ( VS        ),
     // GFX - CPU interface
+    .cpu_irqn   ( cpu_irqn  ),
     .gfx1_cs    ( gfx1_cs   ),
     .gfx2_cs    ( gfx2_cs   ),
     .cpu_rnw    ( cpu_rnw   ),
