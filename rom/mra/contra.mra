@@ -1,14 +1,23 @@
 <misterromdescription>
     <name>contra</name>
+    <rbf>jtcontra</rbf>
     <setname>contra</setname>
-    <rom index="0" zip="contra.zip" type="merged">
+    <rom index="0" zip="contra.zip" type="merged" md5="None">
         <!-- maincpu -->
-        <part name="633m03.18a" crc="d045e1da" length="0x8000" offset="0x8000"/>
+        <interleave output="16">
+            <part name="633m03.18a" crc="d045e1da" length="0x8000" offset="0x8000" map="12"/>
+        </interleave>
         <!-- banks -->
-        <part name="633m03.18a" crc="d045e1da" length="0x8000" offset="0"/>
-        <part name="633i02.17a" crc="b2f7bd9a"/>
+        <interleave output="16">
+            <part name="633m03.18a" crc="d045e1da" length="0x8000" offset="0" map="12"/>
+        </interleave>
+        <interleave output="16">
+            <part name="633i02.17a" crc="b2f7bd9a" map="12"/>
+        </interleave>
         <!-- audiocpu -->
-        <part name="633e01.12a" crc="d1549255" length="0x8000"/>
+        <interleave output="16">
+            <part name="633e01.12a" crc="d1549255" length="0x8000" map="12"/>
+        </interleave>
         <!-- gfx1 -->
         <part name="633e04.7d" crc="14ddc542"/>
         <part name="633e05.7f" crc="42185044"/>
@@ -37,4 +46,6 @@
         <dip name="Service Mode" bits="18" ids="On,Off"/>
         <dip name="Sound" bits="19" ids="Mono,Stereo"/>
     </switches>
+    <buttons names="Fire,Jump,Start,Coin,Pause" 
+        default="A,B,R,L,Start"/>
 </misterromdescription>

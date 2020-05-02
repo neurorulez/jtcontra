@@ -34,8 +34,8 @@ module jtcontra_game(
     // cabinet I/O
     input   [ 1:0]  start_button,
     input   [ 1:0]  coin_input,
-    input   [ 6:0]  joystick1,
-    input   [ 6:0]  joystick2,
+    input   [ 5:0]  joystick1,
+    input   [ 5:0]  joystick2,
     // SDRAM interface
     input           downloading,
     output          dwnld_busy,
@@ -47,7 +47,7 @@ module jtcontra_game(
     input           sdram_ack,
     output          refresh_en,
     // ROM LOAD
-    input   [21:0]  ioctl_addr,
+    input   [24:0]  ioctl_addr,
     input   [ 7:0]  ioctl_data,
     input           ioctl_wr,
     output  [21:0]  prog_addr,
@@ -89,10 +89,12 @@ wire [12:0] main_AB;
 wire        gfx_irqn, gfx1_cs, gfx2_cs, gfx1_cfg_cs, gfx2_cfg_cs, pal_cs;
 wire [ 7:0] gfx1_dout, gfx2_dout, pal_dout;
 
+assign prog_rd    = 0;
+assign dwnld_busy = downloading;
 assign { dipsw_c, dipsw_b, dipsw_a } = dipsw;
 
 localparam SND_OFFSET  = 22'h2_0000 >> 1;
-localparam GFX1_OFFSET = SND_OFFSET  + (22'h1_0000 >> 1);
+localparam GFX1_OFFSET = SND_OFFSET  + (22'h0_8000 >> 1);
 localparam GFX2_OFFSET = GFX1_OFFSET + (22'h8_0000 >> 1);
 
 // TEMPORARY ASSIGNMENTS!
@@ -164,6 +166,19 @@ jtcontra_main u_main(
     .dipsw_c        ( dipsw_c       )
 );
 
+jtcontra_video u_video(
+    .rst        ( rst       ),
+    .clk        ( clk       ),
+    .pxl2_cen   ( pxl2_cen  ),
+    .pxl_cen    ( pxl_cen   ),
+    .LHBL       ( LHBL      ),
+    .LVBL       ( LVBL      ),
+    .LHBL_dly   ( LHBL_dly  ),
+    .LVBL_dly   ( LVBL_dly  ),
+    .HS         ( HS        ),
+    .VS         ( VS        )
+);
+
 jtcontra_sound u_sound(
     .clk        ( clk24         ), // 24 MHz
     .rst        ( rst           ),
@@ -223,7 +238,6 @@ jtframe_rom #(
 
     .slot0_addr  ( gfx1_addr     ),
     .slot1_addr  ( gfx2_addr     ),
-    .slot2_addr  ( scr_addr      ),
     .slot6_addr  ( snd_addr      ),
     .slot7_addr  ( main_addr     ),
 

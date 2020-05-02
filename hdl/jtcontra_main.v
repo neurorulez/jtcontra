@@ -114,8 +114,9 @@ end
 
 always @(posedge clk) begin
     if( rst ) begin
-        bank    <= 4'd0;
-        snd_irq <= 0;
+        bank      <= 4'd0;
+        snd_irq   <= 0;
+        snd_latch <= 8'd0;
     end else if(cpu_cen) begin
         if( bank_cs ) bank <= cpu_dout[3:0];
         if( out_cs  ) begin

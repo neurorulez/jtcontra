@@ -19,7 +19,7 @@
 module jtcontra_prom_we(
     input                clk,
     input                downloading,
-    input      [22:0]    ioctl_addr,
+    input      [24:0]    ioctl_addr,
     input      [ 7:0]    ioctl_data,
     input                ioctl_wr,
     output reg [21:0]    prog_addr,
