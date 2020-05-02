@@ -8,7 +8,7 @@
         <part name="633m03.18a" crc="d045e1da" length="0x8000" offset="0"/>
         <part name="633i02.17a" crc="b2f7bd9a"/>
         <!-- audiocpu -->
-        <part name="633e01.12a" crc="d1549255"/>
+        <part name="633e01.12a" crc="d1549255" length="0x8000"/>
         <!-- gfx1 -->
         <part name="633e04.7d" crc="14ddc542"/>
         <part name="633e05.7f" crc="42185044"/>

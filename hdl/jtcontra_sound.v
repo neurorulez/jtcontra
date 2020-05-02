@@ -26,7 +26,6 @@ module jtcontra_sound(
     input           clk,        // 24 MHz
     input           rst,
     input           cen12,
-    input           H8,
     // communication with main CPU
     input           snd_irq,
     input   [ 7:0]  snd_latch,
@@ -45,12 +44,13 @@ module jtcontra_sound(
 wire [ 7:0] cpu_dout, ram_dout, fm_dout;
 wire [15:0] A;
 reg  [ 7:0] cpu_din;
-wire        RnW, firq_n, irq_n;
+wire        RnW, irq_n;
 reg         ram_cs, latch_cs, fm_cs, irq_cs;
 
 assign rom_addr = A[14:0];
 
 wire cen_fm, cen_fm2;
+wire cpu_cen;
 
 always @(*) begin
     rom_cs   = A[15];
@@ -70,15 +70,6 @@ always @(*) begin
     endcase
 end
 
-reg  last_H8, H8_edge;
-wire cpu_cen;
-
-always @(posedge clk) begin
-    last_H8 <= H8;
-    H8_edge <= H8 && !last_H8;
-end
-
-wire ram_we = ram_cs & ~RnW;
 
 jtframe_ff u_ff(
     .clk      ( clk         ),

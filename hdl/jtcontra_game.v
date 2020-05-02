@@ -63,7 +63,8 @@ module jtcontra_game(
     input           dip_test,
     input   [ 1:0]  dip_fxlevel, // Not a DIP on the original PCB   
     // Sound output
-    output  signed [15:0] snd,
+    output  signed [15:0] snd_left,
+    output  signed [15:0] snd_right,
     output          sample,
     input           enable_psg,
     input           enable_fm,
@@ -71,14 +72,48 @@ module jtcontra_game(
     input   [ 3:0]  gfx_en
 );
 
-wire        main_cs, snd_cs;
+wire        main_cs, snd_cs, snd_ok, main_ok;
+wire        snd_irq;
 wire [15:0] gfx1_data, gfx2_data;
 wire [17:0] gfx1_addr, gfx2_addr;
 
+wire [ 7:0] main_data, snd_data, snd_latch;
+wire [14:0] snd_addr;
+wire [16:0] main_addr;
+wire        cen12;
+
+wire [ 7:0] dipsw_a, dipsw_b;
+wire [ 3:0] dipsw_c;
+
+wire [12:0] main_AB;
+wire        gfx_irqn, gfx1_cs, gfx2_cs, gfx1_cfg_cs, gfx2_cfg_cs, pal_cs;
+wire [ 7:0] gfx1_dout, gfx2_dout, pal_dout;
+
+assign { dipsw_c, dipsw_b, dipsw_a } = dipsw;
+
+localparam SND_OFFSET  = 22'h2_0000 >> 1;
+localparam GFX1_OFFSET = SND_OFFSET  + (22'h1_0000 >> 1);
+localparam GFX2_OFFSET = GFX1_OFFSET + (22'h8_0000 >> 1);
+
 // TEMPORARY ASSIGNMENTS!
-assign snd_cs = 0;
 assign gfx1_addr = 18'd0;
 assign gfx2_addr = 18'd0;
+
+jtframe_cen24 u_cen(
+    .clk        ( clk24         ),    // 24 MHz
+    .cen12      ( cen12         ),
+    .cen6       (               ),
+    .cen4       (               ),
+    .cen3       (               ),
+    .cen3q      (               ), // 1/4 advanced with respect to cen3
+    .cen1p5     (               ),
+    // 180 shifted signals
+    .cen12b     (               ),
+    .cen6b      (               ),
+    .cen3b      (               ),
+    .cen3qb     (               ),
+    .cen1p5b    (               )
+);
 
 jtcontra_prom_we u_prom(
     .clk            ( clk           ),
@@ -90,6 +125,62 @@ jtcontra_prom_we u_prom(
     .prog_data      ( prog_data     ),
     .prog_mask      ( prog_mask     ), // active low
     .prog_we        ( prog_we       )
+);
+
+jtcontra_main u_main(
+    .clk            ( clk24         ),        // 24 MHz
+    .rst            ( rst           ),
+    .cen12          ( cen12         ),
+    // communication with main CPU
+    .snd_irq        ( snd_irq       ),
+    .snd_latch      ( snd_latch     ),
+    // ROM
+    .rom_addr       ( main_addr     ),
+    .rom_cs         ( main_cs       ),
+    .rom_data       ( main_data     ),
+    .rom_ok         ( main_ok       ),
+    // cabinet I/O
+    .start_button   ( start_button  ),
+    .coin_input     ( coin_input    ),
+    .joystick1      ( joystick1     ),
+    .joystick2      ( joystick2     ),
+    .service        ( service       ),
+    // GFX
+    .AB             ( main_AB       ),
+    .gfx_irqn       ( gfx_irqn      ),
+    .gfx1_cs        ( gfx1_cs       ),
+    .gfx2_cs        ( gfx2_cs       ),
+    .gfx1_cfg_cs    ( gfx1_cfg_cs   ),
+    .gfx2_cfg_cs    ( gfx2_cfg_cs   ),
+    .pal_cs         ( pal_cs        ),
+
+    .gfx1_dout      ( gfx1_dout     ),
+    .gfx2_dout      ( gfx2_dout     ),
+    .pal_dout       ( pal_dout      ),
+    // DIP switches
+    .dip_pause      ( dip_pause     ),
+    .dipsw_a        ( dipsw_a       ),
+    .dipsw_b        ( dipsw_b       ),
+    .dipsw_c        ( dipsw_c       )
+);
+
+jtcontra_sound u_sound(
+    .clk        ( clk24         ), // 24 MHz
+    .rst        ( rst           ),
+    .cen12      ( cen12         ),
+    // communication with main CPU
+    .snd_irq    ( snd_irq       ),
+    .snd_latch  ( snd_latch     ),
+    // ROM
+    .rom_addr   ( snd_addr      ),
+    .rom_cs     ( snd_cs        ),
+    .rom_data   ( snd_data      ),
+    .rom_ok     ( snd_ok        ),
+
+    // Sound output
+    .snd_left   ( snd_left      ),
+    .snd_right  ( snd_right     ),
+    .sample     (               )
 );
 
 jtframe_rom #(
