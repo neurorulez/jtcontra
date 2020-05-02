@@ -17,16 +17,27 @@
     Date: 02-05-2020 */
 
 module jtcontra_video(
-    input           rst,
-    input           clk,
-    output          pxl2_cen,
-    output          pxl_cen,
-    output          LHBL,
-    output          LVBL,
-    output          LHBL_dly,
-    output          LVBL_dly,
-    output          HS,
-    output          VS
+    input               rst,
+    input               clk,
+    input               clk24,
+    output              pxl2_cen,
+    output              pxl_cen,
+    output              LHBL,
+    output              LVBL,
+    output              LHBL_dly,
+    output              LVBL_dly,
+    output              HS,
+    output              VS,
+    // CPU      interface
+    input               gfx1_cs,
+    input               gfx2_cs,
+    input               cpu_rnw,
+    input               cpu_cen,
+    input      [12:0]   cpu_addr,
+    input      [ 7:0]   cpu_dout,
+    output     [ 7:0]   gfx1_dout,
+    output     [ 7:0]   gfx2_dout,
+    output              cpu_irqn
 );
 
 assign LVBL_dly = LVBL;
@@ -65,5 +76,48 @@ jtframe_vtimer u_timer(
     .VS         ( VS            )
 );
 
+jtcontra_gfx u_gfx1(
+    .rst        ( rst       ),
+    .clk        ( clk       ),
+    .clk24      ( clk24     ),
+    .cpu_cen    ( cpu_cen   ),
+    .pxl2_cen   ( pxl2_cen  ),
+    .pxl_cen    ( pxl_cen   ),
+    .LHBL       ( LHBL      ),
+    .LVBL       ( LVBL      ),
+    .LHBL_dly   ( LHBL_dly  ),
+    .LVBL_dly   ( LVBL_dly  ),
+    .HS         ( HS        ),
+    .VS         ( VS        ),
+    // CPU      interface
+    .gfx_cs     ( gfx1_cs   ),
+    .cpu_rnw    ( cpu_rnw   ),
+    .cpu_addr   ( cpu_addr  ),
+    .cpu_dout   ( cpu_dout  ),
+    .gfx_dout   ( gfx1_dout ),
+    .cpu_irqn   ( cpu_irqn  )
+);
+
+jtcontra_gfx u_gfx2(
+    .rst        ( rst       ),
+    .clk        ( clk       ),
+    .clk24      ( clk24     ),
+    .cpu_cen    ( cpu_cen   ),
+    .pxl2_cen   ( pxl2_cen  ),
+    .pxl_cen    ( pxl_cen   ),
+    .LHBL       ( LHBL      ),
+    .LVBL       ( LVBL      ),
+    .LHBL_dly   ( LHBL_dly  ),
+    .LVBL_dly   ( LVBL_dly  ),
+    .HS         ( HS        ),
+    .VS         ( VS        ),
+    // CPU      interface
+    .gfx_cs     ( gfx2_cs   ),
+    .cpu_rnw    ( cpu_rnw   ),
+    .cpu_addr   ( cpu_addr  ),
+    .cpu_dout   ( cpu_dout  ),
+    .gfx_dout   ( gfx2_dout ),
+    .cpu_irqn   (           )
+);
 
 endmodule

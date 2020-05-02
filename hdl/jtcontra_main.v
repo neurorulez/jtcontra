@@ -26,6 +26,7 @@ module jtcontra_main(
     input               clk,        // 24 MHz
     input               rst,
     input               cen12,
+    output              cpu_cen,
     // communication with main CPU
     output reg          snd_irq,
     output reg  [ 7:0]  snd_latch,
@@ -41,7 +42,9 @@ module jtcontra_main(
     input       [ 5:0]  joystick2,
     input               service,
     // GFX
-    output      [12:0]  AB,
+    output      [12:0]  cpu_addr,
+    output              cpu_rnw,
+    output      [ 7:0]  cpu_dout,
     input               gfx_irqn,
     output reg          gfx1_cs,
     output reg          gfx2_cs,
@@ -59,18 +62,17 @@ module jtcontra_main(
     input   [3:0]       dipsw_c
 );
 
-wire [ 7:0] cpu_dout, ram_dout;
+wire [ 7:0] ram_dout;
 wire [15:0] A;
 reg  [ 7:0] cpu_din;
 wire        RnW, irq_n;
 reg         ram_cs, bank_cs, in_cs, out_cs;
 
-wire cpu_cen;
-
 reg [3:0] bank;
 reg [7:0] port_in;
 
-assign AB = A[12:0];
+assign cpu_addr = A[12:0];
+assign cpu_rnw  = RnW;
 
 always @(*) begin
     rom_cs      = (A[15] || A[15:13]==3'b011) && RnW;
@@ -121,8 +123,10 @@ always @(posedge clk) begin
         if( bank_cs ) bank <= cpu_dout[3:0];
         if( out_cs  ) begin
             case( A[2:1] )
+                // 2'b00: coin counters
                 2'b01: snd_irq   <= 1;
                 2'b10: snd_latch <= cpu_dout;
+                // 2'b11 watchdog
             endcase
         end
     end

@@ -85,9 +85,10 @@ wire        cen12;
 wire [ 7:0] dipsw_a, dipsw_b;
 wire [ 3:0] dipsw_c;
 
-wire [12:0] main_AB;
+wire [12:0] cpu_addr;
 wire        gfx_irqn, gfx1_cs, gfx2_cs, gfx1_cfg_cs, gfx2_cfg_cs, pal_cs;
-wire [ 7:0] gfx1_dout, gfx2_dout, pal_dout;
+wire        cpu_cen, cpu_rnw;
+wire [ 7:0] gfx1_dout, gfx2_dout, pal_dout, cpu_dout;
 
 assign prog_rd    = 0;
 assign dwnld_busy = downloading;
@@ -133,6 +134,7 @@ jtcontra_main u_main(
     .clk            ( clk24         ),        // 24 MHz
     .rst            ( rst           ),
     .cen12          ( cen12         ),
+    .cpu_cen        ( cpu_cen       ),
     // communication with main CPU
     .snd_irq        ( snd_irq       ),
     .snd_latch      ( snd_latch     ),
@@ -148,7 +150,9 @@ jtcontra_main u_main(
     .joystick2      ( joystick2     ),
     .service        ( service       ),
     // GFX
-    .AB             ( main_AB       ),
+    .cpu_addr       ( cpu_addr      ),
+    .cpu_dout       ( cpu_dout      ),
+    .cpu_rnw        ( cpu_rnw       ),
     .gfx_irqn       ( gfx_irqn      ),
     .gfx1_cs        ( gfx1_cs       ),
     .gfx2_cs        ( gfx2_cs       ),
@@ -169,6 +173,7 @@ jtcontra_main u_main(
 jtcontra_video u_video(
     .rst        ( rst       ),
     .clk        ( clk       ),
+    .clk24      ( clk24     ),
     .pxl2_cen   ( pxl2_cen  ),
     .pxl_cen    ( pxl_cen   ),
     .LHBL       ( LHBL      ),
@@ -176,7 +181,16 @@ jtcontra_video u_video(
     .LHBL_dly   ( LHBL_dly  ),
     .LVBL_dly   ( LVBL_dly  ),
     .HS         ( HS        ),
-    .VS         ( VS        )
+    .VS         ( VS        ),
+    // GFX - CPU interface
+    .gfx1_cs    ( gfx1_cs   ),
+    .gfx2_cs    ( gfx2_cs   ),
+    .cpu_rnw    ( cpu_rnw   ),
+    .cpu_cen    ( cpu_cen   ),
+    .cpu_addr   ( cpu_addr  ),
+    .cpu_dout   ( cpu_dout  ),
+    .gfx1_dout  ( gfx1_dout ),
+    .gfx2_dout  ( gfx2_dout )
 );
 
 jtcontra_sound u_sound(

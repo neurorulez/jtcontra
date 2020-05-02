@@ -9,10 +9,10 @@
         </interleave>
         <!-- banks -->
         <interleave output="16">
-            <part name="633m03.18a" crc="d045e1da" length="0x8000" offset="0" map="12"/>
+            <part name="633i02.17a" crc="b2f7bd9a" map="12"/>
         </interleave>
         <interleave output="16">
-            <part name="633i02.17a" crc="b2f7bd9a" map="12"/>
+            <part name="633m03.18a" crc="d045e1da" length="0x8000" offset="0" map="12"/>
         </interleave>
         <!-- audiocpu -->
         <interleave output="16">
