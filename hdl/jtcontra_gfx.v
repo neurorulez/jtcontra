@@ -56,7 +56,8 @@ reg         last_LVBL;
 wire        gfx_we = cpu_cen & ~cpu_rnw & vram_cs;
 
 reg         line;
-wire [9:0]  line_addr = { line, hdump };
+reg  [8:0]  hrender;
+wire [9:0]  line_addr = { line, hrender };
 wire [7:0]  txt_pxl, scr_pxl;
 
 ////////// Memory Mapped Registers
@@ -105,7 +106,7 @@ wire        scr_we = line_we & ~lyr;
 wire [9:0]  dump_addr;
 
 assign      scan_addr = { lyr, vn[7:3], hn[7:3] }; // 1 + 5 + 5 = 11
-assign      rom_addr  = { code,vn[2:0], hn[2:1] }; // 13+3+2 = 18
+assign      rom_addr  = { 1'b0, code, vn[2:0], hn[2] }; // 13+3+1 = 17!
 assign      dump_addr = { ~line, hdump };
 
 always @(posedge clk24) begin
@@ -243,8 +244,9 @@ always @(posedge clk) begin
             if(!done) st <= st + 1;
             case( st )
                 0: begin
-                    vn <= vrender + lyr ? 9'd0 : {1'b0, vpos};
+                    vn <= vrender + (lyr ? 9'd0 : {1'b0, vpos});
                     hn <= hpos;
+                    hrender <= { 7'd0, hpos[1:0] }-9'd1;
                 end
                 2: begin
                     code   <= { bank, code_dout };
@@ -255,26 +257,32 @@ always @(posedge clk) begin
                     if( rom_ok ) begin
                         pxl_data <= rom_data;
                         rom_cs   <= 0;
-                        dump_cnt <= 8'hff;
+                        dump_cnt <= 4'h7;
                     end else st <= st;
                 end
-                5: begin
+                5: begin // dumps 4 pixels
                     if( dump_cnt[0] ) st<=st;
                     dump_cnt <= dump_cnt>>1;
                     pxl_data <= pxl_data >> 4;
+                    hrender  <= hrender + 9'd1;
                     line_din <= { pal, pxl_data[3:0] };
                     line_we  <= 1;
                 end
                 6: begin
+                    line_we <= 0;
                     if( hn < 9'd304 ) begin
-                        hn      <= hn + 9'd8;
+                        hn      <= hn + 9'd4;
                         st      <= 7;
-                        line_we <= 0;
-                        rom_cs  <= 1;
+                        if( !hn[2] ) begin
+                            rom_cs  <= 1;
+                            st      <= 3; // wait for new ROM data
+                        end else begin
+                            st      <= 1; // collect tile info
+                        end
                     end else begin
+                        st  <= 0;
                         if( !lyr ) begin
                             lyr <= 1;
-                            st  <= 0;
                         end else begin
                             done <= 1;
                         end

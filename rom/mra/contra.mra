@@ -36,6 +36,7 @@
         <!-- skips initial "blank" loop to speed up simulation -->
         <patch offset="0x811D"> 12 12 12 12 12 </patch>
         <!-- skips initial memory test-->
+        <!--
         <patch offset="0x8190"> 12 12 </patch>
         <patch offset="0x819A"> 12 12 </patch>
         <patch offset="0x81A0"> 12 12 </patch>
@@ -44,6 +45,7 @@
         <patch offset="0x81C7"> 12 12 </patch>
         <patch offset="0x81CE"> 12 12 </patch>
         <patch offset="0x81D3"> 12 12 </patch>
+        -->
     </rom>
     <switches default="FF,FF" base="16">
         <!-- DSW1 -->
