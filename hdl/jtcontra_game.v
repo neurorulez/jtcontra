@@ -214,6 +214,7 @@ jtcontra_video u_video(
     .blue           ( blue          )
 );
 
+`ifndef NOSOUND
 jtcontra_sound u_sound(
     .clk        ( clk24         ), // 24 MHz
     .rst        ( rst           ),
@@ -232,6 +233,12 @@ jtcontra_sound u_sound(
     .snd_right  ( snd_right     ),
     .sample     (               )
 );
+`else 
+assign snd_cs   = 0;
+assign snd_addr = 15'd0;
+assign snd_left = 16'd0;
+assign snd_right= 16'd0;
+`endif
 
 jtframe_rom #(
     .SLOT0_AW    ( 18              ), // GFX1
