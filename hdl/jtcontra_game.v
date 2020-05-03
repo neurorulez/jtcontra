@@ -84,6 +84,7 @@ wire        cen12;
 
 wire [ 7:0] dipsw_a, dipsw_b;
 wire [ 3:0] dipsw_c;
+wire        flip;
 
 wire [12:0] cpu_addr;
 wire        gfx_irqn, gfx1_cs, gfx2_cs, gfx1_cfg_cs, gfx2_cfg_cs, pal_cs;
@@ -91,6 +92,7 @@ wire        gfx1_vram_cs, gfx2_vram_cs;
 wire        cpu_cen, cpu_rnw, cpu_irqn;
 wire [ 7:0] gfx1_dout, gfx2_dout, pal_dout, cpu_dout;
 
+assign dip_flip   = dipsw[16];
 assign prog_rd    = 0;
 assign dwnld_busy = downloading;
 assign { dipsw_c, dipsw_b, dipsw_a } = dipsw[19:0];
@@ -182,6 +184,7 @@ jtcontra_video u_video(
     .LVBL_dly       ( LVBL_dly      ),
     .HS             ( HS            ),
     .VS             ( VS            ),
+    .flip           ( flip          ),
     // GFX - CPU interface
     .cpu_irqn       ( cpu_irqn      ),
     .gfx1_vram_cs   ( gfx1_vram_cs  ),

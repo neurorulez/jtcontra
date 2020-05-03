@@ -33,6 +33,17 @@
         <part name="633e09.12g" crc="14ca5e19"/>
         <part name="633f10.18g" crc="2b244d84"/>
         <part name="633f11.20g" crc="14ca5e19"/>
+        <!-- skips initial "blank" loop to speed up simulation -->
+        <patch offset="0x811D"> 12 12 12 12 12 </patch>
+        <!-- skips initial memory test-->
+        <patch offset="0x8190"> 12 12 </patch>
+        <patch offset="0x819A"> 12 12 </patch>
+        <patch offset="0x81A0"> 12 12 </patch>
+        <patch offset="0x81A6"> 12 12 </patch>
+        <patch offset="0x81BC"> 12 12 </patch>
+        <patch offset="0x81C7"> 12 12 </patch>
+        <patch offset="0x81CE"> 12 12 </patch>
+        <patch offset="0x81D3"> 12 12 </patch>
     </rom>
     <switches default="FF,FF" base="16">
         <!-- DSW1 -->

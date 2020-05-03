@@ -28,6 +28,7 @@ module jtcontra_video(
     output              LVBL_dly,
     output              HS,
     output              VS,
+    output              flip,
     // CPU      interface
     input               gfx1_vram_cs,
     input               gfx2_vram_cs,
@@ -58,7 +59,7 @@ module jtcontra_video(
 );
 
 wire [8:0] vrender, vrender1, vdump, hdump;
-wire [6:0] gfx1_pxl, gfx2_pxl;
+wire [7:0] gfx1_pxl, gfx2_pxl;
 
 jtframe_cen48 u_cen(
     .clk        ( clk       ),    // 48 MHz
@@ -109,6 +110,7 @@ jtcontra_gfx u_gfx1(
     .vdump      ( vdump         ),
     .vrender    ( vrender       ),
     .vrender1   ( vrender1      ),
+    .flip       ( flip          ),
     // CPU      interface
     .vram_cs    ( gfx1_vram_cs  ),
     .cfg_cs     ( gfx1_cfg_cs   ),
@@ -141,6 +143,7 @@ jtcontra_gfx u_gfx2(
     .vdump      ( vdump         ),
     .vrender    ( vrender       ),
     .vrender1   ( vrender1      ),
+    .flip       (               ),
     // CPU      interface
     .vram_cs    ( gfx2_vram_cs  ),
     .cfg_cs     ( gfx2_cfg_cs   ),
@@ -174,8 +177,8 @@ jtcontra_colmix u_colmix(
     .cpu_dout   ( cpu_dout      ),
     .pal_dout   ( pal_dout      ),
     // Colours
-    .gfx1_pxl   ( gfx1_pxl      ),
-    .gfx2_pxl   ( gfx2_pxl      ),
+    .gfx1_pxl   ( gfx1_pxl[6:0] ),
+    .gfx2_pxl   ( gfx2_pxl[6:0] ),
     .red        ( red           ),
     .green      ( green         ),
     .blue       ( blue          )

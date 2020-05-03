@@ -47,7 +47,7 @@ module jtcontra_gfx(
     output     [17:0]    rom_addr,
     input      [15:0]    rom_data,
     input                rom_ok,
-    output               rom_cs,
+    output reg           rom_cs,
     // colour output
     output reg [ 7:0]    pxl_out
 );
@@ -81,25 +81,32 @@ wire [1:0]  pal_bank   = mmr[6][5:4];
 assign      { code12_sel, code11_sel, code10_sel, code9_sel } = mmr[5];
 
 // Scan
-reg         lyr;
+reg         lyr, done;
 wire [10:0] scan_addr;
 wire [10:0] ram_addr = { cpu_addr[11], cpu_addr[9:0] };
 wire        attr_we  = gfx_we & ~cpu_addr[10];
 wire        code_we  = gfx_we &  cpu_addr[10];
-wire [7:0]  code_dout, attr_dout;
-assign      gfx_dout = cpu_addr[10] ? code_dout : attr_dout;
+wire        obj_we   = gfx_we &  cpu_addr[12];
+wire [7:0]  code_dout, attr_dout, obj_dout;
+assign      gfx_dout = cpu_addr[12] ? obj_dout : 
+                      (cpu_addr[10] ? code_dout : attr_dout);
 reg  [ 4:0] bank;
 reg  [12:0] code;
 reg  [ 3:0] pal;
+reg  [ 7:0] dump_cnt;
+reg  [15:0] pxl_data;
 
-reg  [ 6:0] line_din;
+reg  [ 7:0] line_din;
 reg  [ 8:0] hn, vn;
+reg         line_we;
 
 wire        txt_we = line_we &  lyr;
 wire        scr_we = line_we & ~lyr;
+wire [9:0]  dump_addr;
 
 assign      scan_addr = { lyr, vn[7:3], hn[7:3] }; // 1 + 5 + 5 = 11
-assign      rom_addr  = { code, v[2:0], hn[2:1] }; // 13+3+2 = 18
+assign      rom_addr  = { code,vn[2:0], hn[2:1] }; // 13+3+2 = 18
+assign      dump_addr = { ~line, hdump };
 
 always @(posedge clk24) begin
     if( rst ) begin
@@ -164,7 +171,7 @@ jtframe_dual_ram #(.aw(12)) u_obj_ram(
     .q1     (           )
 );
 
-jtframe_dual_ram #(.dw(7), .aw(10)) u_txt(
+jtframe_dual_ram #(.aw(10)) u_txt(
     .clk0   ( clk       ),
     .clk1   ( clk       ),
     // Port 0
@@ -220,20 +227,21 @@ reg [2:0] st;
 
 always @(posedge clk) begin
     if( rst ) begin
-        done  <= 1;
-        start <= 0;
-        lyr   <= 0;
-        pal   <= 4'd0;
-        code  <= 13'd0;
+        done    <= 1;
+        lyr     <= 0;
+        pal     <= 4'd0;
+        code    <= 13'd0;
+        line_we <= 0;
+        st      <= 3'd0;
     end else if(pxl_cen) begin
         if( LVBL && !last_LVBL ) begin
-            start  <= 1;
             lyr    <= 0;
             done   <= 0;
             rom_cs <= 0;
+            st     <= 3'd0;
         end else begin
             if(!done) st <= st + 1;
-            case( st ) begin
+            case( st )
                 0: begin
                     vn <= vrender + lyr ? 9'd0 : {1'b0, vpos};
                     hn <= hpos;
