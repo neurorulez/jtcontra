@@ -46,9 +46,6 @@ module jtcontra_video(
     output     [ 4:0]   blue
 );
 
-assign LVBL_dly = LVBL;
-assign LHBL_dly = LHBL;
-
 jtframe_cen48 u_cen(
     .clk        ( clk       ),    // 48 MHz
     .cen12      ( pxl2_cen  ),

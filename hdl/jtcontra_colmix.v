@@ -45,8 +45,10 @@ module jtcontra_colmix(
 );
 
 wire        pal_we = cpu_cen & ~cpu_rnw & pal_cs;
-
 wire [ 7:0] col_data;
+
+assign LVBL_dly = LVBL;
+assign LHBL_dly = LHBL;
 
 jtframe_dual_ram #(.aw(8)) u_ram(
     .clk0   ( clk24     ),
