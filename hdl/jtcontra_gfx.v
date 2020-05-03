@@ -44,16 +44,22 @@ module jtcontra_gfx(
     output     [ 7:0]    gfx_dout,
     output reg           cpu_irqn,
     // SDRAM interface
-    output     [16:0]    rom_addr,
+    output     [17:0]    rom_addr,
     input      [15:0]    rom_data,
     input                rom_ok,
     output               rom_cs,
     // colour output
-    output reg [ 6:0]    pxl_out
+    output reg [ 7:0]    pxl_out
 );
 
 reg         last_LVBL;
 wire        gfx_we = cpu_cen & ~cpu_rnw & vram_cs;
+
+reg         line;
+wire [9:0]  line_addr = { line, hdump };
+wire [7:0]  txt_pxl, scr_pxl;
+
+////////// Memory Mapped Registers
 reg  [7:0]  mmr[0:7];
 wire [8:0]  hpos = { mmr[1][0], mmr[0] };
 wire [7:0]  vpos = mmr[2];
@@ -61,10 +67,39 @@ wire [4:0]  tile_extra = { mmr[3][0], mmr[4][3:0] };
 wire        obj_update = mmr[3][3];
 wire        layout     = mmr[3][4]; // 1 for wide layout
 wire [3:0]  extra_mask = mmr[4][7:4];
+wire [1:0]  code9_sel, code10_sel, code11_sel, code12_sel;
 wire        nmi_en     = mmr[7][0];
 wire        irq_en     = mmr[7][1];
 wire        firq_en    = mmr[7][2];
 assign      flip       = mmr[7][3];
+wire        pal_msb    = mmr[6][0];
+wire        hflip_en   = mmr[6][1];
+wire        vflip_en   = mmr[6][2];
+wire        prio_en    = mmr[6][3];
+wire [1:0]  pal_bank   = mmr[6][5:4];
+
+assign      { code12_sel, code11_sel, code10_sel, code9_sel } = mmr[5];
+
+// Scan
+reg         lyr;
+wire [10:0] scan_addr;
+wire [10:0] ram_addr = { cpu_addr[11], cpu_addr[9:0] };
+wire        attr_we  = gfx_we & ~cpu_addr[10];
+wire        code_we  = gfx_we &  cpu_addr[10];
+wire [7:0]  code_dout, attr_dout;
+assign      gfx_dout = cpu_addr[10] ? code_dout : attr_dout;
+reg  [ 4:0] bank;
+reg  [12:0] code;
+reg  [ 3:0] pal;
+
+reg  [ 6:0] line_din;
+reg  [ 8:0] hn, vn;
+
+wire        txt_we = line_we &  lyr;
+wire        scr_we = line_we & ~lyr;
+
+assign      scan_addr = { lyr, vn[7:3], hn[7:3] }; // 1 + 5 + 5 = 11
+assign      rom_addr  = { code, v[2:0], hn[2:1] }; // 13+3+2 = 18
 
 always @(posedge clk24) begin
     if( rst ) begin
@@ -76,14 +111,52 @@ always @(posedge clk24) begin
     end
 end
 
-jtframe_dual_ram #(.aw(13)) u_ram(
+always @(*) begin
+    bank[0] = attr_dout[7];
+    bank[1] = attr_dout[code9_sel ];
+    bank[2] = attr_dout[code10_sel];
+    bank[3] = attr_dout[code11_sel];
+    bank[4] = attr_dout[code12_sel];
+end
+
+jtframe_dual_ram #(.aw(11)) u_cram(
     .clk0   ( clk24     ),
     .clk1   ( clk       ),
     // Port 0
     .data0  ( cpu_dout  ),
-    .addr0  ( cpu_addr  ),
-    .we0    ( gfx_we    ),
-    .q0     ( gfx_dout  ),
+    .addr0  ( ram_addr  ),
+    .we0    ( attr_we   ),
+    .q0     ( attr_dout ),
+    // Port 1
+    .data1  (           ),
+    .addr1  ( scan_addr ),
+    .we1    ( 1'b0      ),
+    .q1     (           )
+);
+
+jtframe_dual_ram #(.aw(11)) u_vram(
+    .clk0   ( clk24     ),
+    .clk1   ( clk       ),
+    // Port 0
+    .data0  ( cpu_dout  ),
+    .addr0  ( ram_addr  ),
+    .we0    ( code_we   ),
+    .q0     ( code_dout ),
+    // Port 1
+    .data1  (           ),
+    .addr1  ( scan_addr ),
+    .we1    ( 1'b0      ),
+    .q1     (           )
+);
+
+jtframe_dual_ram #(.aw(12)) u_obj_ram(
+    .clk0   ( clk24     ),
+    .clk1   ( clk       ),
+    // Port 0
+    .data0  ( cpu_dout  ),
+    .addr0  ( cpu_addr[11:0] ),
+    .we0    ( obj_we    ),
+    .q0     ( obj_dout  ),
     // Port 1
     .data1  (           ),
     .addr1  (           ),
@@ -91,10 +164,117 @@ jtframe_dual_ram #(.aw(13)) u_ram(
     .q1     (           )
 );
 
-always @(posedge clk24) begin
-    last_LVBL <= LVBL;
-    if( !LVBL && last_LVBL && irq_en ) cpu_irqn <= 0;
-    else if( LHBL ) cpu_irqn <= 1;
+jtframe_dual_ram #(.dw(7), .aw(10)) u_txt(
+    .clk0   ( clk       ),
+    .clk1   ( clk       ),
+    // Port 0
+    .data0  ( line_din  ),
+    .addr0  ( line_addr ),
+    .we0    ( txt_we    ),
+    .q0     (           ),
+    // Port 1
+    .data1  (           ),
+    .addr1  ( dump_addr ),
+    .we1    ( 1'b0      ),
+    .q1     ( txt_pxl   )
+);
+
+jtframe_dual_ram #(.aw(10)) u_scr(
+    .clk0   ( clk       ),
+    .clk1   ( clk       ),
+    // Port 0
+    .data0  ( line_din  ),
+    .addr0  ( line_addr ),
+    .we0    ( scr_we    ),
+    .q0     (           ),
+    // Port 1
+    .data1  (           ),
+    .addr1  ( dump_addr ),
+    .we1    ( 1'b0      ),
+    .q1     ( scr_pxl   )
+);
+
+always @(posedge clk) begin
+    if( rst ) begin
+        cpu_irqn <= 1;
+        line     <= 0;
+    end else if(pxl_cen) begin
+        last_LVBL <= LVBL;
+        if( !LVBL && last_LVBL ) begin
+            if( irq_en ) cpu_irqn <= 0;
+            line <= ~line;
+        end
+        else if( LHBL ) cpu_irqn <= 1;
+    end
+end
+
+always @(posedge clk) begin
+    if( rst ) begin
+        pxl_out <= ~7'd0;
+    end else if(pxl_cen) begin
+        pxl_out <= txt_pxl[3:0] == 4'h0 ? scr_pxl : txt_pxl;
+    end
+end
+
+reg [2:0] st;
+
+always @(posedge clk) begin
+    if( rst ) begin
+        done  <= 1;
+        start <= 0;
+        lyr   <= 0;
+        pal   <= 4'd0;
+        code  <= 13'd0;
+    end else if(pxl_cen) begin
+        if( LVBL && !last_LVBL ) begin
+            start  <= 1;
+            lyr    <= 0;
+            done   <= 0;
+            rom_cs <= 0;
+        end else begin
+            if(!done) st <= st + 1;
+            case( st ) begin
+                0: begin
+                    vn <= vrender + lyr ? 9'd0 : {1'b0, vpos};
+                    hn <= hpos;
+                end
+                2: begin
+                    code   <= { bank, code_dout };
+                    pal    <= { pal_msb, attr_dout[2:0] };
+                    rom_cs <= 1;
+                end
+                4: begin
+                    if( rom_ok ) begin
+                        pxl_data <= rom_data;
+                        rom_cs   <= 0;
+                        dump_cnt <= 8'hff;
+                    end else st <= st;
+                end
+                5: begin
+                    if( dump_cnt[0] ) st<=st;
+                    dump_cnt <= dump_cnt>>1;
+                    pxl_data <= pxl_data >> 4;
+                    line_din <= { pal, pxl_data[3:0] };
+                    line_we  <= 1;
+                end
+                6: begin
+                    if( hn < 9'd304 ) begin
+                        hn      <= hn + 9'd8;
+                        st      <= 7;
+                        line_we <= 0;
+                        rom_cs  <= 1;
+                    end else begin
+                        if( !lyr ) begin
+                            lyr <= 1;
+                            st  <= 0;
+                        end else begin
+                            done <= 1;
+                        end
+                    end
+                end
+            endcase // st
+        end
+    end
 end
 
 

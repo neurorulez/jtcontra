@@ -26,8 +26,8 @@ module jtcontra_colmix(
     input               pxl_cen,
     input               LHBL,
     input               LVBL,
-    output              LHBL_dly,
-    output              LVBL_dly,
+    output reg          LHBL_dly,
+    output reg          LVBL_dly,
     // CPU      interface
     input               pal_cs,
     input               cpu_rnw,
@@ -36,19 +36,23 @@ module jtcontra_colmix(
     input      [ 7:0]   cpu_dout,
     output     [ 7:0]   pal_dout,
     // GFX colour requests
-    input      [ 6:0]   gfx1_col,
-    input      [ 6:0]   gfx2_col,
+    input      [ 6:0]   gfx1_pxl,
+    input      [ 6:0]   gfx2_pxl,
     // Colours
-    output     [ 4:0]   red,
-    output     [ 4:0]   green,
-    output     [ 4:0]   blue
+    output reg [ 4:0]   red,
+    output reg [ 4:0]   green,
+    output reg [ 4:0]   blue
 );
 
 wire        pal_we = cpu_cen & ~cpu_rnw & pal_cs;
 wire [ 7:0] col_data;
+wire [ 7:0] col_addr;
+wire        gfx_sel;
+reg         pal_half;
+reg  [14:0] pxl_aux;
 
-assign LVBL_dly = LVBL;
-assign LHBL_dly = LHBL;
+assign gfx_sel  = gfx1_pxl[3:0]==4'b0 ? ~gfx2_pxl[4] : 1'b0;
+assign col_addr = { gfx_sel ? gfx2_pxl : gfx1_pxl, pal_half };
 
 jtframe_dual_ram #(.aw(8)) u_ram(
     .clk0   ( clk24     ),
@@ -60,9 +64,26 @@ jtframe_dual_ram #(.aw(8)) u_ram(
     .q0     ( pal_dout  ),
     // Port 1
     .data1  (           ),
-    .addr1  (           ),
+    .addr1  ( col_addr  ),
     .we1    ( 1'b0      ),
     .q1     ( col_data  )
 );
+
+always @(posedge clk) begin
+    if( rst ) begin
+        pal_half <= 0;
+        red      <= 5'd0;
+        green    <= 5'd0;
+        blue     <= 5'd0;
+    end else begin
+        pxl_aux  <= { pxl_aux[6:0], col_data };
+        pal_half <= ~pal_half;
+        if( pxl_cen ) begin
+            LVBL_dly <= LVBL;
+            LHBL_dly <= LHBL;
+            { blue, green, red } <= (!LVBL || !LHBL) ? 15'd0 : pxl_aux;
+        end
+    end
+end
 
 endmodule

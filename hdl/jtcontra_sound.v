@@ -54,9 +54,9 @@ wire cpu_cen;
 
 always @(*) begin
     rom_cs   = A[15];
-    latch_cs = !A[15] && A[14:13]==2'b00;
+    latch_cs = !A[15] && A[14:13]==2'b00 && RnW;
     fm_cs    = !A[15] && A[14:13]==2'b01;
-    irq_cs   = !A[15] && A[14:13]==2'b10;
+    irq_cs   = !A[15] && A[14:13]==2'b10 && !RnW;
     ram_cs   = !A[15] && A[14:13]==2'b11;
 end
 

@@ -75,7 +75,7 @@ module jtcontra_game(
 wire        main_cs, snd_cs, snd_ok, main_ok, gfx1_ok, gfx2_ok;
 wire        snd_irq;
 wire [15:0] gfx1_data, gfx2_data;
-wire [16:0] gfx1_addr, gfx2_addr;
+wire [17:0] gfx1_addr, gfx2_addr;
 
 wire [ 7:0] main_data, snd_data, snd_latch;
 wire [14:0] snd_addr;
@@ -231,11 +231,11 @@ jtcontra_sound u_sound(
 );
 
 jtframe_rom #(
-    .SLOT0_AW    ( 17              ), // GFX1
+    .SLOT0_AW    ( 18              ), // GFX1
     .SLOT0_DW    ( 16              ),
     .SLOT0_OFFSET( GFX1_OFFSET     ),
 
-    .SLOT1_AW    ( 17              ), // GFX2
+    .SLOT1_AW    ( 18              ), // GFX2
     .SLOT1_DW    ( 16              ),
     .SLOT1_OFFSET( GFX2_OFFSET     ),
 

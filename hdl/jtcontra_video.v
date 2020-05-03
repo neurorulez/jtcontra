@@ -43,11 +43,11 @@ module jtcontra_video(
     output     [ 7:0]   pal_dout,
     output              cpu_irqn,
     // SDRAM interface
-    output     [16:0]   gfx1_addr,
+    output     [17:0]   gfx1_addr,
     input      [15:0]   gfx1_data,
     input               gfx1_ok,
     output              gfx1_cs,
-    output     [16:0]   gfx2_addr,
+    output     [17:0]   gfx2_addr,
     input      [15:0]   gfx2_data,
     input               gfx2_ok,
     output              gfx2_cs,
@@ -58,6 +58,7 @@ module jtcontra_video(
 );
 
 wire [8:0] vrender, vrender1, vdump, hdump;
+wire [6:0] gfx1_pxl, gfx2_pxl;
 
 jtframe_cen48 u_cen(
     .clk        ( clk       ),    // 48 MHz
@@ -120,7 +121,8 @@ jtcontra_gfx u_gfx1(
     .rom_addr   ( gfx1_addr     ),
     .rom_data   ( gfx1_data     ),
     .rom_cs     ( gfx1_cs       ),
-    .rom_ok     ( gfx1_ok       )
+    .rom_ok     ( gfx1_ok       ),
+    .pxl_out    ( gfx1_pxl      )
 );
 
 jtcontra_gfx u_gfx2(
@@ -150,8 +152,8 @@ jtcontra_gfx u_gfx2(
     .rom_addr   ( gfx2_addr     ),
     .rom_data   ( gfx2_data     ),
     .rom_cs     ( gfx2_cs       ),
-    .rom_ok     ( gfx2_ok       )
-
+    .rom_ok     ( gfx2_ok       ),
+    .pxl_out    ( gfx2_pxl      )
 );
 
 jtcontra_colmix u_colmix(
@@ -172,6 +174,8 @@ jtcontra_colmix u_colmix(
     .cpu_dout   ( cpu_dout      ),
     .pal_dout   ( pal_dout      ),
     // Colours
+    .gfx1_pxl   ( gfx1_pxl      ),
+    .gfx2_pxl   ( gfx2_pxl      ),
     .red        ( red           ),
     .green      ( green         ),
     .blue       ( blue          )
