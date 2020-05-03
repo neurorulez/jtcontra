@@ -96,6 +96,7 @@ reg  [12:0] code;
 reg  [ 3:0] pal;
 reg  [ 7:0] dump_cnt;
 reg  [15:0] pxl_data;
+wire [ 7:0] code_scan, attr_scan;
 
 reg  [ 7:0] line_din;
 reg  [ 8:0] hn, vn;
@@ -139,7 +140,7 @@ jtframe_dual_ram #(.aw(11)) u_cram(
     .data1  (           ),
     .addr1  ( scan_addr ),
     .we1    ( 1'b0      ),
-    .q1     (           )
+    .q1     ( attr_scan )
 );
 
 jtframe_dual_ram #(.aw(11)) u_vram(
@@ -154,7 +155,7 @@ jtframe_dual_ram #(.aw(11)) u_vram(
     .data1  (           ),
     .addr1  ( scan_addr ),
     .we1    ( 1'b0      ),
-    .q1     (           )
+    .q1     ( code_scan )
 );
 
 jtframe_dual_ram #(.aw(12)) u_obj_ram(
@@ -205,12 +206,10 @@ jtframe_dual_ram #(.aw(10)) u_scr(
 always @(posedge clk) begin
     if( rst ) begin
         cpu_irqn <= 1;
-        line     <= 0;
     end else if(pxl_cen) begin
         last_LVBL <= LVBL;
         if( !LVBL && last_LVBL ) begin
             if( irq_en ) cpu_irqn <= 0;
-            line <= ~line;
         end
         else if( LHBL ) cpu_irqn <= 1;
     end
@@ -220,11 +219,13 @@ always @(posedge clk) begin
     if( rst ) begin
         pxl_out <= ~7'd0;
     end else if(pxl_cen) begin
-        pxl_out <= txt_pxl[3:0] == 4'h0 ? scr_pxl : txt_pxl;
+        pxl_out <= txt_pxl[3:0] == 4'hf ? scr_pxl : txt_pxl;
     end
 end
 
-reg [2:0] st;
+reg  [ 2:0] st;
+reg         last_LHBL;
+wire [ 9:0] lyr_hn0 = lyr ? 9'd0 : hpos;
 
 always @(posedge clk) begin
     if( rst ) begin
@@ -234,8 +235,11 @@ always @(posedge clk) begin
         code    <= 13'd0;
         line_we <= 0;
         st      <= 3'd0;
-    end else if(pxl_cen) begin
-        if( LVBL && !last_LVBL ) begin
+        line    <= 0;
+    end else begin
+        last_LHBL <= LHBL;
+        if( LHBL && !last_LHBL ) begin
+            line   <= ~line;
             lyr    <= 0;
             done   <= 0;
             rom_cs <= 0;
@@ -245,12 +249,12 @@ always @(posedge clk) begin
             case( st )
                 0: begin
                     vn <= vrender + (lyr ? 9'd0 : {1'b0, vpos});
-                    hn <= hpos;
-                    hrender <= { 7'd0, hpos[1:0] }-9'd1;
+                    hn <= lyr_hn0;
+                    hrender <= { 7'd0, lyr_hn0[1:0] }-9'd1;
                 end
                 2: begin
-                    code   <= { bank, code_dout };
-                    pal    <= { pal_msb, attr_dout[2:0] };
+                    code   <= { bank, code_scan };
+                    pal    <= { pal_msb, attr_scan[2:0] };
                     rom_cs <= 1;
                 end
                 4: begin
@@ -270,7 +274,7 @@ always @(posedge clk) begin
                 end
                 6: begin
                     line_we <= 0;
-                    if( hn < 9'd304 ) begin
+                    if( hn < 9'd256 ) begin
                         hn      <= hn + 9'd4;
                         st      <= 7;
                         if( !hn[2] ) begin
