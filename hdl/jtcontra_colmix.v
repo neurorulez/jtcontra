@@ -14,54 +14,53 @@
 
     Author: Jose Tejada Gomez. Twitter: @topapate
     Version: 1.0
-    Date: 02-05-2020 */
+    Date: 03-05-2020 */
 
-// Main features of Konami's 007121 hardware
-// Some elements have been factored out one level up (H/S timing...)
+// Equivalent to KONAMI 007593
 
-module jtcontra_gfx(
-    input                rst,
-    input                clk,
-    input                clk24,
-    input                pxl2_cen,
-    input                pxl_cen,
-    input                LHBL,
-    input                LVBL,
-    input                HS,
-    input                VS,
+module jtcontra_colmix(
+    input               rst,
+    input               clk,
+    input               clk24,
+    input               pxl2_cen,
+    input               pxl_cen,
+    input               LHBL,
+    input               LVBL,
+    output              LHBL_dly,
+    output              LVBL_dly,
     // CPU      interface
-    input                gfx_cs,
-    input                cpu_rnw,
-    input                cpu_cen,
-    input      [12:0]    cpu_addr,
-    input      [ 7:0]    cpu_dout,
-    output     [ 7:0]    gfx_dout,
-    output reg           cpu_irqn
+    input               pal_cs,
+    input               cpu_rnw,
+    input               cpu_cen,
+    input      [ 7:0]   cpu_addr,
+    input      [ 7:0]   cpu_dout,
+    output     [ 7:0]   pal_dout,
+    // GFX colour requests
+    input      [ 6:0]   gfx1_col,
+    input      [ 6:0]   gfx2_col,
+    // Colours
+    output     [ 4:0]   red,
+    output     [ 4:0]   green,
+    output     [ 4:0]   blue
 );
 
-reg     last_LVBL;
-wire    gfx_we = cpu_cen & ~cpu_rnw & gfx_cs;
+wire        pal_we = cpu_cen & ~cpu_rnw & pal_cs;
 
-jtframe_dual_ram #(.aw(13)) u_ram(
+wire [ 7:0] col_data;
+
+jtframe_dual_ram #(.aw(8)) u_ram(
     .clk0   ( clk24     ),
     .clk1   ( clk       ),
     // Port 0
     .data0  ( cpu_dout  ),
     .addr0  ( cpu_addr  ),
-    .we0    ( gfx_we    ),
-    .q0     ( gfx_dout  ),
+    .we0    ( pal_we    ),
+    .q0     ( pal_dout  ),
     // Port 1
     .data1  (           ),
     .addr1  (           ),
     .we1    ( 1'b0      ),
-    .q1     (           )
+    .q1     ( col_data  )
 );
-
-always @(posedge clk24) begin
-    last_LVBL <= LVBL;
-    if( !LVBL && last_LVBL ) cpu_irqn <= 0;
-    else if( LHBL ) cpu_irqn <= 1;
-end
-
 
 endmodule

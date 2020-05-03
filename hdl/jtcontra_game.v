@@ -22,9 +22,9 @@ module jtcontra_game(
     input           clk24,
     output          pxl2_cen,   // 12   MHz
     output          pxl_cen,    //  6   MHz
-    output   [3:0]  red,
-    output   [3:0]  green,
-    output   [3:0]  blue,
+    output   [4:0]  red,
+    output   [4:0]  green,
+    output   [4:0]  blue,
     output          LHBL,
     output          LVBL,
     output          LHBL_dly,
@@ -189,12 +189,18 @@ jtcontra_video u_video(
     .cpu_irqn   ( cpu_irqn  ),
     .gfx1_cs    ( gfx1_cs   ),
     .gfx2_cs    ( gfx2_cs   ),
+    .pal_cs     ( pal_cs    ),
     .cpu_rnw    ( cpu_rnw   ),
     .cpu_cen    ( cpu_cen   ),
     .cpu_addr   ( cpu_addr  ),
     .cpu_dout   ( cpu_dout  ),
     .gfx1_dout  ( gfx1_dout ),
-    .gfx2_dout  ( gfx2_dout )
+    .gfx2_dout  ( gfx2_dout ),
+    .pal_dout   ( pal_dout  ),
+    // pixels
+    .red        ( red       ),
+    .green      ( green     ),
+    .blue       ( blue      )
 );
 
 jtcontra_sound u_sound(

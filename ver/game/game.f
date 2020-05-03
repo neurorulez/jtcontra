@@ -4,6 +4,7 @@
 ../../hdl/jtcontra_sound.v
 ../../hdl/jtcontra_video.v
 ../../hdl/jtcontra_gfx.v
+../../hdl/jtcontra_colmix.v
 
 ../../modules/jtframe/hdl/video/jtframe_vtimer.v
 ../../modules/jtframe/hdl/clocking/jtframe_cen24.v

@@ -31,13 +31,19 @@ module jtcontra_video(
     // CPU      interface
     input               gfx1_cs,
     input               gfx2_cs,
+    input               pal_cs,
     input               cpu_rnw,
     input               cpu_cen,
     input      [12:0]   cpu_addr,
     input      [ 7:0]   cpu_dout,
     output     [ 7:0]   gfx1_dout,
     output     [ 7:0]   gfx2_dout,
-    output              cpu_irqn
+    output     [ 7:0]   pal_dout,
+    output              cpu_irqn,
+    // Colours
+    output     [ 4:0]   red,
+    output     [ 4:0]   green,
+    output     [ 4:0]   blue
 );
 
 assign LVBL_dly = LVBL;
@@ -85,8 +91,6 @@ jtcontra_gfx u_gfx1(
     .pxl_cen    ( pxl_cen   ),
     .LHBL       ( LHBL      ),
     .LVBL       ( LVBL      ),
-    .LHBL_dly   ( LHBL_dly  ),
-    .LVBL_dly   ( LVBL_dly  ),
     .HS         ( HS        ),
     .VS         ( VS        ),
     // CPU      interface
@@ -107,8 +111,6 @@ jtcontra_gfx u_gfx2(
     .pxl_cen    ( pxl_cen   ),
     .LHBL       ( LHBL      ),
     .LVBL       ( LVBL      ),
-    .LHBL_dly   ( LHBL_dly  ),
-    .LVBL_dly   ( LVBL_dly  ),
     .HS         ( HS        ),
     .VS         ( VS        ),
     // CPU      interface
@@ -118,6 +120,29 @@ jtcontra_gfx u_gfx2(
     .cpu_dout   ( cpu_dout  ),
     .gfx_dout   ( gfx2_dout ),
     .cpu_irqn   (           )
+);
+
+jtcontra_colmix u_colmix(
+    .rst        ( rst           ),
+    .clk        ( clk           ),
+    .clk24      ( clk24         ),
+    .cpu_cen    ( cpu_cen       ),
+    .pxl2_cen   ( pxl2_cen      ),
+    .pxl_cen    ( pxl_cen       ),
+    .LHBL       ( LHBL          ),
+    .LVBL       ( LVBL          ),
+    .LHBL_dly   ( LHBL_dly      ),
+    .LVBL_dly   ( LVBL_dly      ),
+    // CPU      interface
+    .pal_cs     ( pal_cs        ),
+    .cpu_rnw    ( cpu_rnw       ),
+    .cpu_addr   ( cpu_addr[7:0] ),
+    .cpu_dout   ( cpu_dout      ),
+    .pal_dout   ( pal_dout      ),
+    // Colours
+    .red        ( red           ),
+    .green      ( green         ),
+    .blue       ( blue          )
 );
 
 endmodule

@@ -65,7 +65,7 @@ module jtcontra_main(
 wire [ 7:0] ram_dout;
 wire [15:0] A;
 reg  [ 7:0] cpu_din;
-wire        RnW, irq_n;
+wire        RnW, irq_n, irq_ack;
 reg         ram_cs, bank_cs, in_cs, out_cs;
 
 reg [3:0] bank;
@@ -132,6 +132,17 @@ always @(posedge clk) begin
     end
 end
 
+jtframe_ff u_ff(
+    .clk      ( clk         ),
+    .rst      ( rst         ),
+    .cen      ( 1'b1        ),
+    .din      ( 1'b1        ),
+    .q        (             ),
+    .qn       ( irq_n       ),
+    .set      (             ),    // active high
+    .clr      ( irq_ack     ),    // active high
+    .sigedge  ( ~gfx_irqn   )     // signal whose edge will trigger the FF
+);
 
 jtframe_sys6809 #(.RAM_AW(12)) u_cpu(
     .rstn       ( ~rst      ), 
@@ -140,10 +151,10 @@ jtframe_sys6809 #(.RAM_AW(12)) u_cpu(
     .cpu_cen    ( cpu_cen   ),   // 1/4th of cen -> 3MHz
 
     // Interrupts
-    .nIRQ       ( gfx_irqn  ),
+    .nIRQ       ( irq_n     ),
     .nFIRQ      ( 1'b1      ),
     .nNMI       ( 1'b1      ),
-    .irq_ack    (           ),
+    .irq_ack    ( irq_ack   ),
     // Bus sharing
     .bus_busy   ( 1'b0      ),
     .waitn      (           ),

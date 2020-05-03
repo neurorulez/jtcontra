@@ -31,8 +31,8 @@ fi
 echo "Game ROM length: " $GAME_ROM_LEN
 ../../modules/jtframe/bin/sim.sh -mist -d GAME_ROM_LEN=$GAME_ROM_LEN \
     -sysname contra -modules ../../modules \
-    -d COLORW=4 -d STEREO_GAME=1  \
-    -d BUTTONS=2 \
+    -d COLORW=5 -d STEREO_GAME=1  \
+    -d BUTTONS=2 -d JTFRAME_MRA_DIP -d VERTICAL_SCREEN\
     -d SCAN2X_TYPE=5 -d JT51_NODEBUG  \
     -videow 280 -videoh 240 \
     -d JTFRAME_CLK24 \
