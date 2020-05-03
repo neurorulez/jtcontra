@@ -46,8 +46,8 @@ module jtcontra_main(
     output              cpu_rnw,
     output      [ 7:0]  cpu_dout,
     input               gfx_irqn,
-    output reg          gfx1_cs,
-    output reg          gfx2_cs,
+    output reg          gfx1_vram_cs,
+    output reg          gfx2_vram_cs,
     output reg          gfx1_cfg_cs,
     output reg          gfx2_cfg_cs,
     output reg          pal_cs,
@@ -77,8 +77,8 @@ assign cpu_rnw  = RnW;
 always @(*) begin
     rom_cs      = (A[15] || A[15:13]==3'b011) && RnW;
     bank_cs     = A[15:12] == 4'b0111 && !RnW;
-    gfx1_cs     = A[15:13] == 3'b001;
-    gfx2_cs     = A[15:13] == 3'b010;
+    gfx1_vram_cs= A[15:13] == 3'b001;
+    gfx2_vram_cs= A[15:13] == 3'b010;
     ram_cs      = A[15:12] == 4'b0001;
     pal_cs      = A[15:10] == 6'b0000_11;
     gfx1_cfg_cs = A[15:10] == 6'b0000_00 && A[7:5] == 3'b000 && !RnW; // 00 - 07
@@ -93,8 +93,8 @@ always @(*) begin   // consider latching
         ram_cs:   cpu_din = ram_dout;
         pal_cs:   cpu_din = pal_dout;
         in_cs:    cpu_din = port_in;
-        gfx1_cs:  cpu_din = gfx1_dout;
-        gfx2_cs:  cpu_din = gfx2_dout;
+        gfx1_vram_cs:  cpu_din = gfx1_dout;
+        gfx2_vram_cs:  cpu_din = gfx2_dout;
         default:  cpu_din = 8'hff;
     endcase
 end

@@ -75,7 +75,7 @@ module jtcontra_game(
 wire        main_cs, snd_cs, snd_ok, main_ok, gfx1_ok, gfx2_ok;
 wire        snd_irq;
 wire [15:0] gfx1_data, gfx2_data;
-wire [17:0] gfx1_addr, gfx2_addr;
+wire [16:0] gfx1_addr, gfx2_addr;
 
 wire [ 7:0] main_data, snd_data, snd_latch;
 wire [14:0] snd_addr;
@@ -87,6 +87,7 @@ wire [ 3:0] dipsw_c;
 
 wire [12:0] cpu_addr;
 wire        gfx_irqn, gfx1_cs, gfx2_cs, gfx1_cfg_cs, gfx2_cfg_cs, pal_cs;
+wire        gfx1_vram_cs, gfx2_vram_cs;
 wire        cpu_cen, cpu_rnw, cpu_irqn;
 wire [ 7:0] gfx1_dout, gfx2_dout, pal_dout, cpu_dout;
 
@@ -97,10 +98,6 @@ assign { dipsw_c, dipsw_b, dipsw_a } = dipsw[19:0];
 localparam SND_OFFSET  = 22'h2_0000 >> 1;
 localparam GFX1_OFFSET = SND_OFFSET  + (22'h0_8000 >> 1);
 localparam GFX2_OFFSET = GFX1_OFFSET + (22'h8_0000 >> 1);
-
-// TEMPORARY ASSIGNMENTS!
-assign gfx1_addr = 18'd0;
-assign gfx2_addr = 18'd0;
 
 jtframe_cen24 u_cen(
     .clk        ( clk24         ),    // 24 MHz
@@ -156,8 +153,8 @@ jtcontra_main u_main(
     .cpu_dout       ( cpu_dout      ),
     .cpu_rnw        ( cpu_rnw       ),
     .gfx_irqn       ( cpu_irqn      ),
-    .gfx1_cs        ( gfx1_cs       ),
-    .gfx2_cs        ( gfx2_cs       ),
+    .gfx1_vram_cs   ( gfx1_vram_cs  ),
+    .gfx2_vram_cs   ( gfx2_vram_cs  ),
     .gfx1_cfg_cs    ( gfx1_cfg_cs   ),
     .gfx2_cfg_cs    ( gfx2_cfg_cs   ),
     .pal_cs         ( pal_cs        ),
@@ -174,33 +171,44 @@ jtcontra_main u_main(
 `endif
 
 jtcontra_video u_video(
-    .rst        ( rst       ),
-    .clk        ( clk       ),
-    .clk24      ( clk24     ),
-    .pxl2_cen   ( pxl2_cen  ),
-    .pxl_cen    ( pxl_cen   ),
-    .LHBL       ( LHBL      ),
-    .LVBL       ( LVBL      ),
-    .LHBL_dly   ( LHBL_dly  ),
-    .LVBL_dly   ( LVBL_dly  ),
-    .HS         ( HS        ),
-    .VS         ( VS        ),
+    .rst            ( rst           ),
+    .clk            ( clk           ),
+    .clk24          ( clk24         ),
+    .pxl2_cen       ( pxl2_cen      ),
+    .pxl_cen        ( pxl_cen       ),
+    .LHBL           ( LHBL          ),
+    .LVBL           ( LVBL          ),
+    .LHBL_dly       ( LHBL_dly      ),
+    .LVBL_dly       ( LVBL_dly      ),
+    .HS             ( HS            ),
+    .VS             ( VS            ),
     // GFX - CPU interface
-    .cpu_irqn   ( cpu_irqn  ),
-    .gfx1_cs    ( gfx1_cs   ),
-    .gfx2_cs    ( gfx2_cs   ),
-    .pal_cs     ( pal_cs    ),
-    .cpu_rnw    ( cpu_rnw   ),
-    .cpu_cen    ( cpu_cen   ),
-    .cpu_addr   ( cpu_addr  ),
-    .cpu_dout   ( cpu_dout  ),
-    .gfx1_dout  ( gfx1_dout ),
-    .gfx2_dout  ( gfx2_dout ),
-    .pal_dout   ( pal_dout  ),
+    .cpu_irqn       ( cpu_irqn      ),
+    .gfx1_vram_cs   ( gfx1_vram_cs  ),
+    .gfx2_vram_cs   ( gfx2_vram_cs  ),
+    .gfx1_cfg_cs    ( gfx1_cfg_cs   ),
+    .gfx2_cfg_cs    ( gfx2_cfg_cs   ),
+    .pal_cs         ( pal_cs        ),
+    .cpu_rnw        ( cpu_rnw       ),
+    .cpu_cen        ( cpu_cen       ),
+    .cpu_addr       ( cpu_addr      ),
+    .cpu_dout       ( cpu_dout      ),
+    .gfx1_dout      ( gfx1_dout     ),
+    .gfx2_dout      ( gfx2_dout     ),
+    .pal_dout       ( pal_dout      ),
+    // SDRAM
+    .gfx1_addr      ( gfx1_addr     ),
+    .gfx1_data      ( gfx1_data     ),
+    .gfx1_ok        ( gfx1_ok       ),
+    .gfx1_cs        ( gfx1_cs       ),
+    .gfx2_addr      ( gfx2_addr     ),
+    .gfx2_data      ( gfx2_data     ),
+    .gfx2_ok        ( gfx2_ok       ),
+    .gfx2_cs        ( gfx2_cs       ),
     // pixels
-    .red        ( red       ),
-    .green      ( green     ),
-    .blue       ( blue      )
+    .red            ( red           ),
+    .green          ( green         ),
+    .blue           ( blue          )
 );
 
 jtcontra_sound u_sound(
@@ -223,11 +231,11 @@ jtcontra_sound u_sound(
 );
 
 jtframe_rom #(
-    .SLOT0_AW    ( 18              ), // GFX1
+    .SLOT0_AW    ( 17              ), // GFX1
     .SLOT0_DW    ( 16              ),
     .SLOT0_OFFSET( GFX1_OFFSET     ),
 
-    .SLOT1_AW    ( 18              ), // GFX2
+    .SLOT1_AW    ( 17              ), // GFX2
     .SLOT1_DW    ( 16              ),
     .SLOT1_OFFSET( GFX2_OFFSET     ),
 

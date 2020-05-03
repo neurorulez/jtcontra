@@ -29,18 +29,52 @@ module jtcontra_gfx(
     input                LVBL,
     input                HS,
     input                VS,
+    input   [8:0]        hdump,
+    input   [8:0]        vdump,
+    input   [8:0]        vrender,
+    input   [8:0]        vrender1,
+    output               flip,
     // CPU      interface
-    input                gfx_cs,
+    input                vram_cs,
+    input                cfg_cs,
     input                cpu_rnw,
     input                cpu_cen,
     input      [12:0]    cpu_addr,
     input      [ 7:0]    cpu_dout,
     output     [ 7:0]    gfx_dout,
-    output reg           cpu_irqn
+    output reg           cpu_irqn,
+    // SDRAM interface
+    output     [16:0]    rom_addr,
+    input      [15:0]    rom_data,
+    input                rom_ok,
+    output               rom_cs,
+    // colour output
+    output reg [ 6:0]    pxl_out
 );
 
-reg     last_LVBL;
-wire    gfx_we = cpu_cen & ~cpu_rnw & gfx_cs;
+reg         last_LVBL;
+wire        gfx_we = cpu_cen & ~cpu_rnw & vram_cs;
+reg  [7:0]  mmr[0:7];
+wire [8:0]  hpos = { mmr[1][0], mmr[0] };
+wire [7:0]  vpos = mmr[2];
+wire [4:0]  tile_extra = { mmr[3][0], mmr[4][3:0] };
+wire        obj_update = mmr[3][3];
+wire        layout     = mmr[3][4]; // 1 for wide layout
+wire [3:0]  extra_mask = mmr[4][7:4];
+wire        nmi_en     = mmr[7][0];
+wire        irq_en     = mmr[7][1];
+wire        firq_en    = mmr[7][2];
+assign      flip       = mmr[7][3];
+
+always @(posedge clk24) begin
+    if( rst ) begin
+        { mmr[7], mmr[6], mmr[5], mmr[4] } <= 32'd0;
+        { mmr[3], mmr[2], mmr[1], mmr[0] } <= 32'd0;
+    end else if(cpu_cen) begin
+        if(!cpu_rnw && cfg_cs)
+            mmr[ cpu_addr[2:0] ] <= cpu_dout;
+    end
+end
 
 jtframe_dual_ram #(.aw(13)) u_ram(
     .clk0   ( clk24     ),
@@ -59,7 +93,7 @@ jtframe_dual_ram #(.aw(13)) u_ram(
 
 always @(posedge clk24) begin
     last_LVBL <= LVBL;
-    if( !LVBL && last_LVBL ) cpu_irqn <= 0;
+    if( !LVBL && last_LVBL && irq_en ) cpu_irqn <= 0;
     else if( LHBL ) cpu_irqn <= 1;
 end
 
