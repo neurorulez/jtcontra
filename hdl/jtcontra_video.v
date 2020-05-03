@@ -55,7 +55,9 @@ module jtcontra_video(
     // Colours
     output     [ 4:0]   red,
     output     [ 4:0]   green,
-    output     [ 4:0]   blue
+    output     [ 4:0]   blue,
+    // Test
+    input      [ 3:0]   gfx_en
 );
 
 wire [8:0] vrender, vrender1, vdump, hdump;
@@ -124,7 +126,9 @@ jtcontra_gfx u_gfx1(
     .rom_data   ( gfx1_data     ),
     .rom_cs     ( gfx1_cs       ),
     .rom_ok     ( gfx1_ok       ),
-    .pxl_out    ( gfx1_pxl      )
+    .pxl_out    ( gfx1_pxl      ),
+    // Test
+    .gfx_en     ( gfx_en[1:0]   )
 );
 
 jtcontra_gfx u_gfx2(
@@ -156,7 +160,9 @@ jtcontra_gfx u_gfx2(
     .rom_data   ( gfx2_data     ),
     .rom_cs     ( gfx2_cs       ),
     .rom_ok     ( gfx2_ok       ),
-    .pxl_out    ( gfx2_pxl      )
+    .pxl_out    ( gfx2_pxl      ),
+    // Test
+    .gfx_en     ( gfx_en[3:2]   )
 );
 
 jtcontra_colmix u_colmix(

@@ -1,5 +1,6 @@
 set_global_assignment -name VERILOG_MACRO "CORENAME=\"JTCONTRA\""
 set_global_assignment -name VERILOG_MACRO "VERTICAL_SCREEN=1"
+set_global_assignment -name VERILOG_MACRO "JTFRAME_CLK24=1"
 set_global_assignment -name VERILOG_MACRO "JTFRAME_MRA_DIP=1"
 set_global_assignment -name VERILOG_MACRO "GAMETOP=jtcontra_game"
 set_global_assignment -name VERILOG_MACRO "STEREO_GAME=1"

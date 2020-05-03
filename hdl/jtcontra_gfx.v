@@ -49,7 +49,9 @@ module jtcontra_gfx(
     input                rom_ok,
     output reg           rom_cs,
     // colour output
-    output reg [ 7:0]    pxl_out
+    output reg [ 7:0]    pxl_out,
+    // test
+    input      [ 1:0]    gfx_en
 );
 
 reg         last_LVBL;

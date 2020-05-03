@@ -211,7 +211,9 @@ jtcontra_video u_video(
     // pixels
     .red            ( red           ),
     .green          ( green         ),
-    .blue           ( blue          )
+    .blue           ( blue          ),
+    // Test
+    .gfx_en         ( gfx_en        )
 );
 
 `ifndef NOSOUND
