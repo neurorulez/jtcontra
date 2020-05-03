@@ -72,7 +72,7 @@ module jtcontra_game(
     input   [ 3:0]  gfx_en
 );
 
-wire        main_cs, snd_cs, snd_ok, main_ok;
+wire        main_cs, snd_cs, snd_ok, main_ok, gfx1_ok, gfx2_ok;
 wire        snd_irq;
 wire [15:0] gfx1_data, gfx2_data;
 wire [17:0] gfx1_addr, gfx2_addr;
@@ -92,7 +92,7 @@ wire [ 7:0] gfx1_dout, gfx2_dout, pal_dout, cpu_dout;
 
 assign prog_rd    = 0;
 assign dwnld_busy = downloading;
-assign { dipsw_c, dipsw_b, dipsw_a } = dipsw;
+assign { dipsw_c, dipsw_b, dipsw_a } = dipsw[19:0];
 
 localparam SND_OFFSET  = 22'h2_0000 >> 1;
 localparam GFX1_OFFSET = SND_OFFSET  + (22'h0_8000 >> 1);
