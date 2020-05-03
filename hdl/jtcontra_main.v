@@ -120,6 +120,7 @@ always @(posedge clk) begin
         snd_irq   <= 0;
         snd_latch <= 8'd0;
     end else if(cpu_cen) begin
+        snd_irq   <= 0;
         if( bank_cs ) bank <= cpu_dout[3:0];
         if( out_cs  ) begin
             case( A[2:1] )
