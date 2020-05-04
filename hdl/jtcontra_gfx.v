@@ -221,14 +221,14 @@ always @(posedge clk) begin
     end
 end
 
+wire [7:0] scr_pxl_gated = {8{gfx_en[1]}} & scr_pxl;
+wire [7:0] chr_pxl_gated = {8{gfx_en[0] & char_en}} & chr_pxl;
+
 always @(posedge clk) begin
     if( rst ) begin
         pxl_out <= ~7'd0;
     end else if(pxl_cen) begin
-        if( char_en )
-            pxl_out <= chr_pxl[3:0] == 4'h0 ? scr_pxl : chr_pxl;
-        else
-            pxl_out <= scr_pxl;
+        pxl_out <= chr_pxl_gated[3:0] == 4'h0 ? scr_pxl_gated : chr_pxl_gated;
     end
 end
 
