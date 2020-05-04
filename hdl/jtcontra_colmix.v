@@ -52,7 +52,8 @@ reg         pal_half;
 reg  [14:0] pxl_aux;
 
 assign gfx_sel  = gfx1_pxl[3:0]==4'b0 ? ~gfx2_pxl[4] : 1'b0;
-assign col_addr = { gfx_sel ? gfx2_pxl : gfx1_pxl, pal_half };
+//assign gfx_sel  = 0;
+assign col_addr = { (gfx_sel ? gfx2_pxl : gfx1_pxl), pal_half };
 
 jtframe_dual_ram #(.aw(8)) u_ram(
     .clk0   ( clk24     ),

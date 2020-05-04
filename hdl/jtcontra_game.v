@@ -133,7 +133,7 @@ jtcontra_prom_we u_prom(
 `ifdef GFX_ONLY
 jtcontra_simloader u_simloader(
     .rst            ( rst           ),
-    .clk            ( clk           ),
+    .clk            ( clk24         ),
     .cpu_cen        ( cpu_cen       ),
     // GFX
     .cpu_addr       ( cpu_addr      ),
@@ -280,8 +280,8 @@ jtframe_rom #(
     .clk         ( clk           ),
     .vblank      ( ~LVBL         ),
 
-    .slot0_cs    ( LVBL          ),
-    .slot1_cs    ( LVBL          ),
+    .slot0_cs    ( gfx1_cs       ),
+    .slot1_cs    ( gfx2_cs       ),
     .slot2_cs    ( 1'b0          ), 
     .slot3_cs    ( 1'b0          ), // unused
     .slot4_cs    ( 1'b0          ), // unused

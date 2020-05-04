@@ -33,10 +33,11 @@ module jtcontra_simloader(
 
 reg [7:0] gfx_snap[0:16383];
 reg [7:0] pal_snap [0:255 ];
+reg [7:0] gfx_cfg[0:15];
 
 assign cpu_cen = 1;
 
-integer file, cnt, dump_cnt, pal_cnt;
+integer file, cnt, dump_cnt, pal_cnt, cfg_cnt;
 
 initial begin
     file=$fopen("gfx1.bin","rb");
@@ -53,12 +54,15 @@ initial begin
     cnt=$fread(pal_snap,file);
     $display("%d bytes loaded as PAL snapshot",cnt);
     $fclose(file);
+
+    $readmemh("gfx_cfg.hex",gfx_cfg);
 end
 
 always @(posedge clk) begin
     if( rst ) begin
         dump_cnt     <= 0;
         pal_cnt      <= 0;
+        cfg_cnt      <= 0;
         cpu_addr     <= ~13'h0;
         gfx1_cfg_cs  <= 0;
         gfx2_cfg_cs  <= 0;
@@ -86,6 +90,19 @@ always @(posedge clk) begin
             gfx1_vram_cs <= 0;
             gfx2_vram_cs <= 0;
             pal_cs       <= 0;
+            cpu_addr[12:3] <= 0;
+            if( cfg_cnt < 16 ) begin
+                cpu_addr[2:0] <= cfg_cnt[2:0];
+                cpu_rnw       <= 0;
+                cpu_dout      <= gfx_cfg[ cfg_cnt ];
+                cfg_cnt       <= cfg_cnt+1;
+                gfx1_cfg_cs   <= cfg_cnt[3];
+                gfx2_cfg_cs   <= ~cfg_cnt[3];
+            end else begin
+                gfx1_cfg_cs   <= 0;
+                gfx2_cfg_cs   <= 0;
+                cpu_rnw       <= 1;
+            end
         end
     end
 end

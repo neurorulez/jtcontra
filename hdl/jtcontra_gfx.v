@@ -54,13 +54,15 @@ module jtcontra_gfx(
     input      [ 1:0]    gfx_en
 );
 
+parameter H0 = 9'h75; // initial value of hdump after H blanking
+
 reg         last_LVBL;
 wire        gfx_we = cpu_cen & ~cpu_rnw & vram_cs;
 
 reg         line;
 reg  [8:0]  hrender;
 wire [9:0]  line_addr = { line, hrender };
-wire [7:0]  txt_pxl, scr_pxl;
+wire [7:0]  chr_pxl, scr_pxl;
 
 ////////// Memory Mapped Registers
 reg  [7:0]  mmr[0:7];
@@ -80,6 +82,8 @@ wire        hflip_en   = mmr[6][1];
 wire        vflip_en   = mmr[6][2];
 wire        prio_en    = mmr[6][3];
 wire [1:0]  pal_bank   = mmr[6][5:4];
+wire        char_en    = 1;
+// wire        char_en    =~mmr[7][4];     // undocumented by MAME
 
 assign      { code12_sel, code11_sel, code10_sel, code9_sel } = mmr[5];
 
@@ -104,7 +108,7 @@ reg  [ 7:0] line_din;
 reg  [ 8:0] hn, vn;
 reg         line_we;
 
-wire        txt_we = line_we &  lyr;
+wire        chr_we = line_we &  lyr;
 wire        scr_we = line_we & ~lyr;
 wire [9:0]  dump_addr;
 
@@ -124,13 +128,13 @@ end
 
 always @(*) begin
     bank[0] = attr_dout[7];
-    bank[1] = attr_dout[code9_sel ];
-    bank[2] = attr_dout[code10_sel];
-    bank[3] = attr_dout[code11_sel];
-    bank[4] = attr_dout[code12_sel];
+    bank[1] = attr_dout[3+code9_sel ];
+    bank[2] = attr_dout[3+code10_sel];
+    bank[3] = attr_dout[3+code11_sel];
+    bank[4] = attr_dout[3+code12_sel];
 end
 
-jtframe_dual_ram #(.aw(11)) u_cram(
+jtframe_dual_ram #(.aw(11)) u_attr_ram(
     .clk0   ( clk24     ),
     .clk1   ( clk       ),
     // Port 0
@@ -145,7 +149,7 @@ jtframe_dual_ram #(.aw(11)) u_cram(
     .q1     ( attr_scan )
 );
 
-jtframe_dual_ram #(.aw(11)) u_vram(
+jtframe_dual_ram #(.aw(11)) u_code_ram(
     .clk0   ( clk24     ),
     .clk1   ( clk       ),
     // Port 0
@@ -175,22 +179,22 @@ jtframe_dual_ram #(.aw(12)) u_obj_ram(
     .q1     (           )
 );
 
-jtframe_dual_ram #(.aw(10)) u_txt(
+jtframe_dual_ram #(.aw(10)) u_line_char(
     .clk0   ( clk       ),
     .clk1   ( clk       ),
     // Port 0
     .data0  ( line_din  ),
     .addr0  ( line_addr ),
-    .we0    ( txt_we    ),
+    .we0    ( chr_we    ),
     .q0     (           ),
     // Port 1
     .data1  (           ),
     .addr1  ( dump_addr ),
     .we1    ( 1'b0      ),
-    .q1     ( txt_pxl   )
+    .q1     ( chr_pxl   )
 );
 
-jtframe_dual_ram #(.aw(10)) u_scr(
+jtframe_dual_ram #(.aw(10)) u_line_scr(
     .clk0   ( clk       ),
     .clk1   ( clk       ),
     // Port 0
@@ -221,7 +225,10 @@ always @(posedge clk) begin
     if( rst ) begin
         pxl_out <= ~7'd0;
     end else if(pxl_cen) begin
-        pxl_out <= txt_pxl[3:0] == 4'hf ? scr_pxl : txt_pxl;
+        if( char_en )
+            pxl_out <= chr_pxl[3:0] == 4'h0 ? scr_pxl : chr_pxl;
+        else
+            pxl_out <= scr_pxl;
     end
 end
 
@@ -240,7 +247,7 @@ always @(posedge clk) begin
         line    <= 0;
     end else begin
         last_LHBL <= LHBL;
-        if( LHBL && !last_LHBL ) begin
+        if( LHBL && !last_LHBL && LVBL) begin
             line   <= ~line;
             lyr    <= 0;
             done   <= 0;
@@ -252,7 +259,7 @@ always @(posedge clk) begin
                 0: begin
                     vn <= vrender + (lyr ? 9'd0 : {1'b0, vpos});
                     hn <= lyr_hn0;
-                    hrender <= { 7'd0, lyr_hn0[1:0] }-9'd1;
+                    hrender <= { 7'd0, lyr_hn0[1:0] }+H0-9'd1;
                 end
                 2: begin
                     code   <= { bank, code_scan };
@@ -269,14 +276,14 @@ always @(posedge clk) begin
                 5: begin // dumps 4 pixels
                     if( dump_cnt[0] ) st<=st;
                     dump_cnt <= dump_cnt>>1;
-                    pxl_data <= pxl_data >> 4;
+                    pxl_data <= pxl_data << 4;
                     hrender  <= hrender + 9'd1;
-                    line_din <= { pal, pxl_data[3:0] };
+                    line_din <= { pal, pxl_data[15:12] };
                     line_we  <= 1;
                 end
                 6: begin
                     line_we <= 0;
-                    if( hn < 9'd256 ) begin
+                    if( hn < 9'd320 ) begin
                         hn      <= hn + 9'd4;
                         st      <= 7;
                         if( !hn[2] ) begin
@@ -287,7 +294,7 @@ always @(posedge clk) begin
                         end
                     end else begin
                         st  <= 0;
-                        if( !lyr ) begin
+                        if( !lyr && char_en ) begin
                             lyr <= 1;
                         end else begin
                             done <= 1;

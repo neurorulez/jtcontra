@@ -151,6 +151,7 @@ jtcontra_gfx u_gfx2(
     // CPU      interface
     .vram_cs    ( gfx2_vram_cs  ),
     .cfg_cs     ( gfx2_cfg_cs   ),
+    .cpu_rnw    ( cpu_rnw       ),
     .cpu_addr   ( cpu_addr      ),
     .cpu_dout   ( cpu_dout      ),
     .gfx_dout   ( gfx2_dout     ),

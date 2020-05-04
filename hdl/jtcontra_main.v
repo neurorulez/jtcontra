@@ -89,13 +89,13 @@ end
 
 always @(*) begin   // consider latching
     case(1'b1)
-        rom_cs:   cpu_din = rom_data;
-        ram_cs:   cpu_din = ram_dout;
-        pal_cs:   cpu_din = pal_dout;
-        in_cs:    cpu_din = port_in;
-        gfx1_vram_cs:  cpu_din = gfx1_dout;
-        gfx2_vram_cs:  cpu_din = gfx2_dout;
-        default:  cpu_din = 8'hff;
+        rom_cs:         cpu_din = rom_data;
+        ram_cs:         cpu_din = ram_dout;
+        pal_cs:         cpu_din = pal_dout;
+        in_cs:          cpu_din = port_in;
+        gfx1_vram_cs:   cpu_din = gfx1_dout;
+        gfx2_vram_cs:   cpu_din = gfx2_dout;
+        default:        cpu_din = 8'hff;
     endcase
 end
 
