@@ -1,3 +1,3 @@
-set_global_assignment -name VERILOG_MACRO "SCAN2X_TYPE=5"
+set_global_assignment -name VERILOG_MACRO "SCAN2X_TYPE=6"
 
 

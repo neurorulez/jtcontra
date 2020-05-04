@@ -1,3 +1,5 @@
+jtcontra_simloader.v
+
 ../../hdl/jtcontra_game.v
 ../../hdl/jtcontra_main.v
 ../../hdl/jtcontra_prom_we.v

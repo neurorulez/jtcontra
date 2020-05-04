@@ -87,8 +87,8 @@ assign      { code12_sel, code11_sel, code10_sel, code9_sel } = mmr[5];
 reg         lyr, done;
 wire [10:0] scan_addr;
 wire [10:0] ram_addr = { cpu_addr[11], cpu_addr[9:0] };
-wire        attr_we  = gfx_we & ~cpu_addr[10];
-wire        code_we  = gfx_we &  cpu_addr[10];
+wire        attr_we  = gfx_we & ~cpu_addr[10] & ~cpu_addr[12];
+wire        code_we  = gfx_we &  cpu_addr[10] & ~cpu_addr[12];
 wire        obj_we   = gfx_we &  cpu_addr[12];
 wire [7:0]  code_dout, attr_dout, obj_dout;
 assign      gfx_dout = cpu_addr[12] ? obj_dout : 

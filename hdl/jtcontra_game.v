@@ -130,6 +130,22 @@ jtcontra_prom_we u_prom(
     .sdram_ack      ( sdram_ack     )
 );
 
+`ifdef GFX_ONLY
+jtcontra_simloader u_simloader(
+    .rst            ( rst           ),
+    .clk            ( clk           ),
+    .cpu_cen        ( cpu_cen       ),
+    // GFX
+    .cpu_addr       ( cpu_addr      ),
+    .cpu_dout       ( cpu_dout      ),
+    .cpu_rnw        ( cpu_rnw       ),
+    .gfx1_vram_cs   ( gfx1_vram_cs  ),
+    .gfx2_vram_cs   ( gfx2_vram_cs  ),
+    .gfx1_cfg_cs    ( gfx1_cfg_cs   ),
+    .gfx2_cfg_cs    ( gfx2_cfg_cs   ),
+    .pal_cs         ( pal_cs        )
+);
+`else
 `ifndef NOMAIN
 jtcontra_main u_main(
     .clk            ( clk24         ),        // 24 MHz
@@ -170,6 +186,7 @@ jtcontra_main u_main(
     .dipsw_b        ( dipsw_b       ),
     .dipsw_c        ( dipsw_c       )
 );
+`endif
 `endif
 
 jtcontra_video u_video(
