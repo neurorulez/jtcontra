@@ -127,11 +127,11 @@ always @(posedge clk24) begin
 end
 
 always @(*) begin
-    bank[0] = attr_dout[7];
-    bank[1] = attr_dout[3+code9_sel ];
-    bank[2] = attr_dout[3+code10_sel];
-    bank[3] = attr_dout[3+code11_sel];
-    bank[4] = attr_dout[3+code12_sel];
+    bank[0] = attr_scan[7];
+    bank[1] = attr_scan[3+code9_sel ];
+    bank[2] = attr_scan[3+code10_sel];
+    bank[3] = attr_scan[3+code11_sel];
+    bank[4] = attr_scan[3+code12_sel];
 end
 
 jtframe_dual_ram #(.aw(11)) u_attr_ram(
