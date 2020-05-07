@@ -51,9 +51,9 @@ module jtcontra_gfx(
     output     [17:0]    rom_addr,
     input      [15:0]    rom_data,
     input                rom_ok,
-    output reg           rom_cs,
+    output               rom_cs,
     // colour output
-    output reg [ 7:0]    pxl_out,
+    output reg [ 6:0]    pxl_out,
     // test
     input      [ 1:0]    gfx_en
 );
@@ -63,17 +63,16 @@ parameter H0 = 9'h75; // initial value of hdump after H blanking
 reg         last_LVBL;
 wire        gfx_we = cpu_cen & ~cpu_rnw & vram_cs;
 
-reg         line;
-reg  [8:0]  hrender;
-wire [9:0]  line_addr = { line, hrender };
-wire [7:0]  chr_pxl, scr_pxl;
+wire        line;
+wire [9:0]  line_addr;
+wire [7:0]  chr_pxl, scr_pxl, line_din;
 
 ////////// Memory Mapped Registers
 reg  [7:0]  mmr[0:7];
 wire [8:0]  hpos = { mmr[1][0], mmr[0] };
 wire [7:0]  vpos = mmr[2];
 wire [4:0]  tile_extra = { mmr[3][0], mmr[4][3:0] };
-wire        obj_update = mmr[3][3];
+wire        obj_page   = mmr[3][3]; // select from which page to draw sprites
 wire        layout     = mmr[3][4]; // 1 for wide layout
 wire [3:0]  extra_mask = mmr[4][7:4];
 wire [1:0]  code9_sel, code10_sel, code11_sel, code12_sel;
@@ -98,7 +97,6 @@ reg  [8:0]  scr_dump_start;
 reg  [8:0]  scr_dump_end;
 
 // Scan
-reg         lyr, done;
 wire [10:0] scan_addr;
 wire [10:0] ram_addr = { cpu_addr[11], cpu_addr[9:0] };
 wire        attr_we  = gfx_we & ~cpu_addr[10] & ~cpu_addr[12];
@@ -107,26 +105,17 @@ wire        obj_we   = gfx_we &  cpu_addr[12];
 wire [7:0]  code_dout, attr_dout, obj_dout;
 assign      gfx_dout = cpu_addr[12] ? obj_dout : 
                       (cpu_addr[10] ? code_dout : attr_dout);
-reg  [ 4:0] bank;
-reg  [12:0] code;
-reg  [ 3:0] pal;
-reg  [ 7:0] dump_cnt;
-reg  [15:0] pxl_data;
 wire [ 7:0] code_scan, attr_scan;
 
-reg  [ 7:0] line_din;
-reg  [ 8:0] hn, vn;
-reg         line_we;
+reg  [ 7:0] obj_line_din;
+reg         obj_line_we;
 
 reg  [ 7:0] vprom_addr, oprom_addr;
 wire [ 3:0] vprom_data, oprom_data;
 
-wire        chr_we = line_we &  lyr;
-wire        scr_we = line_we & ~lyr;
 wire [9:0]  line_dump;
+reg  [9:0]  obj_line_addr;  
 
-assign      scan_addr = { lyr, vn[7:3], hn[7:3] }; // 1 + 5 + 5 = 11
-assign      rom_addr  = { 1'b0, code, vn[2:0], hn[2] }; // 13+3+1 = 17!
 assign      line_dump = { ~line, hdump };
 
 always @(posedge clk24) begin
@@ -140,26 +129,160 @@ always @(posedge clk24) begin
         if( layout ) begin
             // total 35*8 = 280 visible pixels
             chr_dump_start <= 9'h74;
-            chr_dump_end   <= chr_dump_start+5*8;
+            chr_dump_end   <= chr_dump_start+(9'd5<<3);
             scr_dump_start <= chr_dump_end;
-            scr_dump_end   <= scr_dump_start+30*8;
+            scr_dump_end   <= scr_dump_start+(9'd30<<3);
         end else begin
             // total 32*8 = 256 visible pixels
-            chr_dump_start <= 9'h74+2*8;
-            chr_dump_end   <= chr_dump_start+32*8;
+            chr_dump_start <= 9'h74+(9'd2<<3);
+            chr_dump_end   <= chr_dump_start+(9'd32<<3);
             scr_dump_start <= chr_dump_start;
             scr_dump_end   <= chr_dump_end;
         end
     end
 end
 
-always @(*) begin
-    bank[0] = attr_scan[7];
-    bank[1] = attr_scan[3+code9_sel ];
-    bank[2] = attr_scan[3+code10_sel];
-    bank[3] = attr_scan[3+code11_sel];
-    bank[4] = attr_scan[3+code12_sel];
+always @(posedge clk) begin
+    if( rst ) begin
+        cpu_irqn <= 1;
+    end else if(pxl_cen) begin
+        last_LVBL <= LVBL;
+        if( !LVBL && last_LVBL ) begin
+            if( irq_en ) cpu_irqn <= 0;
+        end
+        else if( LHBL ) cpu_irqn <= 1;
+    end
 end
+
+wire [7:0] scr_pxl_gated = {8{gfx_en[1]}} & scr_pxl;
+wire [7:0] chr_pxl_gated = {8{gfx_en[0] & char_en}} & chr_pxl;
+wire       chr_blank     = chr_pxl_gated[3:0] == 4'h0;
+wire       chr_area      = hdump>=chr_dump_start && hdump<chr_dump_end;
+wire       scr_area      = hdump>=scr_dump_start && hdump<scr_dump_end;
+reg        draw_scr;
+
+always @(*) begin
+    draw_scr <= ( chr_area && !scr_area) ? 0 : (
+                (!chr_area &&  scr_area) ? 1 : (
+                 chr_blank ? 1 : 0 ));
+end
+
+always @(posedge clk) begin
+    if( rst ) begin
+        pxl_out    <= ~7'd0;
+        vprom_addr <= 8'd0;
+    end else begin
+        vprom_addr <= draw_scr ? scr_pxl_gated : chr_pxl_gated;
+        if(pxl_cen) begin
+            pxl_out <= { pal_bank, 1'b1, vprom_data[3:0] };
+        end
+    end
+end
+
+jtcontra_gfx_tilemap u_tilemap(
+    .rst                ( rst               ),
+    .clk                ( clk               ),
+    // screen
+    .LHBL               ( LHBL              ),
+    .LVBL               ( LVBL              ),
+    .hpos               ( hpos              ),
+    .vpos               ( vpos              ),
+    .vrender            ( vrender           ),
+    .lyr                ( lyr               ),
+    .line               ( line              ),
+    .line_addr          ( line_addr         ),
+    .done               ( done              ),
+    .chr_we             ( chr_we            ),
+    .scr_we             ( scr_we            ),
+    .line_din           ( line_din          ),
+    .scan_addr          ( scan_addr         ),
+    // SDRAM
+    .rom_cs             ( rom_cs            ),
+    .rom_addr           ( rom_addr          ),
+    .rom_ok             ( rom_ok            ),
+    .rom_data           ( rom_data          ),
+    .attr_scan          ( attr_scan         ),
+    .code_scan          ( code_scan         ),
+    // Configuration
+    .chr_dump_start     ( chr_dump_start    ),
+    .scr_dump_start     ( scr_dump_start    ),
+    .pal_msb            ( pal_msb           ),
+    .code9_sel          ( code9_sel         ),
+    .code10_sel         ( code10_sel        ),
+    .code11_sel         ( code11_sel        ),
+    .code12_sel         ( code12_sel        )
+);
+
+// Colour PROMs
+
+jtframe_prom #(.dw(4),.aw(8) ) u_vprom(
+    .clk        ( clk                       ),
+    .cen        ( 1'b1                      ),
+    .data       ( prog_data                 ),
+    .rd_addr    ( vprom_addr                ),
+    .wr_addr    ( prog_addr[7:0]            ),
+    .we         ( prom_we & prog_addr[8]    ),
+    .q          ( vprom_data                )
+);
+
+jtframe_prom #(.dw(4),.aw(8) ) u_oprom(
+    .clk        ( clk                       ),
+    .cen        ( 1'b1                      ),
+    .data       ( prog_data                 ),
+    .rd_addr    ( oprom_addr                ),
+    .wr_addr    ( prog_addr[7:0]            ),
+    .we         ( prom_we & ~prog_addr[8]   ),
+    .q          ( oprom_data                )
+);
+
+// Line buffers could work with only AW=9 but it would
+// make logic a bit more complex without any benefit in
+// the FPGA, as the minimum size BRAM available is normally AW=10
+jtframe_dual_ram #(.aw(10)) u_line_char(
+    .clk0   ( clk       ),
+    .clk1   ( clk       ),
+    // Port 0
+    .data0  ( line_din  ),
+    .addr0  ( line_addr ),
+    .we0    ( chr_we    ),
+    .q0     (           ),
+    // Port 1
+    .data1  (           ),
+    .addr1  ( line_dump ),
+    .we1    ( 1'b0      ),
+    .q1     ( chr_pxl   )
+);
+
+jtframe_dual_ram #(.aw(10)) u_line_scr(
+    .clk0   ( clk       ),
+    .clk1   ( clk       ),
+    // Port 0
+    .data0  ( line_din  ),
+    .addr0  ( line_addr ),
+    .we0    ( scr_we    ),
+    .q0     (           ),
+    // Port 1
+    .data1  (           ),
+    .addr1  ( line_dump ),
+    .we1    ( 1'b0      ),
+    .q1     ( scr_pxl   )
+);
+
+/*
+jtframe_dual_ram #(.aw(10)) u_line_obj(
+    .clk0   ( clk           ),
+    .clk1   ( clk           ),
+    // Port 0
+    .data0  ( obj_line_din  ),
+    .addr0  ( obj_line_addr ),
+    .we0    ( obj_line_we   ),
+    .q0     (               ),
+    // Port 1
+    .data1  (               ),
+    .addr1  ( line_dump     ),
+    .we1    ( 1'b0          ),
+    .q1     ( obj_pxl       )
+);*/
 
 jtframe_dual_ram #(.aw(11)) u_attr_ram(
     .clk0   ( clk24     ),
@@ -204,173 +327,6 @@ jtframe_dual_ram #(.aw(12)) u_obj_ram(
     .addr1  (           ),
     .we1    ( 1'b0      ),
     .q1     (           )
-);
-
-// Line buffers could work with only AW=9 but it would
-// make logic a bit more complex without any benefit in
-// the FPGA, as the minimum size BRAM available is normally AW=10
-jtframe_dual_ram #(.aw(10)) u_line_char(
-    .clk0   ( clk       ),
-    .clk1   ( clk       ),
-    // Port 0
-    .data0  ( line_din  ),
-    .addr0  ( line_addr ),
-    .we0    ( chr_we    ),
-    .q0     (           ),
-    // Port 1
-    .data1  (           ),
-    .addr1  ( line_dump ),
-    .we1    ( 1'b0      ),
-    .q1     ( chr_pxl   )
-);
-
-jtframe_dual_ram #(.aw(10)) u_line_scr(
-    .clk0   ( clk       ),
-    .clk1   ( clk       ),
-    // Port 0
-    .data0  ( line_din  ),
-    .addr0  ( line_addr ),
-    .we0    ( scr_we    ),
-    .q0     (           ),
-    // Port 1
-    .data1  (           ),
-    .addr1  ( line_dump ),
-    .we1    ( 1'b0      ),
-    .q1     ( scr_pxl   )
-);
-
-always @(posedge clk) begin
-    if( rst ) begin
-        cpu_irqn <= 1;
-    end else if(pxl_cen) begin
-        last_LVBL <= LVBL;
-        if( !LVBL && last_LVBL ) begin
-            if( irq_en ) cpu_irqn <= 0;
-        end
-        else if( LHBL ) cpu_irqn <= 1;
-    end
-end
-
-wire [7:0] scr_pxl_gated = {8{gfx_en[1]}} & scr_pxl;
-wire [7:0] chr_pxl_gated = {8{gfx_en[0] & char_en}} & chr_pxl;
-wire       chr_blank     = chr_pxl_gated[3:0] == 4'h0;
-wire       chr_area      = hdump>=chr_dump_start && hdump<chr_dump_end;
-wire       scr_area      = hdump>=scr_dump_start && hdump<scr_dump_end;
-reg        draw_scr;
-
-always @(*) begin
-    draw_scr <= ( chr_area && !scr_area) ? 0 : (
-                (!chr_area &&  scr_area) ? 1 : (
-                 chr_blank ? 1 : 0 ));
-end
-
-always @(posedge clk) begin
-    if( rst ) begin
-        pxl_out    <= ~7'd0;
-        vprom_addr <= 8'd0;
-    end else begin
-        vprom_addr <= draw_scr ? scr_pxl_gated : chr_pxl_gated;
-        if(pxl_cen) begin
-            pxl_out <= { vprom_addr[7:4], vprom_data[3:0] };
-        end
-    end
-end
-
-reg  [ 2:0] st;
-reg         last_LHBL;
-wire [ 9:0] lyr_hn0 = lyr ? 9'd0 : hpos;
-
-always @(posedge clk) begin
-    if( rst ) begin
-        done    <= 1;
-        lyr     <= 0;
-        pal     <= 4'd0;
-        code    <= 13'd0;
-        line_we <= 0;
-        st      <= 3'd0;
-        line    <= 0;
-    end else begin
-        last_LHBL <= LHBL;
-        if( LHBL && !last_LHBL && LVBL) begin
-            line   <= ~line;
-            lyr    <= 0;
-            done   <= 0;
-            rom_cs <= 0;
-            st     <= 3'd0;
-        end else begin
-            if(!done) st <= st + 1;
-            case( st )
-                0: begin
-                    vn <= vrender + (lyr ? 9'd0 : {1'b0, vpos})+9'd8;
-                    hn <= lyr_hn0;
-                    hrender <= { 7'd0, lyr_hn0[1:0] } + 
-                        ( lyr ? chr_dump_start : scr_dump_start );
-                end
-                2: begin
-                    code   <= { bank, code_scan };
-                    pal    <= { pal_msb, attr_scan[2:0] };
-                    rom_cs <= 1;
-                end
-                4: begin
-                    if( rom_ok ) begin
-                        pxl_data <= rom_data;
-                        rom_cs   <= 0;
-                        dump_cnt <= 4'h7;
-                    end else st <= st;
-                end
-                5: begin // dumps 4 pixels
-                    if( dump_cnt[0] ) st<=st;
-                    dump_cnt <= dump_cnt>>1;
-                    pxl_data <= pxl_data << 4;
-                    hrender  <= hrender + 9'd1;
-                    line_din <= { pal, pxl_data[15:12] };
-                    line_we  <= 1;
-                end
-                6: begin
-                    line_we <= 0;
-                    if( hn < 9'd320 ) begin
-                        hn      <= hn + 9'd4;
-                        st      <= 7;
-                        if( !hn[2] ) begin
-                            rom_cs  <= 1;
-                            st      <= 3; // wait for new ROM data
-                        end else begin
-                            st      <= 1; // collect tile info
-                        end
-                    end else begin
-                        st  <= 0;
-                        if( !lyr && char_en ) begin
-                            lyr <= 1;
-                        end else begin
-                            done <= 1;
-                        end
-                    end
-                end
-            endcase // st
-        end
-    end
-end
-
-// Colour PROMs
-
-jtframe_prom #(.dw(4),.aw(8) ) u_vprom(
-    .clk        ( clk                       ),
-    .cen        ( 1'b1                      ),
-    .data       ( prog_data                 ),
-    .rd_addr    ( vprom_addr                ),
-    .wr_addr    ( prog_addr[7:0]            ),
-    .we         ( prom_we & prog_addr[8]    ),
-    .q          ( vprom_data                )
-);
-
-jtframe_prom #(.dw(4),.aw(8) ) u_oprom(
-    .clk        ( clk                       ),
-    .cen        ( 1'b1                      ),
-    .data       ( prog_data                 ),
-    .rd_addr    ( oprom_addr                ),
-    .wr_addr    ( prog_addr[7:0]            ),
-    .we         ( prom_we & ~prog_addr[8]   ),
-    .q          ( oprom_data                )
 );
 
 endmodule

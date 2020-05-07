@@ -65,7 +65,7 @@ module jtcontra_video(
 );
 
 wire [8:0] vrender, vrender1, vdump, hdump;
-wire [7:0] gfx1_pxl, gfx2_pxl;
+wire [6:0] gfx1_pxl, gfx2_pxl;
 
 jtframe_cen48 u_cen(
     .clk        ( clk       ),    // 48 MHz
@@ -199,8 +199,8 @@ jtcontra_colmix u_colmix(
     .cpu_dout   ( cpu_dout      ),
     .pal_dout   ( pal_dout      ),
     // Colours
-    .gfx1_pxl   ( gfx1_pxl[6:0] ),
-    .gfx2_pxl   ( gfx2_pxl[6:0] ),
+    .gfx1_pxl   ( gfx1_pxl      ),
+    .gfx2_pxl   ( gfx2_pxl      ),
     .red        ( red           ),
     .green      ( green         ),
     .blue       ( blue          )

@@ -81,7 +81,7 @@ void contra_state::contra_map(address_map &map)
 
 	map(0x1000, 0x1fff).ram();
 
-	map(0x2000, 0x23ff).ram().w(FUNC(contra_state::contra_fg_cram_w)).share("fg_cram");
+	map(0x2000, 0x23ff).ram().w(FUNC(contra_state::contra_fg_cram_w)).share("fg_cram");  // K007121_1
 	map(0x2400, 0x27ff).ram().w(FUNC(contra_state::contra_fg_vram_w)).share("fg_vram");
 	map(0x2800, 0x2bff).ram().w(FUNC(contra_state::contra_text_cram_w)).share("tx_cram");
 	map(0x2c00, 0x2fff).ram().w(FUNC(contra_state::contra_text_vram_w)).share("tx_vram");

@@ -50,10 +50,12 @@ wire [ 7:0] col_addr;
 wire        gfx_sel;
 reg         pal_half;
 reg  [14:0] pxl_aux;
+wire [ 6:0] gfx_mux;
 
-assign gfx_sel  = gfx1_pxl[3:0]==4'b0 ? ~gfx2_pxl[4] : 1'b0;
-//assign gfx_sel  = 0;
-assign col_addr = { (gfx_sel ? gfx2_pxl : gfx1_pxl), pal_half };
+assign gfx_sel  = gfx1_pxl[3:0]==4'h0 ? gfx2_pxl[4] : 1'b0;
+assign gfx_mux  = gfx_sel ? gfx2_pxl : gfx1_pxl;
+assign col_addr = { gfx_mux, pal_half };
+
 
 jtframe_dual_ram #(.aw(8)) u_ram(
     .clk0   ( clk24     ),
@@ -82,7 +84,7 @@ always @(posedge clk) begin
             LVBL_dly <= LVBL;
             LHBL_dly <= LHBL;
             { blue, green, red } <= (!LVBL || !LHBL) ? 15'd0 : pxl_aux;
-            pal_half <= 0;
+            pal_half <= 1;
         end else 
             pal_half <= ~pal_half;
     end

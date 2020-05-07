@@ -96,8 +96,8 @@ always @(posedge clk) begin
                 cpu_rnw       <= 0;
                 cpu_dout      <= gfx_cfg[ cfg_cnt ];
                 cfg_cnt       <= cfg_cnt+1;
-                gfx1_cfg_cs   <= cfg_cnt[3];
-                gfx2_cfg_cs   <= ~cfg_cnt[3];
+                gfx1_cfg_cs   <= ~cfg_cnt[3];
+                gfx2_cfg_cs   <= cfg_cnt[3];
             end else begin
                 gfx1_cfg_cs   <= 0;
                 gfx2_cfg_cs   <= 0;

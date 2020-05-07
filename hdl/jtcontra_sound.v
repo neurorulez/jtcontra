@@ -47,7 +47,14 @@ reg  [ 7:0] cpu_din;
 wire        RnW, irq_n;
 reg         ram_cs, latch_cs, fm_cs, irq_cs;
 
-assign rom_addr = A[14:0];
+wire signed [15:0] xleft, xright;
+
+assign rom_addr  = A[14:0];
+
+// Sound has +6dB gain which seems needed at least for Contra
+// May produce distortion. Look here in case of trouble:
+assign snd_left  = xleft  << 1;
+assign snd_right = xright << 1;
 
 wire cen_fm, cen_fm2;
 wire cpu_cen;
@@ -134,8 +141,8 @@ jt51 u_jt51(
     .left       (           ),
     .right      (           ),
     // Full resolution output
-    .xleft      ( snd_left  ),
-    .xright     ( snd_right ),
+    .xleft      ( xleft     ),
+    .xright     ( xright    ),
     // unsigned outputs for sigma delta converters, full resolution
     .dacleft    (           ),
     .dacright   (           )

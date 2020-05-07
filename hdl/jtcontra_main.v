@@ -133,6 +133,8 @@ always @(posedge clk) begin
     end
 end
 
+wire irq_trigger = ~gfx_irqn | dip_pause;
+
 jtframe_ff u_ff(
     .clk      ( clk         ),
     .rst      ( rst         ),
@@ -142,7 +144,7 @@ jtframe_ff u_ff(
     .qn       ( irq_n       ),
     .set      (             ),    // active high
     .clr      ( irq_ack     ),    // active high
-    .sigedge  ( ~gfx_irqn   )     // signal whose edge will trigger the FF
+    .sigedge  ( irq_trigger )     // signal whose edge will trigger the FF
 );
 
 jtframe_sys6809 #(.RAM_AW(12)) u_cpu(

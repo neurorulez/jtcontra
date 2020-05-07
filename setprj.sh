@@ -8,4 +8,5 @@ else
     export JTFRAME=$JTROOT/modules/jtframe
 
     source $JTFRAME/bin/setprj.sh $*
+    alias jtcore jtcore contra -d JTFRAME_SIM_DIPS="~32'd0"
 fi

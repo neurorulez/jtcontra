@@ -5,6 +5,7 @@ jtcontra_simloader.v
 ../../hdl/jtcontra_sound.v
 ../../hdl/jtcontra_video.v
 ../../hdl/jtcontra_gfx.v
+../../hdl/jtcontra_gfx_tilemap.v
 ../../hdl/jtcontra_colmix.v
 
 ../../modules/jtframe/hdl/video/jtframe_vtimer.v

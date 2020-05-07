@@ -16,4 +16,4 @@ while [ $# -gt 0 ]; do
     shift
 done
 
-go.sh -d GFX_ONLY -d NOSOUND -video 2 -deep $OTHER
+go.sh -d GFX_ONLY -d NOSOUND -video 2 -deep -d VIDEO_START=1 $OTHER
