@@ -34,6 +34,10 @@ module jtcontra_gfx(
     input   [8:0]        vrender,
     input   [8:0]        vrender1,
     output               flip,
+    // PROMs
+    input      [ 8:0]    prog_addr,
+    input      [ 3:0]    prog_data,
+    input                prom_we,
     // CPU      interface
     input                vram_cs,
     input                cfg_cs,
@@ -113,6 +117,9 @@ wire [ 7:0] code_scan, attr_scan;
 reg  [ 7:0] line_din;
 reg  [ 8:0] hn, vn;
 reg         line_we;
+
+reg  [ 7:0] vprom_addr, oprom_addr;
+wire [ 3:0] vprom_data, oprom_data;
 
 wire        chr_we = line_we &  lyr;
 wire        scr_we = line_we & ~lyr;
@@ -259,9 +266,13 @@ end
 
 always @(posedge clk) begin
     if( rst ) begin
-        pxl_out <= ~7'd0;
-    end else if(pxl_cen) begin
-        pxl_out <= draw_scr ? scr_pxl_gated : chr_pxl_gated;
+        pxl_out    <= ~7'd0;
+        vprom_addr <= 8'd0;
+    end else begin
+        vprom_addr <= draw_scr ? scr_pxl_gated : chr_pxl_gated;
+        if(pxl_cen) begin
+            pxl_out <= { vprom_addr[7:4], vprom_data[3:0] };
+        end
     end
 end
 
@@ -340,5 +351,26 @@ always @(posedge clk) begin
     end
 end
 
+// Colour PROMs
+
+jtframe_prom #(.dw(4),.aw(8) ) u_vprom(
+    .clk        ( clk                       ),
+    .cen        ( 1'b1                      ),
+    .data       ( prog_data                 ),
+    .rd_addr    ( vprom_addr                ),
+    .wr_addr    ( prog_addr[7:0]            ),
+    .we         ( prom_we & prog_addr[8]    ),
+    .q          ( vprom_data                )
+);
+
+jtframe_prom #(.dw(4),.aw(8) ) u_oprom(
+    .clk        ( clk                       ),
+    .cen        ( 1'b1                      ),
+    .data       ( prog_data                 ),
+    .rd_addr    ( oprom_addr                ),
+    .wr_addr    ( prog_addr[7:0]            ),
+    .we         ( prom_we & ~prog_addr[8]   ),
+    .q          ( oprom_data                )
+);
 
 endmodule

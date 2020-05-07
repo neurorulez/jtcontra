@@ -80,7 +80,7 @@ wire [17:0] gfx1_addr, gfx2_addr;
 wire [ 7:0] main_data, snd_data, snd_latch;
 wire [14:0] snd_addr;
 wire [16:0] main_addr;
-wire        cen12;
+wire        cen12, prom_we;
 
 wire [ 7:0] dipsw_a, dipsw_b;
 wire [ 3:0] dipsw_c;
@@ -117,7 +117,8 @@ jtframe_cen24 u_cen(
     .cen1p5b    (               )
 );
 
-jtframe_dwnld u_dwnld(
+jtframe_dwnld #(.PROM_START(25'h128_000))
+u_dwnld(
     .clk            ( clk           ),
     .downloading    ( downloading   ),
     .ioctl_addr     ( ioctl_addr    ),
@@ -127,6 +128,7 @@ jtframe_dwnld u_dwnld(
     .prog_data      ( prog_data     ),
     .prog_mask      ( prog_mask     ), // active low
     .prog_we        ( prog_we       ),
+    .prom_we        ( prom_we       ),
     .sdram_ack      ( sdram_ack     )
 );
 
@@ -202,6 +204,10 @@ jtcontra_video u_video(
     .HS             ( HS            ),
     .VS             ( VS            ),
     .flip           ( flip          ),
+    // PROMs
+    .prom_we        ( prom_we       ),
+    .prog_addr      ( prog_addr[9:0]),
+    .prog_data      ( prog_data[3:0]),
     // GFX - CPU interface
     .cpu_irqn       ( cpu_irqn      ),
     .gfx1_vram_cs   ( gfx1_vram_cs  ),

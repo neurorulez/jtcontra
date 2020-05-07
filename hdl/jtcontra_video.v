@@ -29,6 +29,10 @@ module jtcontra_video(
     output              HS,
     output              VS,
     output              flip,
+    // PROMs
+    input      [ 9:0]    prog_addr,
+    input      [ 3:0]    prog_data,
+    input                prom_we,
     // CPU      interface
     input               gfx1_vram_cs,
     input               gfx2_vram_cs,
@@ -96,6 +100,9 @@ jtframe_vtimer u_timer(
     .VS         ( VS            )
 );
 
+wire gfx1_prom_we = ~prog_addr[9] & prom_we;
+wire gfx2_prom_we =  prog_addr[9] & prom_we;
+
 jtcontra_gfx u_gfx1(
     .rst        ( rst           ),
     .clk        ( clk           ),
@@ -107,6 +114,10 @@ jtcontra_gfx u_gfx1(
     .LVBL       ( LVBL          ),
     .HS         ( HS            ),
     .VS         ( VS            ),
+    // PROMs
+    .prom_we    ( gfx1_prom_we  ),
+    .prog_addr  ( prog_addr[8:0]),
+    .prog_data  ( prog_data[3:0]),
     // Screen position
     .hdump      ( hdump         ),
     .vdump      ( vdump         ),
@@ -142,6 +153,10 @@ jtcontra_gfx u_gfx2(
     .LVBL       ( LVBL          ),
     .HS         ( HS            ),
     .VS         ( VS            ),
+    // PROMs
+    .prom_we    ( gfx2_prom_we  ),
+    .prog_addr  ( prog_addr[8:0]),
+    .prog_data  ( prog_data[3:0]),
     // Screen position
     .hdump      ( hdump         ),
     .vdump      ( vdump         ),
