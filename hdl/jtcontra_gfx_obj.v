@@ -54,7 +54,6 @@ reg  [ 8:0] xpos;
 reg  [ 9:0] scan_base;
 
 assign      line_addr = xpos;
-assign      rom_addr  = { 1'b0, code, vn[2:0], hn[2] }; // 13+3+1 = 17!
 assign      scan_addr = scan_base + byte_sel;
 
 reg  [ 5:0] attr;
@@ -83,6 +82,8 @@ always @(posedge clk) begin
         code    <= 13'd0;
         line_we <= 0;
         st      <= 3'd0;
+        size_cnt<= 4'd0;
+        dump_cnt<= 8'd0;
     end else begin
         last_start <= start;
         if( start && !last_start && LVBL) begin
@@ -95,6 +96,7 @@ always @(posedge clk) begin
             if(!done) st <= st + 1;
             case( st )
                 0: begin
+                    rom_cs   <= 0;
                     byte_sel <= 3'd2;   // get y position
                 end
                 1: begin
@@ -144,7 +146,7 @@ always @(posedge clk) begin
                     line_we <= 0;
                     {code[1:0],h4} <= {code[1:0],h4} + 3'd1;
                     if( !h4 ) size_cnt <= size_cnt>>1;
-                    if( !h4 || size_cnt[0] ) begin
+                    if( !h4 && size_cnt[0] ) begin
                         rom_cs  <= 1;
                         st      <= 6; // wait for new ROM data
                     end else begin                            
@@ -158,6 +160,7 @@ always @(posedge clk) begin
                         scan_base <= scan_base + 10'd5;
                     end else begin
                         done      <= 1;
+                        rom_cs    <= 0;
                     end
                 end
             endcase // st

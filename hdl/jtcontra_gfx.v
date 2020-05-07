@@ -107,14 +107,14 @@ assign      gfx_dout = cpu_addr[12] ? obj_dout :
                       (cpu_addr[10] ? code_dout : attr_dout);
 wire [ 7:0] code_scan, attr_scan, obj_scan;
 
-reg  [ 7:0] obj_line_din;
+wire [ 7:0] obj_line_din;
 wire        obj_line_we;
 
 reg  [ 7:0] vprom_addr, oprom_addr;
 wire [ 3:0] vprom_data, oprom_data;
 
 wire [9:0]  line_dump;
-reg  [9:0]  obj_line_addr;
+wire [9:0]  obj_line_addr;
 
 wire        rom_obj_cs, rom_scr_cs;
 wire [17:0] rom_scr_addr, rom_obj_addr;
@@ -122,8 +122,8 @@ wire [17:0] rom_scr_addr, rom_obj_addr;
 assign      line_dump = { ~line, hdump };
 
 // good candidates for latching:
-assign      rom_cs   = rom_scr_cs | rom_obj_cs;
-assign      rom_addr = rom_scr_cs ? rom_scr_addr : rom_obj_addr;
+assign      rom_cs   = !done ? rom_scr_cs   : rom_obj_cs;
+assign      rom_addr = !done ? rom_scr_addr : rom_obj_addr;
 
 always @(posedge clk24) begin
     if( rst ) begin
@@ -227,7 +227,7 @@ jtcontra_gfx_obj u_obj(
     .start              ( done              ),
     .LVBL               ( LVBL              ),
     .vrender            ( vrender           ),
-    .done               ( done              ),
+    .done               (                   ),
     .obj_we             ( obj_line_we       ),
     .line_din           ( obj_line_din      ),
     .line_addr          ( obj_line_addr[8:0]),
