@@ -87,6 +87,12 @@ wire        char_en    = 1;
 
 assign      { code12_sel, code11_sel, code10_sel, code9_sel } = mmr[5];
 
+// Other configuration
+reg  [8:0]  chr_dump_start;
+reg  [8:0]  chr_dump_end;
+reg  [8:0]  scr_dump_start;
+reg  [8:0]  scr_dump_end;
+
 // Scan
 reg         lyr, done;
 wire [10:0] scan_addr;
@@ -110,11 +116,11 @@ reg         line_we;
 
 wire        chr_we = line_we &  lyr;
 wire        scr_we = line_we & ~lyr;
-wire [9:0]  dump_addr;
+wire [9:0]  line_dump;
 
 assign      scan_addr = { lyr, vn[7:3], hn[7:3] }; // 1 + 5 + 5 = 11
 assign      rom_addr  = { 1'b0, code, vn[2:0], hn[2] }; // 13+3+1 = 17!
-assign      dump_addr = { ~line, hdump };
+assign      line_dump = { ~line, hdump };
 
 always @(posedge clk24) begin
     if( rst ) begin
@@ -123,6 +129,20 @@ always @(posedge clk24) begin
     end else if(cpu_cen) begin
         if(!cpu_rnw && cfg_cs)
             mmr[ cpu_addr[2:0] ] <= cpu_dout;
+        // Apply layout
+        if( layout ) begin
+            // total 35*8 = 280 visible pixels
+            chr_dump_start <= 9'h74;
+            chr_dump_end   <= chr_dump_start+5*8;
+            scr_dump_start <= chr_dump_end;
+            scr_dump_end   <= scr_dump_start+30*8;
+        end else begin
+            // total 32*8 = 256 visible pixels
+            chr_dump_start <= 9'h74+2*8;
+            chr_dump_end   <= chr_dump_start+32*8;
+            scr_dump_start <= chr_dump_start;
+            scr_dump_end   <= chr_dump_end;
+        end
     end
 end
 
@@ -179,6 +199,9 @@ jtframe_dual_ram #(.aw(12)) u_obj_ram(
     .q1     (           )
 );
 
+// Line buffers could work with only AW=9 but it would
+// make logic a bit more complex without any benefit in
+// the FPGA, as the minimum size BRAM available is normally AW=10
 jtframe_dual_ram #(.aw(10)) u_line_char(
     .clk0   ( clk       ),
     .clk1   ( clk       ),
@@ -189,7 +212,7 @@ jtframe_dual_ram #(.aw(10)) u_line_char(
     .q0     (           ),
     // Port 1
     .data1  (           ),
-    .addr1  ( dump_addr ),
+    .addr1  ( line_dump ),
     .we1    ( 1'b0      ),
     .q1     ( chr_pxl   )
 );
@@ -204,7 +227,7 @@ jtframe_dual_ram #(.aw(10)) u_line_scr(
     .q0     (           ),
     // Port 1
     .data1  (           ),
-    .addr1  ( dump_addr ),
+    .addr1  ( line_dump ),
     .we1    ( 1'b0      ),
     .q1     ( scr_pxl   )
 );
@@ -223,12 +246,22 @@ end
 
 wire [7:0] scr_pxl_gated = {8{gfx_en[1]}} & scr_pxl;
 wire [7:0] chr_pxl_gated = {8{gfx_en[0] & char_en}} & chr_pxl;
+wire       chr_blank     = chr_pxl_gated[3:0] == 4'h0;
+wire       chr_area      = hdump>=chr_dump_start && hdump<chr_dump_end;
+wire       scr_area      = hdump>=scr_dump_start && hdump<scr_dump_end;
+reg        draw_scr;
+
+always @(*) begin
+    draw_scr <= ( chr_area && !scr_area) ? 0 : (
+                (!chr_area &&  scr_area) ? 1 : (
+                 chr_blank ? 1 : 0 ));
+end
 
 always @(posedge clk) begin
     if( rst ) begin
         pxl_out <= ~7'd0;
     end else if(pxl_cen) begin
-        pxl_out <= chr_pxl_gated[3:0] == 4'h0 ? scr_pxl_gated : chr_pxl_gated;
+        pxl_out <= draw_scr ? scr_pxl_gated : chr_pxl_gated;
     end
 end
 
@@ -259,7 +292,8 @@ always @(posedge clk) begin
                 0: begin
                     vn <= vrender + (lyr ? 9'd0 : {1'b0, vpos});
                     hn <= lyr_hn0;
-                    hrender <= { 7'd0, lyr_hn0[1:0] }+H0-9'd1;
+                    hrender <= { 7'd0, lyr_hn0[1:0] } + 
+                        ( lyr ? chr_dump_start : scr_dump_start );
                 end
                 2: begin
                     code   <= { bank, code_scan };

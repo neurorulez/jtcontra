@@ -34,6 +34,6 @@ echo "Game ROM length: " $GAME_ROM_LEN
     -d COLORW=5 -d STEREO_GAME=1  \
     -d BUTTONS=2 -d JTFRAME_MRA_DIP -d VERTICAL_SCREEN\
     -d SCAN2X_TYPE=5 -d JT51_NODEBUG  \
-    -videow 280 -videoh 240 \
+    -videow 280 -videoh 240 -d VIDEO_START=1 \
     -d JTFRAME_CLK24 \
     $*

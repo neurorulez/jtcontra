@@ -117,7 +117,7 @@ jtframe_cen24 u_cen(
     .cen1p5b    (               )
 );
 
-jtcontra_prom_we u_prom(
+jtframe_dwnld u_dwnld(
     .clk            ( clk           ),
     .downloading    ( downloading   ),
     .ioctl_addr     ( ioctl_addr    ),

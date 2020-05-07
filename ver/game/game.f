@@ -2,7 +2,6 @@ jtcontra_simloader.v
 
 ../../hdl/jtcontra_game.v
 ../../hdl/jtcontra_main.v
-../../hdl/jtcontra_prom_we.v
 ../../hdl/jtcontra_sound.v
 ../../hdl/jtcontra_video.v
 ../../hdl/jtcontra_gfx.v
@@ -16,5 +15,6 @@ jtcontra_simloader.v
 ../../modules/jtframe/hdl/ram/jtframe_dual_ram.v
 ../../modules/jtframe/hdl/sdram/jtframe_rom.v
 ../../modules/jtframe/hdl/sdram/jtframe_romrq.v
+../../modules/jtframe/hdl/sdram/jtframe_dwnld.v
 ../../modules/jtframe/hdl/jtframe_z80wait.v
 ../../modules/jtframe/hdl/jtframe_ff.v

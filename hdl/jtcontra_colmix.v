@@ -78,12 +78,13 @@ always @(posedge clk) begin
         blue     <= 5'd0;
     end else begin
         pxl_aux  <= { pxl_aux[6:0], col_data };
-        pal_half <= ~pal_half;
         if( pxl_cen ) begin
             LVBL_dly <= LVBL;
             LHBL_dly <= LHBL;
             { blue, green, red } <= (!LVBL || !LHBL) ? 15'd0 : pxl_aux;
-        end
+            pal_half <= 0;
+        end else 
+            pal_half <= ~pal_half;
     end
 end
 
