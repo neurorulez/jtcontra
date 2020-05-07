@@ -102,21 +102,28 @@ wire [10:0] ram_addr = { cpu_addr[11], cpu_addr[9:0] };
 wire        attr_we  = gfx_we & ~cpu_addr[10] & ~cpu_addr[12];
 wire        code_we  = gfx_we &  cpu_addr[10] & ~cpu_addr[12];
 wire        obj_we   = gfx_we &  cpu_addr[12];
-wire [7:0]  code_dout, attr_dout, obj_dout;
+wire [7:0]  code_dout, attr_dout, obj_dout, obj_pxl;
 assign      gfx_dout = cpu_addr[12] ? obj_dout : 
                       (cpu_addr[10] ? code_dout : attr_dout);
-wire [ 7:0] code_scan, attr_scan;
+wire [ 7:0] code_scan, attr_scan, obj_scan;
 
 reg  [ 7:0] obj_line_din;
-reg         obj_line_we;
+wire        obj_line_we;
 
 reg  [ 7:0] vprom_addr, oprom_addr;
 wire [ 3:0] vprom_data, oprom_data;
 
 wire [9:0]  line_dump;
-reg  [9:0]  obj_line_addr;  
+reg  [9:0]  obj_line_addr;
+
+wire        rom_obj_cs, rom_scr_cs;
+wire [17:0] rom_scr_addr, rom_obj_addr;
 
 assign      line_dump = { ~line, hdump };
+
+// good candidates for latching:
+assign      rom_cs   = rom_scr_cs | rom_obj_cs;
+assign      rom_addr = rom_scr_cs ? rom_scr_addr : rom_obj_addr;
 
 always @(posedge clk24) begin
     if( rst ) begin
@@ -154,12 +161,13 @@ always @(posedge clk) begin
     end
 end
 
-wire [7:0] scr_pxl_gated = {8{gfx_en[1]}} & scr_pxl;
-wire [7:0] chr_pxl_gated = {8{gfx_en[0] & char_en}} & chr_pxl;
-wire       chr_blank     = chr_pxl_gated[3:0] == 4'h0;
-wire       chr_area      = hdump>=chr_dump_start && hdump<chr_dump_end;
-wire       scr_area      = hdump>=scr_dump_start && hdump<scr_dump_end;
-reg        draw_scr;
+wire [ 7:0] scr_pxl_gated = {8{gfx_en[1]}} & scr_pxl;
+wire [ 7:0] chr_pxl_gated = {8{gfx_en[0] & char_en}} & chr_pxl;
+wire        chr_blank     = chr_pxl_gated[3:0] == 4'h0;
+wire        chr_area      = hdump>=chr_dump_start && hdump<chr_dump_end;
+wire        scr_area      = hdump>=scr_dump_start && hdump<scr_dump_end;
+reg         draw_scr;
+wire [11:0] obj_scan_addr;
 
 always @(*) begin
     draw_scr <= ( chr_area && !scr_area) ? 0 : (
@@ -197,8 +205,8 @@ jtcontra_gfx_tilemap u_tilemap(
     .line_din           ( line_din          ),
     .scan_addr          ( scan_addr         ),
     // SDRAM
-    .rom_cs             ( rom_cs            ),
-    .rom_addr           ( rom_addr          ),
+    .rom_cs             ( rom_scr_cs        ),
+    .rom_addr           ( rom_scr_addr      ),
     .rom_ok             ( rom_ok            ),
     .rom_data           ( rom_data          ),
     .attr_scan          ( attr_scan         ),
@@ -212,6 +220,29 @@ jtcontra_gfx_tilemap u_tilemap(
     .code11_sel         ( code11_sel        ),
     .code12_sel         ( code12_sel        )
 );
+
+jtcontra_gfx_obj u_obj(
+    .rst                ( rst               ),
+    .clk                ( clk               ),
+    .start              ( done              ),
+    .LVBL               ( LVBL              ),
+    .vrender            ( vrender           ),
+    .done               ( done              ),
+    .obj_we             ( obj_line_we       ),
+    .line_din           ( obj_line_din      ),
+    .line_addr          ( obj_line_addr[8:0]),
+    .scan_addr          ( obj_scan_addr[9:0]),
+    // SDRAM
+    .rom_cs             ( rom_obj_cs        ),
+    .rom_addr           ( rom_obj_addr      ),
+    .rom_ok             ( rom_ok            ),
+    .rom_data           ( rom_data          ),
+    .obj_scan           ( obj_scan          )
+);
+
+assign obj_line_addr[ 9] = line;
+assign obj_scan_addr[11] = obj_page;
+assign obj_scan_addr[10] = 1'b0;
 
 // Colour PROMs
 
@@ -268,7 +299,6 @@ jtframe_dual_ram #(.aw(10)) u_line_scr(
     .q1     ( scr_pxl   )
 );
 
-/*
 jtframe_dual_ram #(.aw(10)) u_line_obj(
     .clk0   ( clk           ),
     .clk1   ( clk           ),
@@ -282,7 +312,7 @@ jtframe_dual_ram #(.aw(10)) u_line_obj(
     .addr1  ( line_dump     ),
     .we1    ( 1'b0          ),
     .q1     ( obj_pxl       )
-);*/
+);
 
 jtframe_dual_ram #(.aw(11)) u_attr_ram(
     .clk0   ( clk24     ),
@@ -315,18 +345,18 @@ jtframe_dual_ram #(.aw(11)) u_code_ram(
 );
 
 jtframe_dual_ram #(.aw(12)) u_obj_ram(
-    .clk0   ( clk24     ),
-    .clk1   ( clk       ),
+    .clk0   ( clk24         ),
+    .clk1   ( clk           ),
     // Port 0
-    .data0  ( cpu_dout  ),
-    .addr0  ( cpu_addr[11:0] ),
-    .we0    ( obj_we    ),
-    .q0     ( obj_dout  ),
+    .data0  ( cpu_dout      ),
+    .addr0  ( cpu_addr[11:0]),
+    .we0    ( obj_we        ),
+    .q0     ( obj_dout      ),
     // Port 1
-    .data1  (           ),
-    .addr1  (           ),
-    .we1    ( 1'b0      ),
-    .q1     (           )
+    .data1  (               ),
+    .addr1  ( obj_scan_addr ),
+    .we1    ( 1'b0          ),
+    .q1     ( obj_scan      )
 );
 
 endmodule

@@ -4,6 +4,7 @@ set_global_assignment -name VERILOG_FILE [file join $::quartus(qip_path) ../hdl/
 set_global_assignment -name VERILOG_FILE [file join $::quartus(qip_path) ../hdl/jtcontra_video.v        ]
 set_global_assignment -name VERILOG_FILE [file join $::quartus(qip_path) ../hdl/jtcontra_gfx.v          ]
 set_global_assignment -name VERILOG_FILE [file join $::quartus(qip_path) ../hdl/jtcontra_gfx_tilemap.v  ]
+set_global_assignment -name VERILOG_FILE [file join $::quartus(qip_path) ../hdl/jtcontra_gfx_obj.v      ]
 set_global_assignment -name VERILOG_FILE [file join $::quartus(qip_path) ../hdl/jtcontra_colmix.v       ]
 
 set_global_assignment -name VERILOG_FILE [file join $::quartus(qip_path) ../modules/jtframe/hdl/clocking/jtframe_cen48.v       ]
