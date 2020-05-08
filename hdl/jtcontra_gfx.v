@@ -48,10 +48,10 @@ module jtcontra_gfx(
     output     [ 7:0]    gfx_dout,
     output reg           cpu_irqn,
     // SDRAM interface
-    output     [17:0]    rom_addr,
+    output reg [17:0]    rom_addr,
     input      [15:0]    rom_data,
     input                rom_ok,
-    output               rom_cs,
+    output reg           rom_cs,
     // colour output
     output reg [ 6:0]    pxl_out,
     // test
@@ -107,23 +107,54 @@ assign      gfx_dout = cpu_addr[12] ? obj_dout :
                       (cpu_addr[10] ? code_dout : attr_dout);
 wire [ 7:0] code_scan, attr_scan, obj_scan;
 
-wire [ 7:0] obj_line_din;
-wire        obj_line_we;
-
-reg  [ 7:0] vprom_addr, oprom_addr;
+reg  [ 7:0] vprom_addr;
 wire [ 3:0] vprom_data, oprom_data;
 
 wire [9:0]  line_dump;
-wire [9:0]  obj_line_addr;
 
 wire        rom_obj_cs, rom_scr_cs;
 wire [17:0] rom_scr_addr, rom_obj_addr;
 
 assign      line_dump = { ~line, hdump };
 
-// good candidates for latching:
-assign      rom_cs   = !done ? rom_scr_cs   : rom_obj_cs;
-assign      rom_addr = !done ? rom_scr_addr : rom_obj_addr;
+// local SDRAM mux
+reg  [ 1:0] data_sel;
+reg         rom_scr_ok, rom_obj_ok;
+reg  [15:0] rom_scr_data, rom_obj_data;
+
+always @(posedge clk, posedge rst) begin
+    if( rst ) begin
+        rom_cs   <= 0;
+        rom_addr <= 18'd0;
+        data_sel <= 2'b00;
+    end else begin
+        if( data_sel==2'b00 ) begin
+            if( rom_scr_cs ) begin
+                rom_cs     <= 1;
+                rom_addr   <= rom_scr_addr;
+                rom_scr_ok <= 0;
+                data_sel   <= 2'b01;
+            end else if( rom_obj_cs ) begin
+                rom_cs     <= 1;
+                rom_addr   <= rom_obj_addr;
+                rom_obj_ok <= 0;
+                data_sel   <= 2'b10;
+            end
+            else rom_cs <= 0;
+        end else if( rom_ok ) begin
+            if( data_sel[0] ) begin
+                rom_scr_data <= rom_data;
+                rom_scr_ok   <= 1;
+            end
+            if( data_sel[1] ) begin
+                rom_obj_data <= rom_data;
+                rom_obj_ok   <= 1;
+            end
+            data_sel <= 2'b00;
+            rom_cs   <= 0;
+        end
+    end
+end
 
 always @(posedge clk24) begin
     if( rst ) begin
@@ -161,9 +192,11 @@ always @(posedge clk) begin
     end
 end
 
+// Local colour mixer
 wire [ 7:0] scr_pxl_gated = {8{gfx_en[1]}} & scr_pxl;
 wire [ 7:0] chr_pxl_gated = {8{gfx_en[0] & char_en}} & chr_pxl;
 wire        chr_blank     = chr_pxl_gated[3:0] == 4'h0;
+wire        obj_blank     = oprom_data[3:0] == 4'h0;
 wire        chr_area      = hdump>=chr_dump_start && hdump<chr_dump_end;
 wire        scr_area      = hdump>=scr_dump_start && hdump<scr_dump_end;
 reg         draw_scr;
@@ -182,7 +215,11 @@ always @(posedge clk) begin
     end else begin
         vprom_addr <= draw_scr ? scr_pxl_gated : chr_pxl_gated;
         if(pxl_cen) begin
-            pxl_out <= { pal_bank, 1'b1, vprom_data[3:0] };
+            pxl_out[6:5] <= pal_bank;
+            if( obj_blank )
+                pxl_out <= { 1'b1, vprom_data };
+            else
+                pxl_out <= { 1'b0, oprom_data };
         end
     end
 end
@@ -207,8 +244,8 @@ jtcontra_gfx_tilemap u_tilemap(
     // SDRAM
     .rom_cs             ( rom_scr_cs        ),
     .rom_addr           ( rom_scr_addr      ),
-    .rom_ok             ( rom_ok            ),
-    .rom_data           ( rom_data          ),
+    .rom_ok             ( rom_scr_ok        ),
+    .rom_data           ( rom_scr_data      ),
     .attr_scan          ( attr_scan         ),
     .code_scan          ( code_scan         ),
     // Configuration
@@ -224,23 +261,21 @@ jtcontra_gfx_tilemap u_tilemap(
 jtcontra_gfx_obj u_obj(
     .rst                ( rst               ),
     .clk                ( clk               ),
-    .start              ( done              ),
+    .start              ( LHBL              ),
     .LVBL               ( LVBL              ),
     .vrender            ( vrender           ),
     .done               (                   ),
-    .obj_we             ( obj_line_we       ),
-    .line_din           ( obj_line_din      ),
-    .line_addr          ( obj_line_addr[8:0]),
     .scan_addr          ( obj_scan_addr[9:0]),
+    .line_dump          ( line_dump         ),
+    .pxl                ( obj_pxl           ),
     // SDRAM
     .rom_cs             ( rom_obj_cs        ),
     .rom_addr           ( rom_obj_addr      ),
-    .rom_ok             ( rom_ok            ),
-    .rom_data           ( rom_data          ),
+    .rom_ok             ( rom_obj_ok        ),
+    .rom_data           ( rom_obj_data      ),
     .obj_scan           ( obj_scan          )
 );
 
-assign obj_line_addr[ 9] = line;
 assign obj_scan_addr[11] = obj_page;
 assign obj_scan_addr[10] = 1'b0;
 
@@ -260,7 +295,7 @@ jtframe_prom #(.dw(4),.aw(8) ) u_oprom(
     .clk        ( clk                       ),
     .cen        ( 1'b1                      ),
     .data       ( prog_data                 ),
-    .rd_addr    ( oprom_addr                ),
+    .rd_addr    ( obj_pxl                   ),
     .wr_addr    ( prog_addr[7:0]            ),
     .we         ( prom_we & ~prog_addr[8]   ),
     .q          ( oprom_data                )
@@ -297,21 +332,6 @@ jtframe_dual_ram #(.aw(10)) u_line_scr(
     .addr1  ( line_dump ),
     .we1    ( 1'b0      ),
     .q1     ( scr_pxl   )
-);
-
-jtframe_dual_ram #(.aw(10)) u_line_obj(
-    .clk0   ( clk           ),
-    .clk1   ( clk           ),
-    // Port 0
-    .data0  ( obj_line_din  ),
-    .addr0  ( obj_line_addr ),
-    .we0    ( obj_line_we   ),
-    .q0     (               ),
-    // Port 1
-    .data1  (               ),
-    .addr1  ( line_dump     ),
-    .we1    ( 1'b0          ),
-    .q1     ( obj_pxl       )
 );
 
 jtframe_dual_ram #(.aw(11)) u_attr_ram(

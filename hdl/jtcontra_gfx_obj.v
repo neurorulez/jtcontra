@@ -26,10 +26,10 @@ module jtcontra_gfx_obj(
     input                LVBL,
     input       [ 8:0]   vrender,
     output reg           done,
-    output               obj_we,
-    output reg  [ 7:0]   line_din,
-    output      [ 8:0]   line_addr,
     output      [ 9:0]   scan_addr, // max 64 sprites in total
+    // Line buffer
+    input       [ 9:0]   line_dump,
+    output      [ 7:0]   pxl,
     // SDRAM
     output reg           rom_cs,
     output      [17:0]   rom_addr,
@@ -52,14 +52,18 @@ reg  [ 3:0] size_cnt;
 reg  [15:0] pxl_data;
 reg  [ 8:0] xpos;
 reg  [ 9:0] scan_base;
+reg         obj_we;
+reg  [ 7:0] line_din;
+reg  [ 9:0] line_addr;
 
-assign      line_addr = xpos;
+assign      line_addr = { line, xpos };
 assign      scan_addr = scan_base + byte_sel;
 
 reg  [ 5:0] attr;
 reg  [ 2:0] height;
 reg  [ 8:0] upper_limit;
 reg  [ 2:0] vsub;
+reg         line;
 
 always @(*) begin
     case( attr[3:1] )
@@ -81,6 +85,7 @@ always @(posedge clk) begin
         pal     <= 4'd0;
         code    <= 13'd0;
         line_we <= 0;
+        line    <= 0;
         st      <= 3'd0;
         size_cnt<= 4'd0;
         dump_cnt<= 8'd0;
@@ -92,6 +97,7 @@ always @(posedge clk) begin
             st        <= 3'd0;
             scan_base <= 10'd0;
             byte_sel  <= 3'd4;      // get obj size
+            line      <= ~line;
         end else begin
             if(!done) st <= st + 1;
             case( st )
@@ -167,5 +173,20 @@ always @(posedge clk) begin
         end
     end
 end
+
+jtframe_dual_ram #(.aw(10)) u_line_obj(
+    .clk0   ( clk           ),
+    .clk1   ( clk           ),
+    // Port 0
+    .data0  ( line_din      ),
+    .addr0  ( line_addr     ),
+    .we0    ( line_we       ),
+    .q0     (               ),
+    // Port 1
+    .data1  (               ),
+    .addr1  ( line_dump     ),
+    .we1    ( 1'b0          ),
+    .q1     ( pxl           )
+);
 
 endmodule
