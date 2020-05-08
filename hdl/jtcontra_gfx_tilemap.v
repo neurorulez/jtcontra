@@ -46,6 +46,8 @@ module jtcontra_gfx_tilemap(
     input       [ 8:0]   chr_dump_start,
     input       [ 8:0]   scr_dump_start,
     input                pal_msb,
+    input       [ 3:0]   extra_mask,
+    input       [ 3:0]   extra_bits,
     input       [ 1:0]   code9_sel,
     input       [ 1:0]   code10_sel,
     input       [ 1:0]   code11_sel,
@@ -73,10 +75,10 @@ assign      scan_addr = { lyr, vn[7:3], hn[7:3] }; // 1 + 5 + 5 = 11
 
 always @(*) begin
     bank[0] = attr_scan[7];
-    bank[1] = attr_scan[3+code9_sel ];
-    bank[2] = attr_scan[3+code10_sel];
-    bank[3] = attr_scan[3+code11_sel];
-    bank[4] = attr_scan[3+code12_sel];
+    bank[1] = extra_mask[0] ? extra_bits[0] : attr_scan[3+code9_sel ];
+    bank[2] = extra_mask[1] ? extra_bits[1] : attr_scan[3+code10_sel];
+    bank[3] = extra_mask[2] ? extra_bits[2] : attr_scan[3+code11_sel];
+    bank[4] = extra_mask[3] ? extra_bits[3] : attr_scan[3+code12_sel];
 end
 
 always @(posedge clk) begin
@@ -107,7 +109,7 @@ always @(posedge clk) begin
                 end
                 2: begin
                     code   <= { bank, code_scan };
-                    pal    <= { pal_msb, attr_scan[2:0] };
+                    pal    <= { pal_msb & attr_scan[3], attr_scan[2:0] };
                     rom_cs <= 1;
                 end
                 4: begin

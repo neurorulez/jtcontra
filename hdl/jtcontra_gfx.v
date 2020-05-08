@@ -75,6 +75,7 @@ wire [4:0]  tile_extra = { mmr[3][0], mmr[4][3:0] };
 wire        obj_page   = mmr[3][3]; // select from which page to draw sprites
 wire        layout     = mmr[3][4]; // 1 for wide layout
 wire [3:0]  extra_mask = mmr[4][7:4];
+wire [3:0]  extra_bits = mmr[4][3:0];
 wire [1:0]  code9_sel, code10_sel, code11_sel, code12_sel;
 wire        nmi_en     = mmr[7][0];
 wire        irq_en     = mmr[7][1];
@@ -266,6 +267,8 @@ jtcontra_gfx_tilemap u_tilemap(
     .chr_dump_start     ( chr_dump_start    ),
     .scr_dump_start     ( scr_dump_start    ),
     .pal_msb            ( pal_msb           ),
+    .extra_mask         ( extra_mask        ),
+    .extra_bits         ( extra_bits        ),
     .code9_sel          ( code9_sel         ),
     .code10_sel         ( code10_sel        ),
     .code11_sel         ( code11_sel        ),
