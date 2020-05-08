@@ -22,13 +22,15 @@
 module jtcontra_gfx_obj(
     input                rst,
     input                clk,
-    input                start,
+    input                pxl_cen,
+    input                LHBL,
     input                LVBL,
     input       [ 8:0]   vrender,
     output reg           done,
     output      [ 9:0]   scan_addr, // max 64 sprites in total
     // Line buffer
-    input       [ 9:0]   line_dump,
+    input       [ 8:0]   hdump,
+    input       [ 8:0]   dump_start,
     output      [ 7:0]   pxl,
     // SDRAM
     output reg           rom_cs,
@@ -44,7 +46,7 @@ reg         line_we;
 reg         h4;
 reg  [ 2:0] byte_sel;
 reg  [ 3:0] st;
-reg         last_start;
+reg         last_LHBL;
 reg  [ 8:0] hn, vn;
 reg  [ 4:0] bank;
 reg  [ 7:0] dump_cnt;
@@ -54,16 +56,17 @@ reg  [ 8:0] xpos;
 reg  [ 9:0] scan_base;
 reg         obj_we;
 reg  [ 7:0] line_din;
-reg  [ 9:0] line_addr;
-
-assign      line_addr = { line, xpos };
-assign      scan_addr = scan_base + byte_sel;
+wire [ 9:0] line_addr;
 
 reg  [ 5:0] attr;
 reg  [ 2:0] height;
 reg  [ 8:0] upper_limit;
 reg  [ 2:0] vsub;
 reg         line;
+wire [ 9:0] line_dump = { ~line, hdump };
+
+assign      line_addr = { line, xpos };
+assign      scan_addr = scan_base + byte_sel;
 
 always @(*) begin
     case( attr[3:1] )
@@ -90,8 +93,8 @@ always @(posedge clk) begin
         size_cnt<= 4'd0;
         dump_cnt<= 8'd0;
     end else begin
-        last_start <= start;
-        if( start && !last_start && LVBL) begin
+        last_LHBL <= LHBL;
+        if( LHBL && !last_LHBL && LVBL) begin
             done      <= 0;
             rom_cs    <= 0;
             st        <= 3'd0;
@@ -130,7 +133,7 @@ always @(posedge clk) begin
                     rom_cs      <= 1;
                 end
                 5: begin
-                    xpos <= {1'b0, obj_scan};
+                    xpos <= {1'b0, obj_scan} + dump_start;
                 end
                 6: begin
                     if( rom_ok ) begin
@@ -174,19 +177,20 @@ always @(posedge clk) begin
     end
 end
 
-jtframe_dual_ram #(.aw(10)) u_line_obj(
-    .clk0   ( clk           ),
-    .clk1   ( clk           ),
-    // Port 0
-    .data0  ( line_din      ),
-    .addr0  ( line_addr     ),
-    .we0    ( line_we       ),
-    .q0     (               ),
-    // Port 1
-    .data1  (               ),
-    .addr1  ( line_dump     ),
-    .we1    ( 1'b0          ),
-    .q1     ( pxl           )
+jtframe_obj_buffer #(
+    .ALPHA(0), 
+    .BLANK(0)
+) u_line(
+    .clk    ( clk           ),
+    // New data writes
+    .wr_data( line_din      ),
+    .wr_addr( line_addr     ),
+    .we     ( line_we       ),
+    // Old data reads (and erases)
+    .rd_addr( line_dump     ),
+    .rd     ( pxl_cen       ),  // data will be erased after the rd event
+    .rd_data( pxl           )
 );
+
 
 endmodule

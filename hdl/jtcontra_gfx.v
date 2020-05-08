@@ -165,17 +165,17 @@ always @(posedge clk24) begin
             mmr[ cpu_addr[2:0] ] <= cpu_dout;
         // Apply layout
         if( layout ) begin
-            // total 35*8 = 280 visible pixels
-            chr_dump_start <= 9'h74;
-            chr_dump_end   <= chr_dump_start+(9'd5<<3);
-            scr_dump_start <= chr_dump_end;
-            scr_dump_end   <= scr_dump_start+(9'd30<<3);
+            // total 35*8 = 280 visible pixels: OCTAL!!
+            chr_dump_start <= 9'o000;
+            chr_dump_end   <= 9'o050;
+            scr_dump_start <= 9'o050;
+            scr_dump_end   <= 9'o450; // o400 = d256
         end else begin
-            // total 32*8 = 256 visible pixels
-            chr_dump_start <= 9'h74+(9'd2<<3);
-            chr_dump_end   <= chr_dump_start+(9'd32<<3);
-            scr_dump_start <= chr_dump_start;
-            scr_dump_end   <= chr_dump_end;
+            // total 32*8 = 256 visible pixels: OCTAL!!
+            chr_dump_start <= 9'o020;
+            chr_dump_end   <= 9'o420;
+            scr_dump_start <= 9'o020;
+            scr_dump_end   <= 9'o420;
         end
     end
 end
@@ -217,9 +217,9 @@ always @(posedge clk) begin
         if(pxl_cen) begin
             pxl_out[6:5] <= pal_bank;
             if( obj_blank )
-                pxl_out <= { 1'b1, vprom_data };
+                pxl_out <= { 1'b1, vprom_data }; // Tilemap
             else
-                pxl_out <= { 1'b0, oprom_data };
+                pxl_out <= { 1'b0, oprom_data }; // Object
         end
     end
 end
@@ -261,13 +261,15 @@ jtcontra_gfx_tilemap u_tilemap(
 jtcontra_gfx_obj u_obj(
     .rst                ( rst               ),
     .clk                ( clk               ),
-    .start              ( LHBL              ),
+    .pxl_cen            ( pxl_cen           ),
+    .LHBL               ( LHBL              ),
     .LVBL               ( LVBL              ),
     .vrender            ( vrender           ),
     .done               (                   ),
     .scan_addr          ( obj_scan_addr[9:0]),
-    .line_dump          ( line_dump         ),
+    .hdump              ( hdump             ),
     .pxl                ( obj_pxl           ),
+    .dump_start         ( scr_dump_start    ),
     // SDRAM
     .rom_cs             ( rom_obj_cs        ),
     .rom_addr           ( rom_obj_addr      ),

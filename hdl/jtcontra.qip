@@ -15,7 +15,8 @@ set_global_assignment -name VERILOG_FILE [file join $::quartus(qip_path) ../modu
 set_global_assignment -name VERILOG_FILE [file join $::quartus(qip_path) ../modules/jtframe/hdl/jtframe_ff.v ]
 set_global_assignment -name VERILOG_FILE [file join $::quartus(qip_path) ../modules/jtframe/hdl/ram/jtframe_ram.v  ]
 set_global_assignment -name VERILOG_FILE [file join $::quartus(qip_path) ../modules/jtframe/hdl/ram/jtframe_dual_ram.v   ]
-set_global_assignment -name VERILOG_FILE [file join $::quartus(qip_path) ../modules/jtframe/hdl/ram/jtframe_prom.v     ]
+set_global_assignment -name VERILOG_FILE [file join $::quartus(qip_path) ../modules/jtframe/hdl/ram/jtframe_prom.v       ]
+set_global_assignment -name VERILOG_FILE [file join $::quartus(qip_path) ../modules/jtframe/hdl/ram/jtframe_obj_buffer.v ]
 
 # SDRAM
 set_global_assignment -name QIP_FILE     [file join $::quartus(qip_path) ../modules/jtframe/hdl/sdram/jtframe_rom.qip ]

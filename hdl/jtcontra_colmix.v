@@ -52,7 +52,7 @@ reg         pal_half;
 reg  [14:0] pxl_aux;
 wire [ 6:0] gfx_mux;
 
-assign gfx_sel  = gfx1_pxl[3:0]==4'h0 ? gfx2_pxl[4] : 1'b0;
+assign gfx_sel  = gfx1_pxl[3:0]==4'h0 || !gfx2_pxl[4];
 assign gfx_mux  = gfx_sel ? gfx2_pxl : gfx1_pxl;
 assign col_addr = { gfx_mux, pal_half };
 
