@@ -58,29 +58,23 @@ reg         obj_we;
 reg  [ 7:0] line_din;
 wire [ 9:0] line_addr;
 
-reg  [ 5:0] attr;
-reg  [ 2:0] height;
+reg  [ 2:0] height, height_comb;
 reg  [ 8:0] upper_limit;
-reg  [ 2:0] vsub;
+reg  [ 4:0] vsub;
 reg         line;
 wire [ 9:0] line_dump = { ~line, hdump };
+reg  [ 2:0] size_attr;
+reg         hflip, vflip;
 
 assign      line_addr = { line, xpos };
 assign      scan_addr = scan_base + byte_sel;
 
 always @(*) begin
-    case( attr[3:1] )
-        3'd0: height = 3'b010; // 16x16
-        3'd1: height = 3'b001; // 16x8
-        3'd2: height = 3'b010; // 8x16
-        3'd3: height = 3'b001; // 8x8
-        3'd4: height = 3'b100; // 32x32
-        default: height = 3'b010; // 16x16
-    endcase
-    upper_limit = {1'b0, obj_scan} + { 3'b0, height, 3'd0 };
+    height_comb  = size_attr[2] ? 3'b100 : ( size_attr[0] ? 3'b001 : 3'b010 );
+    upper_limit = {1'b0, obj_scan} + { 3'b0, height_comb, 3'd0 };
 end
 
-assign rom_addr = { code, vsub, h4 }; // 14+3+1 = 18
+assign rom_addr = { code, vsub[2:0], h4 }; // 14+3+1 = 18
 
 always @(posedge clk) begin
     if( rst ) begin
@@ -92,6 +86,7 @@ always @(posedge clk) begin
         st      <= 3'd0;
         size_cnt<= 4'd0;
         dump_cnt<= 8'd0;
+        h4      <= 0;
     end else begin
         last_LHBL <= LHBL;
         if( LHBL && !last_LHBL && LVBL) begin
@@ -107,15 +102,21 @@ always @(posedge clk) begin
                 0: begin
                     rom_cs   <= 0;
                     byte_sel <= 3'd2;   // get y position
+                    h4       <= 0;
                 end
                 1: begin
-                    attr        <= obj_scan[5:0];
+                    xpos[8]     <= obj_scan[0];
+                    size_attr   <= obj_scan[3:1];
+                    hflip       <= obj_scan[4];
+                    vflip       <= obj_scan[5];
                     code[13:12] <= obj_scan[7:6];
                     byte_sel    <= 3'd0;   // get code
-                    size_cnt    <= obj_scan[3] ? 4'b1 : ( obj_scan[2] ? 4'b11 : 4'b1111 );
                 end
                 2: begin
-                    vsub <= vrender[2:0]-obj_scan[2:0];
+                    size_cnt <= size_attr[2] ? 4'b1111 : (
+                                size_attr[1] ? 4'b0001 : 4'b0011 );
+                    vsub     <= vrender[4:0]-obj_scan[4:0];
+                    height   <= height_comb;
                     if( vrender < obj_scan || vrender >= upper_limit ) begin
                         st        <= 9; // next tile
                     end else begin
@@ -128,19 +129,24 @@ always @(posedge clk) begin
                 end
                 4: begin
                     code[11:10] <= obj_scan[1:0];
-                    code[ 1:0 ] <= obj_scan[3:2];
+                    if( height[0] ) // 8px
+                        code[ 1:0 ] <= obj_scan[3:2];
+                    else if (height[1] ) begin // 16px
+                        code[1] <= vsub < 5'o10;
+                    end else begin // 32px
+                        { code[3],code[1] } <= vsub[4:3];
+                    end
                     pal         <= obj_scan[7:4];
                     rom_cs      <= 1;
                 end
                 5: begin
-                    xpos <= {1'b0, obj_scan} + dump_start;
+                    xpos <= {xpos[8], obj_scan} + dump_start;
                 end
                 6: begin
                     if( rom_ok ) begin
                         pxl_data <= rom_data;
                         rom_cs   <= 0;
                         dump_cnt <= 4'h7;
-                        h4       <= 0;
                     end else st <= st;
                 end
                 7: begin // dumps 4 pixels
@@ -153,13 +159,13 @@ always @(posedge clk) begin
                 end
                 8: begin
                     line_we <= 0;
-                    {code[1:0],h4} <= {code[1:0],h4} + 3'd1;
-                    if( !h4 ) size_cnt <= size_cnt>>1;
-                    if( !h4 && size_cnt[0] ) begin
+                    {code[2],code[0],h4} <= {code[2],code[0],h4} + 3'd1;
+                    if( h4 ) size_cnt <= size_cnt>>1;
+                    if( !size_cnt[1] && h4 ) begin
+                        st      <= 9; // next tile
+                    end else begin                            
                         rom_cs  <= 1;
                         st      <= 6; // wait for new ROM data
-                    end else begin                            
-                        st      <= 9; // next tile
                     end
                 end
                 9: begin

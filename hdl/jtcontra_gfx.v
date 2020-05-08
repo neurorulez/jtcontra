@@ -152,6 +152,9 @@ always @(posedge clk, posedge rst) begin
             end
             data_sel <= 2'b00;
             rom_cs   <= 0;
+        end else begin
+            if(!rom_obj_cs) rom_obj_ok<=0;
+            if(!rom_scr_cs) rom_scr_ok<=0;
         end
     end
 end
