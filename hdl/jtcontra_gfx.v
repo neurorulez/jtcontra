@@ -121,38 +121,49 @@ assign      line_dump = { ~line, hdump };
 reg  [ 1:0] data_sel;
 reg         rom_scr_ok, rom_obj_ok;
 reg  [15:0] rom_scr_data, rom_obj_data;
+reg         ok_wait;
 
 always @(posedge clk, posedge rst) begin
     if( rst ) begin
         rom_cs   <= 0;
         rom_addr <= 18'd0;
         data_sel <= 2'b00;
+        ok_wait  <= 0;
     end else begin
         if( data_sel==2'b00 ) begin
-            if( rom_scr_cs ) begin
+            if( rom_scr_cs & gfx_en[0] ) begin
                 rom_cs     <= 1;
                 rom_addr   <= rom_scr_addr;
                 rom_scr_ok <= 0;
                 data_sel   <= 2'b01;
-            end else if( rom_obj_cs ) begin
+                ok_wait    <= 0;
+            end else if( rom_obj_cs & gfx_en[1] ) begin
                 rom_cs     <= 1;
                 rom_addr   <= rom_obj_addr;
                 rom_obj_ok <= 0;
                 data_sel   <= 2'b10;
+                ok_wait    <= 0;
             end
             else rom_cs <= 0;
-        end else if( rom_ok ) begin
+        end else if( rom_ok & ok_wait) begin
             if( data_sel[0] ) begin
                 rom_scr_data <= rom_data;
+                rom_scr_ok   <= 1;
+            end else if(!gfx_en[0]) begin
+                rom_scr_data <= 16'd0;
                 rom_scr_ok   <= 1;
             end
             if( data_sel[1] ) begin
                 rom_obj_data <= rom_data;
                 rom_obj_ok   <= 1;
+            end else if( !gfx_en[1] ) begin
+                rom_obj_data <= 16'd0;
+                rom_obj_ok   <= 1;
             end
             data_sel <= 2'b00;
             rom_cs   <= 0;
         end else begin
+            ok_wait <= 1;
             if(!rom_obj_cs) rom_obj_ok<=0;
             if(!rom_scr_cs) rom_scr_ok<=0;
         end
@@ -196,8 +207,8 @@ always @(posedge clk) begin
 end
 
 // Local colour mixer
-wire [ 7:0] scr_pxl_gated = {8{gfx_en[1]}} & scr_pxl;
-wire [ 7:0] chr_pxl_gated = {8{gfx_en[0] & char_en}} & chr_pxl;
+wire [ 7:0] scr_pxl_gated = scr_pxl;
+wire [ 7:0] chr_pxl_gated = chr_pxl;
 wire        chr_blank     = chr_pxl_gated[3:0] == 4'h0;
 wire        obj_blank     = oprom_data[3:0] == 4'h0;
 wire        chr_area      = hdump>=chr_dump_start && hdump<chr_dump_end;
@@ -220,9 +231,9 @@ always @(posedge clk) begin
         if(pxl_cen) begin
             pxl_out[6:5] <= pal_bank;
             if( obj_blank )
-                pxl_out <= { 1'b1, vprom_data }; // Tilemap
+                pxl_out[4:0] <= { 1'b1, vprom_data }; // Tilemap
             else
-                pxl_out <= { 1'b0, oprom_data }; // Object
+                pxl_out[4:0] <= { 1'b0, oprom_data }; // Object
         end
     end
 end
@@ -281,7 +292,7 @@ jtcontra_gfx_obj u_obj(
     .obj_scan           ( obj_scan          )
 );
 
-assign obj_scan_addr[11] = obj_page;
+assign obj_scan_addr[11] = ~obj_page;
 assign obj_scan_addr[10] = 1'b0;
 
 // Colour PROMs
