@@ -71,7 +71,7 @@ wire [7:0]  chr_pxl, scr_pxl, line_din;
 reg  [7:0]  mmr[0:7];
 wire [8:0]  hpos = { mmr[1][0], mmr[0] };
 wire [7:0]  vpos = mmr[2];
-wire [4:0]  tile_extra = { mmr[3][0], mmr[4][3:0] };
+wire        tile_msb   = mmr[3][0];
 wire        obj_page   = mmr[3][3]; // select from which page to draw sprites
 wire        layout     = mmr[3][4]; // 1 for wide layout
 wire [3:0]  extra_mask = mmr[4][7:4];
@@ -86,6 +86,8 @@ wire        hflip_en   = mmr[6][1];
 wire        vflip_en   = mmr[6][2];
 wire        prio_en    = mmr[6][3];
 wire [1:0]  pal_bank   = mmr[6][5:4];
+wire        extra_en   = 0; // there must be a bit in the MMR that turns off all the extra_bits above
+                            // because Contra doesn't need them but seems to write to them
 wire        char_en    = 1;
 // wire        char_en    =~mmr[7][4];     // undocumented by MAME
 
@@ -268,7 +270,9 @@ jtcontra_gfx_tilemap u_tilemap(
     .scr_dump_start     ( scr_dump_start    ),
     .pal_msb            ( pal_msb           ),
     .extra_mask         ( extra_mask        ),
+    .extra_en           ( extra_en          ),
     .extra_bits         ( extra_bits        ),
+    .tile_msb           ( tile_msb          ),
     .code9_sel          ( code9_sel         ),
     .code10_sel         ( code10_sel        ),
     .code11_sel         ( code11_sel        ),

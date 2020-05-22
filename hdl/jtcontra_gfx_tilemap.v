@@ -47,7 +47,9 @@ module jtcontra_gfx_tilemap(
     input       [ 8:0]   scr_dump_start,
     input                pal_msb,
     input       [ 3:0]   extra_mask,
+    input                extra_en,
     input       [ 3:0]   extra_bits,
+    input                tile_msb,
     input       [ 1:0]   code9_sel,
     input       [ 1:0]   code10_sel,
     input       [ 1:0]   code11_sel,
@@ -70,15 +72,15 @@ wire [ 9:0] lyr_hn0 = lyr ? 9'd0 : hpos;
 
 assign      chr_we = line_we &  lyr;
 assign      scr_we = line_we & ~lyr;
-assign      rom_addr  = { 1'b0, code, vn[2:0], hn[2] }; // 13+3+1 = 17!
+assign      rom_addr  = { tile_msb, code, vn[2:0], hn[2] }; // 13+3+1 = 17!
 assign      scan_addr = { lyr, vn[7:3], hn[7:3] }; // 1 + 5 + 5 = 11
 
 always @(*) begin
     bank[0] = attr_scan[7];
-    bank[1] = extra_mask[0] ? extra_bits[0] : attr_scan[3+code9_sel ];
-    bank[2] = extra_mask[1] ? extra_bits[1] : attr_scan[3+code10_sel];
-    bank[3] = extra_mask[2] ? extra_bits[2] : attr_scan[3+code11_sel];
-    bank[4] = extra_mask[3] ? extra_bits[3] : attr_scan[3+code12_sel];
+    bank[1] = extra_en & extra_mask[0] ? extra_bits[0] : attr_scan[3+code9_sel ];
+    bank[2] = extra_en & extra_mask[1] ? extra_bits[1] : attr_scan[3+code10_sel];
+    bank[3] = extra_en & extra_mask[2] ? extra_bits[2] : attr_scan[3+code11_sel];
+    bank[4] = extra_en & extra_mask[3] ? extra_bits[3] : attr_scan[3+code12_sel];
 end
 
 always @(posedge clk) begin
