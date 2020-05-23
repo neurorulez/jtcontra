@@ -129,21 +129,26 @@ always @(posedge clk) begin
                 end
                 4: begin
                     code[11:10] <= obj_scan[1:0];
-                    if( height[0] ) // 8px
-                        code[ 1:0 ] <= obj_scan[3:2];
-                    else if (height[1] ) begin // 16px
-                        code[1] <= vsub >= 5'o10;
-                        code[0] <= 0;
-                    end else begin // 32px
-                        code[2] <= 0;
-                        code[0] <= 0;
+                    // code[3] and code[1] => vertical size
+                    if( size_attr[2] ) // 32px
                         { code[3],code[1] } <= vsub[4:3];
+                    else if( size_attr[0] ) // 8px
+                        code[1] <= obj_scan[3];
+                    else begin
+                        code[1] <= vflip ? &vsub[4:3] : vsub[3];
                     end
+                    // code[2] and code[0] => horizontal size
+                    if( size_attr[2] ) // 32px
+                        { code[2],code[0] } <= 2'd0;
+                    else if( size_attr[1] ) // 8px
+                        code[0] <= obj_scan[2];
+                    else 
+                        code[0] <= 0;
                     pal         <= obj_scan[7:4];
                     rom_cs      <= 1;
                 end
                 5: begin
-                    xpos <= {xpos[8], obj_scan} + - 9'd1 + dump_start;
+                    xpos <= {xpos[8], obj_scan} -9'd1 + dump_start;
                     if( hflip ) code[0] <= ~code[0];
                 end
                 6: begin
