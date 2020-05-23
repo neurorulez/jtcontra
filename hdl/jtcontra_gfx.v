@@ -216,6 +216,7 @@ wire        chr_blank     = chr_pxl_gated[3:0] == 4'h0;
 wire        obj_blank     = oprom_data[3:0] == 4'h0;
 wire        chr_area      = hdump>=chr_dump_start && hdump<chr_dump_end;
 wire        scr_area      = hdump>=scr_dump_start && hdump<scr_dump_end;
+wire        blank_area    = vdump<9'o20;
 reg         draw_scr;
 wire [11:0] obj_scan_addr;
 
@@ -232,11 +233,15 @@ always @(posedge clk) begin
     end else begin
         vprom_addr <= draw_scr ? scr_pxl_gated : chr_pxl_gated;
         if(pxl_cen) begin
-            pxl_out[6:5] <= pal_bank;
-            if( obj_blank )
-                pxl_out[4:0] <= { 1'b1, vprom_data }; // Tilemap
-            else
-                pxl_out[4:0] <= { 1'b0, oprom_data }; // Object
+            if( blank_area )
+                pxl_out <= 7'd0;
+            else begin
+                pxl_out[6:5] <= pal_bank;
+                if( obj_blank )
+                    pxl_out[4:0] <= { 1'b1, vprom_data }; // Tilemap
+                else
+                    pxl_out[4:0] <= { 1'b0, oprom_data }; // Object
+            end
         end
     end
 end
