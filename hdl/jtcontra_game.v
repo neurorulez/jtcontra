@@ -25,8 +25,6 @@ module jtcontra_game(
     output   [4:0]  red,
     output   [4:0]  green,
     output   [4:0]  blue,
-    output          LHBL,
-    output          LVBL,
     output          LHBL_dly,
     output          LVBL_dly,
     output          HS,
