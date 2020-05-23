@@ -40,6 +40,7 @@ void parse( const unsigned char* buf, const char *name ) {
             unsigned sprsize= (buf[i+4]>>1)&7;
             unsigned pal = buf[i+1]>>4;
             if( y>= 240 ) continue;
+            cout << "---------------- " << hex << (i&0x3FF) << " -----------------------\n";
             cout << "Code\t" << hex << bank << "-" << code << "-" << code_lsb;
             cout << " -- full " << hex << full_code;
             cout << " -- RAW " << setfill('0') << hex
@@ -60,7 +61,6 @@ void parse( const unsigned char* buf, const char *name ) {
                 default: cout << "UNKNOWN"; break;
             }
             cout << '\n';
-            cout << "----------------------------------------\n";
         }
     }
 }

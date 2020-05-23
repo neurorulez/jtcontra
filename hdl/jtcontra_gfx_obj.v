@@ -133,14 +133,17 @@ always @(posedge clk) begin
                         code[ 1:0 ] <= obj_scan[3:2];
                     else if (height[1] ) begin // 16px
                         code[1] <= vsub >= 5'o10;
+                        code[0] <= 0;
                     end else begin // 32px
+                        code[2] <= 0;
+                        code[0] <= 0;
                         { code[3],code[1] } <= vsub[4:3];
                     end
                     pal         <= obj_scan[7:4];
                     rom_cs      <= 1;
                 end
                 5: begin
-                    xpos <= {xpos[8], obj_scan} + dump_start;
+                    xpos <= {xpos[8], obj_scan} + - 9'd1 + dump_start;
                     if( hflip ) code[0] <= ~code[0];
                 end
                 6: begin
