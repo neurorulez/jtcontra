@@ -237,7 +237,7 @@ always @(posedge clk) begin
                 pxl_out <= 7'd0;
             else begin
                 pxl_out[6:5] <= pal_bank;
-                if( obj_blank )
+                if( obj_blank || (layout && chr_area))
                     pxl_out[4:0] <= { 1'b1, vprom_data }; // Tilemap
                 else
                     pxl_out[4:0] <= { 1'b0, oprom_data }; // Object
@@ -304,7 +304,7 @@ jtcontra_gfx_obj u_obj(
     .obj_scan           ( obj_scan          )
 );
 
-assign obj_scan_addr[11] = ~obj_page;
+assign obj_scan_addr[11] = obj_page;
 assign obj_scan_addr[10] = 1'b0;
 
 // Colour PROMs
