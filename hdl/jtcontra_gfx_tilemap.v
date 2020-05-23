@@ -104,7 +104,7 @@ always @(posedge clk) begin
             if(!done) st <= st + 1;
             case( st )
                 0: begin
-                    vn <= vrender + (lyr ? 9'd0 : {1'b0, vpos})+9'd8;
+                    vn <= vrender + (lyr ? 9'd0 : {1'b0, vpos});
                     hn <= lyr_hn0;
                     hrender <= { 7'd0, lyr_hn0[1:0] } + 
                         ( lyr ? chr_dump_start : scr_dump_start );
