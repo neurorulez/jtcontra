@@ -32,6 +32,7 @@ void parse( const unsigned char* buf, const char *name ) {
             unsigned code = buf[i];
             unsigned code_lsb = (buf[i+1]>>2)&3;
             unsigned bank = ((buf[i+4]&0xc0)>>4) | (buf[i+1]&3);
+            unsigned full_code = (((bank<<8) | code)<<2) | code_lsb;
             unsigned y = buf[i+2];
             unsigned x = buf[i+3] | ( (buf[i+4]&1)<<8 );
             unsigned flipy = (buf[i+4]&0x20) != 0;
@@ -39,7 +40,14 @@ void parse( const unsigned char* buf, const char *name ) {
             unsigned sprsize= (buf[i+4]>>1)&7;
             unsigned pal = buf[i+1]>>4;
             if( y>= 240 ) continue;
-            cout << "Code\t" << hex << bank << "-" << code << "-" << code_lsb << '\n';
+            cout << "Code\t" << hex << bank << "-" << code << "-" << code_lsb;
+            cout << " -- full " << hex << full_code;
+            cout << " -- RAW " << setfill('0') << hex
+                           << setw(2) << (unsigned)buf[i+0] << ' '
+                           << setw(2) << (unsigned)buf[i+1] << ' '
+                           << setw(2) << (unsigned)buf[i+2] << ' '
+                           << setw(2) << (unsigned)buf[i+3] << ' '
+                           << setw(2) << (unsigned)buf[i+4] << ' ' << '\n';
             cout << "Pos " << dec << x << " / " << y << "    ";
             cout << "Flip " << flipx << " / " << flipy << "    ";
             cout << "Pal " << pal << " size ";

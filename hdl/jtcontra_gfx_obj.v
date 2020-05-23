@@ -132,7 +132,7 @@ always @(posedge clk) begin
                     if( height[0] ) // 8px
                         code[ 1:0 ] <= obj_scan[3:2];
                     else if (height[1] ) begin // 16px
-                        code[1] <= vsub < 5'o10;
+                        code[1] <= vsub >= 5'o10;
                     end else begin // 32px
                         { code[3],code[1] } <= vsub[4:3];
                     end
@@ -169,7 +169,7 @@ always @(posedge clk) begin
                     end
                 end
                 9: begin
-                    byte_sel  <= 3'd2;
+                    byte_sel  <= 3'd4;
                     st        <= 0;
                     if( scan_base < 10'h13b ) begin
                         scan_base <= scan_base + 10'd5;
