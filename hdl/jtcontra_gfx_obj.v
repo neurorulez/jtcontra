@@ -115,7 +115,7 @@ always @(posedge clk) begin
                 2: begin
                     size_cnt <= size_attr[2] ? 4'b1111 : (
                                 size_attr[1] ? 4'b0001 : 4'b0011 );
-                    vsub     <= vrender[4:0]-obj_scan[4:0];
+                    vsub     <= (vrender[4:0]-obj_scan[4:0])^{5{vflip}};
                     height   <= height_comb;
                     if( vrender < obj_scan || vrender >= upper_limit ) begin
                         st        <= 9; // next tile
@@ -141,6 +141,7 @@ always @(posedge clk) begin
                 end
                 5: begin
                     xpos <= {xpos[8], obj_scan} + dump_start;
+                    if( hflip ) code[0] <= ~code[0];
                 end
                 6: begin
                     if( rom_ok ) begin
@@ -153,13 +154,14 @@ always @(posedge clk) begin
                     if( dump_cnt[0] ) st<=st;
                     dump_cnt <= dump_cnt>>1;
                     pxl_data <= pxl_data << 4;
-                    xpos     <= xpos + 9'd1;
+                    xpos     <= xpos + (hflip ? -9'd1 : 9'd1);
                     line_din <= { pal, pxl_data[15:12] };
                     line_we  <= 1;
                 end
                 8: begin
                     line_we <= 0;
-                    {code[2],code[0],h4} <= {code[2],code[0],h4} + 3'd1;
+                    {code[2],code[0],h4} <= {code[2],code[0],h4} + 
+                        (hflip ? -3'd1 : 3'd1);
                     if( h4 ) size_cnt <= size_cnt>>1;
                     if( !size_cnt[1] && h4 ) begin
                         st      <= 9; // next tile
