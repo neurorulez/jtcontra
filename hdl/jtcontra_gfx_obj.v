@@ -102,7 +102,6 @@ always @(posedge clk) begin
                 0: begin
                     rom_cs   <= 0;
                     byte_sel <= 3'd2;   // get y position
-                    h4       <= 0;
                 end
                 1: begin
                     xpos[8]     <= obj_scan[0];
@@ -117,6 +116,7 @@ always @(posedge clk) begin
                                 size_attr[1] ? 4'b0001 : 4'b0011 );
                     vsub     <= (vrender[4:0]-obj_scan[4:0])^{5{vflip}};
                     height   <= height_comb;
+                    h4       <= hflip;
                     if( vrender < obj_scan || vrender >= upper_limit ) begin
                         st        <= 9; // next tile
                     end else begin
@@ -139,20 +139,19 @@ always @(posedge clk) begin
                     end
                     // code[2] and code[0] => horizontal size
                     if( size_attr[2] ) // 32px
-                        { code[2],code[0] } <= 2'd0;
+                        { code[2],code[0] } <= {2{hflip}};
                     else if( size_attr[1] ) // 8px
                         code[0] <= obj_scan[2];
                     else 
-                        code[0] <= 0;
+                        code[0] <= hflip;
                     pal         <= obj_scan[7:4];
                     rom_cs      <= 1;
                 end
                 5: begin
                     xpos <= {xpos[8], obj_scan} -9'd1 + dump_start;
-                    if( hflip ) code[0] <= ~code[0];
                 end
                 6: begin
-                    if( rom_ok ) begin
+                      if( rom_ok ) begin
                         pxl_data <= rom_data;
                         rom_cs   <= 0;
                         dump_cnt <= 4'h7;
@@ -161,15 +160,17 @@ always @(posedge clk) begin
                 7: begin // dumps 4 pixels
                     if( dump_cnt[0] ) st<=st;
                     dump_cnt <= dump_cnt>>1;
-                    pxl_data <= pxl_data << 4;
-                    xpos     <= xpos + (hflip ? -9'd1 : 9'd1);
-                    line_din <= { pal, pxl_data[15:12] };
+                    pxl_data <= hflip ? pxl_data>>4 : pxl_data << 4;
+                    xpos     <= xpos + 9'd1;
+                    line_din <= { pal, 
+                        hflip ? pxl_data[3:0] : pxl_data[15:12] 
+                        };
                     line_we  <= 1;
                 end
                 8: begin
                     line_we <= 0;
                     {code[2],code[0],h4} <= {code[2],code[0],h4} + 
-                        (hflip ? -3'd1 : 3'd1);
+                        ( hflip ? -3'd1 : 3'd1 );
                     if( h4 ) size_cnt <= size_cnt>>1;
                     if( !size_cnt[1] && h4 ) begin
                         st      <= 9; // next tile
