@@ -106,7 +106,7 @@ always @(posedge clk) begin
                 0: begin
                     vn <= vrender + (lyr ? 9'd0 : {1'b0, vpos});
                     hn <= lyr_hn0[8:0];
-                    hrender <= { 7'd0, lyr_hn0[1:0] } + 
+                    hrender <= { 6'd0, lyr_hn0[2:0] } +
                         ( lyr ? chr_dump_start : scr_dump_start );
                 end
                 2: begin
@@ -131,7 +131,7 @@ always @(posedge clk) begin
                 end
                 6: begin
                     line_we <= 0;
-                    if( hn < 9'd320 ) begin
+                    if( hrender < 9'd320 ) begin
                         hn      <= hn + 9'd4;
                         st      <= 7;
                         if( !hn[2] ) begin
