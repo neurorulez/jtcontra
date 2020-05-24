@@ -106,8 +106,8 @@ always @(posedge clk) begin
                 0: begin
                     vn <= vrender + (lyr ? 9'd0 : {1'b0, vpos});
                     hn <= lyr_hn0[8:0];
-                    hrender <= { 6'd0, lyr_hn0[2:0] } +
-                        ( lyr ? chr_dump_start : scr_dump_start );
+                    hrender <= ( lyr ? chr_dump_start : scr_dump_start )
+                               - { 7'd0, lyr_hn0[1:0] };
                 end
                 2: begin
                     code   <= { bank, code_scan };
