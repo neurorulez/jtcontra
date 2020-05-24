@@ -24,20 +24,19 @@
     <about author="jotego" webpage="https://patreon.com/topapate"
                            source ="https://github.com/jotego/jtcps1"
                            twitter="@topapate"/>
-    <name>contra</name>
+    <name>contra1</name>
     <rbf>jtcontra</rbf>
-    <setname>contra</setname>
-    <rom index="0" zip="contra.zip" type="merged" md5="None">
+    <setname>contra1</setname>
+    <rom index="0" zip="contra1.zip|contra.zip" type="merged">
         <!-- maincpu -->
         <interleave output="16">
-            <part name="633m03.18a" crc="d045e1da" length="0x8000" offset="0x8000" map="12"/>
+            <part name="633i03.18a" crc="7fc0d8cf" length="0x8000" offset="0x8000" map="12"/>
         </interleave>
-        <!-- banks -->
         <interleave output="16">
             <part name="633i02.17a" crc="b2f7bd9a" map="12"/>
         </interleave>
         <interleave output="16">
-            <part name="633m03.18a" crc="d045e1da" length="0x8000" offset="0" map="12"/>
+            <part name="633i03.18a" crc="7fc0d8cf" length="0x8000" offset="0" map="12"/>
         </interleave>
         <!-- audiocpu -->
         <interleave output="16">
@@ -58,9 +57,8 @@
         <part name="633e09.12g" crc="14ca5e19"/>
         <part name="633f10.18g" crc="2b244d84"/>
         <part name="633f11.20g" crc="14ca5e19"/>
-        <!-- skips initial "blank" loop to speed up simulation -->
-        <!-- Don't use for running the game as it won't pass the startup test -->
-        <!-- <patch offset="0x811D"> 12 12 12 12 12 </patch> -->
+        <!-- pals -->
+        <part name="007766.20d.bin" crc=""/>
     </rom>
     <rom index="1">
         <part> 01 </part>
@@ -81,6 +79,4 @@
         <dip name="Service Mode" bits="18" ids="On,Off"/>
         <dip name="Sound" bits="19" ids="Mono,Stereo"/>
     </switches>
-    <buttons names="Fire,Jump,Start,Coin,Pause" 
-        default="A,B,R,L,Start"/>
 </misterromdescription>

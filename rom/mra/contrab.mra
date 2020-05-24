@@ -24,43 +24,38 @@
     <about author="jotego" webpage="https://patreon.com/topapate"
                            source ="https://github.com/jotego/jtcps1"
                            twitter="@topapate"/>
-    <name>contra</name>
+    <name>contrab</name>
     <rbf>jtcontra</rbf>
-    <setname>contra</setname>
-    <rom index="0" zip="contra.zip" type="merged" md5="None">
+    <setname>contrab</setname>
+    <rom index="0" zip="contrab.zip|contra.zip" type="merged">
         <!-- maincpu -->
-        <interleave output="16">
-            <part name="633m03.18a" crc="d045e1da" length="0x8000" offset="0x8000" map="12"/>
-        </interleave>
-        <!-- banks -->
-        <interleave output="16">
-            <part name="633i02.17a" crc="b2f7bd9a" map="12"/>
-        </interleave>
-        <interleave output="16">
-            <part name="633m03.18a" crc="d045e1da" length="0x8000" offset="0" map="12"/>
-        </interleave>
+        <part name="3.ic20" crc="d045e1da"/>
+        <part name="1.ic19" crc="b2f7bd9a"/>
         <!-- audiocpu -->
-        <interleave output="16">
-            <part name="633e01.12a" crc="d1549255" length="0x8000" map="12"/>
-        </interleave>
+        <part name="3.ic63" crc="d1549255"/>
         <!-- gfx1 -->
-        <interleave output="16">
-            <part name="633e04.7d" crc="14ddc542" map="01"/>
-            <part name="633e05.7f" crc="42185044" map="10"/>
-        </interleave>
+        <part name="7.rom" crc="57f467d2"/>
+        <part name="10.rom" crc="e6db9685"/>
+        <part name="9.rom" crc="875c61de"/>
+        <part name="8.rom" crc="642765d6"/>
+        <part name="15.rom" crc="daa2324b"/>
+        <part name="16.rom" crc="e27cc835"/>
+        <part name="17.rom" crc="ce4330b9"/>
+        <part name="18.rom" crc="1571ce42"/>
         <!-- gfx2 -->
-        <interleave output="16">
-            <part name="633e06.16d" crc="9cf6faae" map="01"/>
-            <part name="633e07.16f" crc="f2d06638" map="10"/>
-        </interleave>
+        <part name="4.rom" crc="2cc7e52c"/>
+        <part name="5.rom" crc="e01a5b9c"/>
+        <part name="6.rom" crc="aeea6744"/>
+        <part name="14.rom" crc="765afdc7"/>
+        <part name="11.rom" crc="bd9ba92c"/>
+        <part name="12.rom" crc="d0be7ec2"/>
+        <part name="13.rom" crc="2b513d12"/>
         <!-- proms -->
         <part name="633e08.10g" crc="9f0949fa"/>
         <part name="633e09.12g" crc="14ca5e19"/>
         <part name="633f10.18g" crc="2b244d84"/>
         <part name="633f11.20g" crc="14ca5e19"/>
-        <!-- skips initial "blank" loop to speed up simulation -->
-        <!-- Don't use for running the game as it won't pass the startup test -->
-        <!-- <patch offset="0x811D"> 12 12 12 12 12 </patch> -->
+        <part name="conprom.53" crc="05a1da7e"/>
     </rom>
     <rom index="1">
         <part> 01 </part>
@@ -81,6 +76,4 @@
         <dip name="Service Mode" bits="18" ids="On,Off"/>
         <dip name="Sound" bits="19" ids="Mono,Stereo"/>
     </switches>
-    <buttons names="Fire,Jump,Start,Coin,Pause" 
-        default="A,B,R,L,Start"/>
 </misterromdescription>
