@@ -4,7 +4,7 @@ JedecChain;
 	DefaultMfr(6E);
 
 	P ActionCode(Cfg)
-		Device PartName(EP3C25E144) File("jtcontra.sof") MfrSpec(OpMask(1));
+		Device PartName(EP3C25E144) Path("") File("jtcontra.sof") MfrSpec(OpMask(1));
 
 ChainEnd;
 

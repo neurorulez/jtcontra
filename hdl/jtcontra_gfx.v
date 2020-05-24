@@ -62,6 +62,7 @@ parameter H0 = 9'h75; // initial value of hdump after H blanking
 
 reg         last_LVBL;
 wire        gfx_we = cpu_cen & ~cpu_rnw & vram_cs;
+wire        lyr, done, chr_we, scr_we;
 
 wire        line;
 wire [9:0]  line_addr;
@@ -221,9 +222,9 @@ reg         draw_scr;
 wire [11:0] obj_scan_addr;
 
 always @(*) begin
-    draw_scr <= ( chr_area && !scr_area) ? 0 : (
-                (!chr_area &&  scr_area) ? 1 : (
-                 chr_blank ? 1 : 0 ));
+    draw_scr <= ( chr_area && !scr_area) ? 1'b0 : (
+                (!chr_area &&  scr_area) ? 1'b1 : (
+                 chr_blank ? 1'b1 : 1'b0 ));
 end
 
 always @(posedge clk) begin

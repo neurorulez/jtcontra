@@ -58,7 +58,7 @@ reg         obj_we;
 reg  [ 7:0] line_din;
 wire [ 9:0] line_addr;
 
-reg  [ 2:0] height, height_comb;
+reg  [ 2:0] height_comb;
 reg  [ 8:0] upper_limit;
 reg  [ 4:0] vsub;
 reg         line;
@@ -97,7 +97,7 @@ always @(posedge clk) begin
             byte_sel  <= 3'd4;      // get obj size
             line      <= ~line;
         end else begin
-            if(!done) st <= st + 1;
+            if(!done) st <= st + 4'd1;
             case( st )
                 0: begin
                     rom_cs   <= 0;
@@ -115,7 +115,6 @@ always @(posedge clk) begin
                     size_cnt <= size_attr[2] ? 4'b1111 : (
                                 size_attr[1] ? 4'b0001 : 4'b0011 );
                     vsub     <= (vrender[4:0]-obj_scan[4:0])^{5{vflip}};
-                    height   <= height_comb;
                     h4       <= hflip;
                     if( vrender < obj_scan || vrender >= upper_limit ) begin
                         st        <= 9; // next tile

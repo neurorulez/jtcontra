@@ -101,11 +101,11 @@ always @(posedge clk) begin
             rom_cs <= 0;
             st     <= 3'd0;
         end else begin
-            if(!done) st <= st + 1;
+            if(!done) st <= st + 3'd1;
             case( st )
                 0: begin
                     vn <= vrender + (lyr ? 9'd0 : {1'b0, vpos});
-                    hn <= lyr_hn0;
+                    hn <= lyr_hn0[8:0];
                     hrender <= { 7'd0, lyr_hn0[1:0] } + 
                         ( lyr ? chr_dump_start : scr_dump_start );
                 end

@@ -83,6 +83,7 @@ wire        cen12, prom_we;
 wire [ 7:0] dipsw_a, dipsw_b;
 wire [ 3:0] dipsw_c;
 wire        flip;
+wire        LHBL, LVBL;
 
 wire [12:0] cpu_addr;
 wire        gfx_irqn, gfx1_cs, gfx2_cs, gfx1_cfg_cs, gfx2_cfg_cs, pal_cs;
