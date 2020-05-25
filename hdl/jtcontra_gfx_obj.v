@@ -65,6 +65,7 @@ reg         line;
 wire [ 9:0] line_dump = { ~line, hdump };
 reg  [ 2:0] size_attr;
 reg         hflip, vflip;
+reg  [ 8:0] pxl_cnt; // OBJ limit should be less than 64us*6MHz=384 pixels
 
 assign      line_addr = { line, xpos };
 assign      scan_addr = scan_base + byte_sel;
@@ -95,6 +96,7 @@ always @(posedge clk) begin
             st        <= 3'd0;
             scan_base <= 10'd0;
             byte_sel  <= 3'd4;      // get obj size
+            pxl_cnt   <= 8'd0;
             line      <= ~line;
         end else begin
             if(!done) st <= st + 4'd1;
@@ -166,6 +168,7 @@ always @(posedge clk) begin
                     if( dump_cnt[0] ) st<=st;
                     dump_cnt <= dump_cnt>>1;
                     pxl_data <= hflip ? pxl_data>>4 : pxl_data << 4;
+                    pxl_cnt  <= pxl_cnt + 9'd1;
                     xpos     <= xpos + 9'd1;
                     line_din <= { pal, 
                         hflip ? pxl_data[3:0] : pxl_data[15:12] 
@@ -187,7 +190,7 @@ always @(posedge clk) begin
                 9: begin
                     byte_sel  <= 3'd4;
                     st        <= 0;
-                    if( scan_base < 10'h13b ) begin
+                    if( scan_base < 10'h13b && pxl_cnt<9'd384 ) begin
                         scan_base <= scan_base + 10'd5;
                     end else begin
                         done      <= 1;
