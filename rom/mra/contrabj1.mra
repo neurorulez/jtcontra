@@ -29,27 +29,31 @@
     <setname>contrabj1</setname>
     <rom index="0" zip="contrabj1.zip|contra.zip" type="merged">
         <!-- maincpu -->
-        <part name="2__(contrabtj2).2k" crc="bdb9196d"/>
-        <part name="1.2h" crc="5d5f7438"/>
+        <interleave output="16">
+            <part name="2__(contrabtj2).2k" crc="bdb9196d" length="0x8000" offset="0x8000" map="12"/>
+        </interleave>
+        <interleave output="16">
+            <part name="1.2h" crc="5d5f7438" map="12"/>
+        </interleave>
+        <interleave output="16">
+            <part name="2__(contrabtj2).2k" crc="bdb9196d" length="0x8000" offset="0" map="12"/>
+        </interleave>
         <!-- audiocpu -->
-        <part name="a3.4p" crc="d1549255"/>
+        <interleave output="16">
+            <part name="a3.4p" crc="d1549255" map="12"/>
+        </interleave>
+        <!-- Same GFX data as original but bootleg breaks it up in smaller ROM chips.
+             I just get the data from the original ones here -->
         <!-- gfx1 -->
-        <part name="a7.14f" crc="57f467d2"/>
-        <part name="a10.14l" crc="e6db9685"/>
-        <part name="a9.14k" crc="875c61de"/>
-        <part name="a8.14h" crc="642765d6"/>
-        <part name="a15.14r" crc="daa2324b"/>
-        <part name="a16.14t" crc="e27cc835"/>
-        <part name="a17.14v" crc="ce4330b9"/>
-        <part name="a18.14w" crc="1571ce42"/>
+        <interleave output="16">
+            <part name="633e04.7d" crc="14ddc542" map="01"/>
+            <part name="633e05.7f" crc="42185044" map="10"/>
+        </interleave>
         <!-- gfx2 -->
-        <part name="a4.14a" crc="2cc7e52c"/>
-        <part name="a5.14c" crc="e01a5b9c"/>
-        <part name="e6.14d" crc="aeea6744"/>
-        <part name="a14.14q" crc="765afdc7"/>
-        <part name="a11.14m" crc="bd9ba92c"/>
-        <part name="a12.14n" crc="d0be7ec2"/>
-        <part name="a13.14p" crc="2b513d12"/>
+        <interleave output="16">
+            <part name="633e06.16d" crc="9cf6faae" map="01"/>
+            <part name="633e07.16f" crc="f2d06638" map="10"/>
+        </interleave>
         <!-- proms -->
         <part name="633e08.10g" crc="9f0949fa"/>
         <part name="633e09.12g" crc="14ca5e19"/>

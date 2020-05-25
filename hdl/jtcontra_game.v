@@ -337,5 +337,4 @@ jtframe_rom #(
     .refresh_en  ( refresh_en    )
 );
 
-
 endmodule
