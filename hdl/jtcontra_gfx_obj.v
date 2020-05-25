@@ -116,7 +116,7 @@ always @(posedge clk) begin
                                 size_attr[1] ? 4'b0001 : 4'b0011 );
                     vsub     <= (vrender[4:0]-obj_scan[4:0])^{5{vflip}};
                     h4       <= hflip;
-                    if( obj_scan== 8'd240 ) begin
+                    if( obj_scan== 8'd240 && scan_base>=10'd80) begin
                         st     <= 0;
                         done   <= 1;
                         rom_cs <= 0;

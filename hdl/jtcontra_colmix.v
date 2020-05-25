@@ -51,11 +51,14 @@ wire        gfx_sel;
 reg         pal_half;
 reg  [14:0] pxl_aux;
 wire [ 6:0] gfx_mux;
+wire [14:0] col_out;
+reg  [14:0] col_in;
 
 assign gfx_sel  = gfx1_pxl[3:0]==4'h0 || !gfx2_pxl[4];
 assign gfx_mux  = gfx_sel ? gfx2_pxl : gfx1_pxl;
 assign col_addr = { gfx_mux, pal_half };
 
+assign { blue, green, red } = col_out;
 
 jtframe_dual_ram #(.aw(8)) u_ram(
     .clk0   ( clk24     ),
@@ -84,15 +87,12 @@ always @(posedge clk) begin
             // LVBL_dly <= LVBL;
             // LHBL_dly <= LHBL;
             // { blue, green, red } <= (!LVBL || !LHBL) ? 15'd0 : pxl_aux;
+            col_in <= pxl_aux;
             pal_half <= 1;
         end else 
             pal_half <= ~pal_half;
     end
 end
-
-wire [14:0] col_out;
-
-assign { blue, green, red } = col_out;
 
 jtframe_blank #(.DLY(3),.DW(15)) u_blank(
     .clk        ( clk       ),
@@ -102,7 +102,7 @@ jtframe_blank #(.DLY(3),.DW(15)) u_blank(
     .LHBL_dly   ( LHBL_dly  ),
     .LVBL_dly   ( LVBL_dly  ),
     .preLBL     (           ),
-    .rgb_in     ( pxl_aux   ),
+    .rgb_in     ( col_in    ),
     .rgb_out    ( col_out   )
 );
 
