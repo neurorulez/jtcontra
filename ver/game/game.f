@@ -10,6 +10,8 @@ jtcontra_simloader.v
 ../../hdl/jtcontra_colmix.v
 
 ../../modules/jtframe/hdl/video/jtframe_vtimer.v
+../../modules/jtframe/hdl/video/jtframe_blank.v
+../../modules/jtframe/hdl/jtframe_sh.v
 ../../modules/jtframe/hdl/clocking/jtframe_cen24.v
 ../../modules/jtframe/hdl/clocking/jtframe_cen48.v
 ../../modules/jtframe/hdl/clocking/jtframe_frac_cen.v

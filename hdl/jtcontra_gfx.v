@@ -73,6 +73,7 @@ reg  [7:0]  mmr[0:7];
 wire [8:0]  hpos = { mmr[1][0], mmr[0] };
 wire [7:0]  vpos = mmr[2];
 wire        tile_msb   = mmr[3][0];
+wire        scrwin     = 1'b0;
 wire        obj_page   = mmr[3][3]; // select from which page to draw sprites
 wire        layout     = mmr[3][4]; // 1 for wide layout
 wire [3:0]  extra_mask = mmr[4][7:4];
@@ -85,7 +86,6 @@ assign      flip       = mmr[7][3];
 wire        pal_msb    = mmr[6][0];
 wire        hflip_en   = mmr[6][1];
 wire        vflip_en   = mmr[6][2];
-wire        scrwin     = mmr[6][3];
 wire [1:0]  pal_bank   = mmr[6][5:4];
 wire        extra_en   = 0; // there must be a bit in the MMR that turns off all the extra_bits above
                             // because Contra doesn't need them but seems to write to them

@@ -116,10 +116,16 @@ always @(posedge clk) begin
                                 size_attr[1] ? 4'b0001 : 4'b0011 );
                     vsub     <= (vrender[4:0]-obj_scan[4:0])^{5{vflip}};
                     h4       <= hflip;
-                    if( vrender < obj_scan || vrender >= upper_limit ) begin
-                        st        <= 9; // next tile
+                    if( obj_scan== 8'd240 ) begin
+                        st     <= 0;
+                        done   <= 1;
+                        rom_cs <= 0;
                     end else begin
-                        byte_sel <= 3'd1; // get colour
+                        if( vrender < obj_scan || vrender >= upper_limit ) begin
+                            st        <= 9; // next tile
+                        end else begin
+                            byte_sel <= 3'd1; // get colour
+                        end
                     end
                 end
                 3: begin
