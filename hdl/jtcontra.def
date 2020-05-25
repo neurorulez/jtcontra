@@ -12,6 +12,8 @@ VIDEO_HEIGHT=240
 BUTTONS=2
 
 [mist|sidi]
+# OSD credits cannot be used when
+# DIP base is less than 13
 JTFRAME_OSD_NOCREDITS
 JTFRAME_MIST_DIPBASE=8
 

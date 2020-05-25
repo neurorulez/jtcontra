@@ -28,7 +28,7 @@ void parse( const unsigned char* buf, const char *name ) {
     cout << name << '\n';
     for( int page=0; page<2; page++) {
         cout << "*************  PAGE " << page << " ************\n";
-        for( int i=0x1000+0x800*page; i<0x10b0+0x800*page; i+=5 ) {
+        for( int i=0x1000+0x800*page; i<0x10f0+0x800*page; i+=5 ) {
             unsigned code = buf[i];
             unsigned code_lsb = (buf[i+1]>>2)&3;
             unsigned bank = ((buf[i+4]&0xc0)>>4) | (buf[i+1]&3);
@@ -39,8 +39,9 @@ void parse( const unsigned char* buf, const char *name ) {
             unsigned flipx = (buf[i+4]&0x10) != 0;
             unsigned sprsize= (buf[i+4]>>1)&7;
             unsigned pal = buf[i+1]>>4;
-            if( y>= 240 ) continue;
-            cout << "---------------- " << hex << (i&0x3FF) << " -----------------------\n";
+            //if( y>= 240 ) continue;
+            cout << "---------------- " << hex << (i&0x3FF);
+            cout << " (" << dec << ((i&0x3ff)/5) << ") -----------------------\n";
             cout << "Code\t" << hex << bank << "-" << code << "-" << code_lsb;
             cout << " -- full " << hex << full_code;
             cout << " -- RAW " << setfill('0') << hex
