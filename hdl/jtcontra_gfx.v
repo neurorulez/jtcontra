@@ -126,6 +126,7 @@ reg  [ 1:0] data_sel;
 reg         rom_scr_ok, rom_obj_ok;
 reg  [15:0] rom_scr_data, rom_obj_data;
 reg         ok_wait;
+reg  [ 1:0] last_cs;
 
 always @(posedge clk, posedge rst) begin
     if( rst ) begin
@@ -134,6 +135,9 @@ always @(posedge clk, posedge rst) begin
         data_sel <= 2'b00;
         ok_wait  <= 0;
     end else begin
+        last_cs <= { rom_obj_cs, rom_scr_cs };
+        if( rom_obj_cs && !last_cs[1] ) rom_obj_ok<=0;
+        if( rom_scr_cs && !last_cs[0] ) rom_scr_ok<=0;
         if( data_sel==2'b00 ) begin
             if( rom_scr_cs & gfx_en[0] ) begin
                 rom_cs     <= 1;
@@ -168,8 +172,6 @@ always @(posedge clk, posedge rst) begin
             rom_cs   <= 0;
         end else begin
             ok_wait <= 1;
-            if(!rom_obj_cs) rom_obj_ok<=0;
-            if(!rom_scr_cs) rom_scr_ok<=0;
         end
     end
 end
