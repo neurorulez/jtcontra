@@ -184,7 +184,7 @@ always @(posedge clk) begin
                         st      <= 9; // next tile
                     end else begin                            
                         rom_cs  <= 1;
-                        st      <= 6; // wait for new ROM data
+                        st      <= 10; // wait for new ROM data
                     end
                 end
                 9: begin
@@ -197,6 +197,7 @@ always @(posedge clk) begin
                         rom_cs    <= 0;
                     end
                 end
+                10: st <= 6; // wait cycle for rom_ok
             endcase // st
         end
     end
