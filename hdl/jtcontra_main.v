@@ -133,7 +133,7 @@ always @(posedge clk) begin
     end
 end
 
-wire irq_trigger = ~gfx_irqn | dip_pause;
+wire irq_trigger = ~gfx_irqn & dip_pause;
 
 jtframe_ff u_ff(
     .clk      ( clk         ),
