@@ -123,7 +123,7 @@ always @(posedge clk) begin
                         done   <= 1;
                         rom_cs <= 0;
                     end else begin
-                        if( (vrender < obj_scan && obj_scan<=8'd240)
+                        if( (vrender < obj_scan && !(obj_scan[7] && !upper_limit[7]) )
                                || vrender[7:0] >= upper_limit[7:0] ) begin
                             st        <= 9; // next tile
                         end else begin
