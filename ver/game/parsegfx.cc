@@ -40,14 +40,14 @@ void parse( const unsigned char* buf, const char *name ) {
             unsigned flipx = (buf[i+4]&0x10) != 0;
             unsigned sprsize= (buf[i+4]>>1)&7;
             unsigned pal = buf[i+1]>>4;
-            //if( y>= 240 ) {
-            //    if( !lastout ) {
-            //        cout << "---------------- " << hex << (i&0x3FF);
-            //        cout << "* Out of screen\n";
-            //    }
-            //    lastout = true;
-            //    continue;
-            //}
+            if( y== 240 && ( (i&0x3ff)/5)>16 ) {
+                if( !lastout ) {
+                    cout << "---------------- " << hex << (i&0x3FF);
+                    cout << "* Out of screen\n";
+                }
+                lastout = true;
+                continue;
+            }
             lastout = false;
             if( buf[i]==0 && buf[i+1]==0 && buf[i+2]==0
                 && buf[i+3]==0 && buf[i+4]==0 ) {

@@ -123,7 +123,8 @@ always @(posedge clk) begin
                         done   <= 1;
                         rom_cs <= 0;
                     end else begin
-                        if( vrender < obj_scan || vrender >= upper_limit ) begin
+                        if( (vrender < obj_scan && obj_scan<=8'd240)
+                               || vrender[7:0] >= upper_limit[7:0] ) begin
                             st        <= 9; // next tile
                         end else begin
                             byte_sel <= 3'd1; // get colour
