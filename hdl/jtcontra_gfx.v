@@ -95,9 +95,9 @@ wire        char_en    = 1;
 assign      { code12_sel, code11_sel, code10_sel, code9_sel } = mmr[5];
 
 // Other configuration
-reg  [8:0]  chr_dump_start;
+reg  [8:0]  chr_dump_start, chr_render_start;
 reg  [8:0]  chr_dump_end;
-reg  [8:0]  scr_dump_start;
+reg  [8:0]  scr_dump_start, scr_render_start;
 reg  [8:0]  scr_dump_end;
 
 // Scan
@@ -107,7 +107,7 @@ wire        attr_we  = gfx_we & ~cpu_addr[10] & ~cpu_addr[12];
 wire        code_we  = gfx_we &  cpu_addr[10] & ~cpu_addr[12];
 wire        obj_we   = gfx_we &  cpu_addr[12];
 wire [7:0]  code_dout, attr_dout, obj_dout, obj_pxl;
-assign      gfx_dout = cpu_addr[12] ? obj_dout : 
+assign      gfx_dout = cpu_addr[12] ? obj_dout :
                       (cpu_addr[10] ? code_dout : attr_dout);
 wire [ 7:0] code_scan, attr_scan, obj_scan;
 
@@ -186,12 +186,23 @@ always @(posedge clk24) begin
         // Apply layout
         if( layout ) begin
             // total 35*8 = 280 visible pixels: OCTAL!!
-            chr_dump_start <= 9'o000;
-            chr_dump_end   <= 9'o050;
-            scr_dump_start <= 9'o050;
-            scr_dump_end   <= 9'o450; // o400 = d256
+            chr_render_start <= 9'o000;
+            scr_render_start <= 9'o050;
+            if( flip ) begin
+                chr_dump_start <= 9'o360;
+                chr_dump_end   <= 9'o450;
+                scr_dump_start <= 9'o000;
+                scr_dump_end   <= 9'o360; // o400 = d256
+            end else begin
+                chr_dump_start <= 9'o000;
+                chr_dump_end   <= 9'o050;
+                scr_dump_start <= 9'o050;
+                scr_dump_end   <= 9'o450; // o400 = d256
+            end
         end else begin
             // total 32*8 = 256 visible pixels: OCTAL!!
+            chr_render_start <= 9'o020;
+            scr_render_start <= 9'o020;
             chr_dump_start <= 9'o020;
             chr_dump_end   <= 9'o420;
             scr_dump_start <= 9'o020;
@@ -259,6 +270,7 @@ jtcontra_gfx_tilemap u_tilemap(
     .hpos               ( hpos              ),
     .vpos               ( vpos              ),
     .vrender            ( vrender           ),
+    .flip               ( flip              ),
     .lyr                ( lyr               ),
     .line               ( line              ),
     .line_addr          ( line_addr         ),
@@ -275,8 +287,8 @@ jtcontra_gfx_tilemap u_tilemap(
     .attr_scan          ( attr_scan         ),
     .code_scan          ( code_scan         ),
     // Configuration
-    .chr_dump_start     ( chr_dump_start    ),
-    .scr_dump_start     ( scr_dump_start    ),
+    .chr_dump_start     ( chr_render_start  ),
+    .scr_dump_start     ( scr_render_start  ),
     .pal_msb            ( pal_msb           ),
     .extra_mask         ( extra_mask        ),
     .extra_en           ( extra_en          ),
@@ -295,6 +307,7 @@ jtcontra_gfx_obj u_obj(
     .LHBL               ( LHBL              ),
     .LVBL               ( LVBL              ),
     .vrender            ( vrender           ),
+    .flip               ( flip              ),
     .done               (                   ),
     .scan_addr          ( obj_scan_addr[9:0]),
     .hdump              ( hdump             ),

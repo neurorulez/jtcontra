@@ -27,6 +27,7 @@ module jtcontra_gfx_tilemap(
     input       [ 8:0]   hpos,
     input       [ 7:0]   vpos,
     input       [ 8:0]   vrender,
+    input                flip,
     output reg           lyr,
     output reg           line,
     output reg           done,
@@ -66,7 +67,7 @@ reg  [ 4:0] bank;
 reg  [ 7:0] dump_cnt;
 reg  [15:0] pxl_data;
 reg  [8:0]  hrender;
-assign      line_addr = { line, hrender };
+assign      line_addr = { line, flip ? 9'h117-hrender  : hrender };
 
 wire [ 9:0] lyr_hn0 = lyr ? 9'd0 : hpos;
 
@@ -104,7 +105,7 @@ always @(posedge clk) begin
             if(!done) st <= st + 3'd1;
             case( st )
                 0: begin
-                    vn <= vrender + (lyr ? 9'd0 : {1'b0, vpos});
+                    vn <= (vrender^{1'b0,{9{flip}}}) + (lyr ? 9'd0 : {1'b0, vpos});
                     hn <= lyr_hn0[8:0];
                     hrender <= ( lyr ? chr_dump_start : scr_dump_start )
                                - { 7'd0, lyr_hn0[1:0] } - 9'd1;

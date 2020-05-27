@@ -26,6 +26,7 @@ module jtcontra_gfx_obj(
     input                LHBL,
     input                LVBL,
     input       [ 8:0]   vrender,
+    input                flip,
     output reg           done,
     output      [ 9:0]   scan_addr, // max 64 sprites in total
     // Line buffer
@@ -66,9 +67,11 @@ wire [ 9:0] line_dump = { ~line, hdump };
 reg  [ 2:0] size_attr;
 reg         hflip, vflip;
 reg  [ 8:0] pxl_cnt; // OBJ limit should be less than 64us*6MHz=384 pixels
+wire [ 8:0] vf;
 
-assign      line_addr = { line, xpos };
+assign      line_addr = { line, flip ? 9'h0EF-xpos : xpos };
 assign      scan_addr = scan_base + byte_sel;
+assign      vf        = vrender ^ {1'b0, {8{flip}}};
 
 always @(*) begin
     height_comb  = size_attr[2] ? 3'b100 : ( size_attr[0] ? 3'b001 : 3'b010 );
@@ -116,16 +119,16 @@ always @(posedge clk) begin
                 2: begin
                     size_cnt <= size_attr[2] ? 4'b1111 : (
                                 size_attr[1] ? 4'b0001 : 4'b0011 );
-                    vsub     <= (vrender[4:0]-obj_scan[4:0])^{5{vflip}};
+                    vsub     <= (vf[4:0]-obj_scan[4:0])^{5{vflip}};
                     h4       <= hflip;
                     if( obj_scan== 8'd240 && scan_base>=10'd80) begin
                         st     <= 0;
                         done   <= 1;
                         rom_cs <= 0;
                     end else begin
-                        if( (vrender < obj_scan && 
-                             {1'b1,vrender[7:0]}>=upper_limit )
-                            || vrender[8:0] >= upper_limit[8:0] ) begin
+                        if( (vf < obj_scan &&
+                             {1'b1,vf[7:0]}>=upper_limit )
+                            || vf[8:0] >= upper_limit[8:0] ) begin
                             st        <= 9; // next tile
                         end else begin
                             byte_sel <= 3'd1; // get colour
@@ -148,10 +151,10 @@ always @(posedge clk) begin
                     end
                     // code[2] and code[0] => horizontal size
                     if( size_attr[2] ) // 32px
-                        { code[2],code[0] } <= {2{hflip}};
+                        { code[2],code[0] } <= hflip;
                     else if( size_attr[1] ) // 8px
                         code[0] <= obj_scan[2];
-                    else 
+                    else
                         code[0] <= hflip;
                     pal         <= obj_scan[7:4];
                     rom_cs      <= 1;
@@ -172,19 +175,19 @@ always @(posedge clk) begin
                     pxl_data <= hflip ? pxl_data>>4 : pxl_data << 4;
                     pxl_cnt  <= pxl_cnt + 9'd1;
                     xpos     <= xpos + 9'd1;
-                    line_din <= { pal, 
-                        hflip ? pxl_data[3:0] : pxl_data[15:12] 
+                    line_din <= { pal,
+                        hflip ? pxl_data[3:0] : pxl_data[15:12]
                         };
                     line_we  <= 1;
                 end
                 8: begin
                     line_we <= 0;
-                    {code[2],code[0],h4} <= {code[2],code[0],h4} + 
+                    {code[2],code[0],h4} <= {code[2],code[0],h4} +
                         ( hflip ? -3'd1 : 3'd1 );
                     if( h4 ) size_cnt <= size_cnt>>1;
-                    if( !size_cnt[1] && h4 ) begin
+                    if( !size_cnt[1] && (h4) ) begin
                         st      <= 9; // next tile
-                    end else begin                            
+                    end else begin
                         rom_cs  <= 1;
                         st      <= 10; // wait for new ROM data
                     end
@@ -206,7 +209,7 @@ always @(posedge clk) begin
 end
 
 jtframe_obj_buffer #(
-    .ALPHA(0), 
+    .ALPHA(0),
     .BLANK(0)
 ) u_line(
     .clk    ( clk           ),
