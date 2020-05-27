@@ -203,6 +203,8 @@ jtcontra_video u_video(
     .HS             ( HS            ),
     .VS             ( VS            ),
     .flip           ( flip          ),
+    .dip_pause      ( dip_pause     ),
+    .start_button   ( &start_button ),
     // PROMs
     .prom_we        ( prom_we       ),
     .prog_addr      ( prog_addr[9:0]),
@@ -255,13 +257,14 @@ jtcontra_sound u_sound(
     // Sound output
     .snd_left   ( snd_left      ),
     .snd_right  ( snd_right     ),
-    .sample     (               )
+    .sample     ( sample        )
 );
 `else 
 assign snd_cs   = 0;
 assign snd_addr = 15'd0;
 assign snd_left = 16'd0;
 assign snd_right= 16'd0;
+assign sample   = 0;
 `endif
 
 jtframe_rom #(
