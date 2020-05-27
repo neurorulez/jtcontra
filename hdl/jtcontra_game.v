@@ -82,7 +82,6 @@ wire        cen12, prom_we;
 
 wire [ 7:0] dipsw_a, dipsw_b;
 wire [ 3:0] dipsw_c;
-wire        flip;
 wire        LHBL, LVBL;
 
 wire [12:0] cpu_addr;
@@ -91,7 +90,6 @@ wire        gfx1_vram_cs, gfx2_vram_cs;
 wire        cpu_cen, cpu_rnw, cpu_irqn;
 wire [ 7:0] gfx1_dout, gfx2_dout, pal_dout, cpu_dout;
 
-assign dip_flip   = dipsw[16];
 assign prog_rd    = 0;
 assign dwnld_busy = downloading;
 assign { dipsw_c, dipsw_b, dipsw_a } = dipsw[19:0];
@@ -202,7 +200,7 @@ jtcontra_video u_video(
     .LVBL_dly       ( LVBL_dly      ),
     .HS             ( HS            ),
     .VS             ( VS            ),
-    .flip           ( flip          ),
+    .flip           ( dip_flip      ),
     .dip_pause      ( dip_pause     ),
     .start_button   ( &start_button ),
     // PROMs

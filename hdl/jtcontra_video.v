@@ -87,7 +87,7 @@ jtframe_cen48 u_cen(
     .cen1p5b    (           )
 );
 
-jtframe_vtimer /*#(.VB_END(9'o17))*/ u_timer(
+jtframe_vtimer u_timer(
     .clk        ( clk           ),
     .pxl_cen    ( pxl_cen       ),
     .vdump      ( vdump         ),
