@@ -151,7 +151,7 @@ always @(posedge clk) begin
                     end
                     // code[2] and code[0] => horizontal size
                     if( size_attr[2] ) // 32px
-                        { code[2],code[0] } <= hflip;
+                        { code[2],code[0] } <= {2{hflip}};
                     else if( size_attr[1] ) // 8px
                         code[0] <= obj_scan[2];
                     else
