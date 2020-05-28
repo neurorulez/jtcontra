@@ -27,7 +27,7 @@
     <name>gryzor</name>
     <rbf>jtcontra</rbf>
     <setname>gryzor</setname>
-    <rom index="0" zip="gryzor.zip|contra.zip" type="merged">
+    <rom index="0" zip="gryzor.zip|contra.zip" type="merged" md5="None">
         <!-- maincpu -->
         <interleave output="16">
             <part name="633j03.18a" crc="20919162" length="0x8000" offset="0x8000" map="12"/>

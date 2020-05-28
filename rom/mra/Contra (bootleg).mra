@@ -27,7 +27,7 @@
     <name>contrab</name>
     <rbf>jtcontra</rbf>
     <setname>contrab</setname>
-    <rom index="0" zip="contrab.zip|contra.zip" type="merged">
+    <rom index="0" zip="contrab.zip|contra.zip" type="merged" md5="None">
         <!-- maincpu -->
         <interleave output="16">
             <part name="3.ic20" crc="d045e1da" length="0x8000" offset="0x8000" map="12"/>

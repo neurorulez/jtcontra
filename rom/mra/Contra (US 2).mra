@@ -27,7 +27,7 @@
     <name>contra1</name>
     <rbf>jtcontra</rbf>
     <setname>contra1</setname>
-    <rom index="0" zip="contra1.zip|contra.zip" type="merged">
+    <rom index="0" zip="contra1.zip|contra.zip" type="merged" md5="None">
         <!-- maincpu -->
         <interleave output="16">
             <part name="633i03.18a" crc="7fc0d8cf" length="0x8000" offset="0x8000" map="12"/>

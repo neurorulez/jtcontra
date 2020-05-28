@@ -27,7 +27,7 @@
     <name>contrabj</name>
     <rbf>jtcontra</rbf>
     <setname>contrabj</setname>
-    <rom index="0" zip="contrabj.zip|contra.zip" type="merged">
+    <rom index="0" zip="contrabj.zip|contra.zip" type="merged" md5="None">
         <!-- maincpu -->
         <interleave output="16">
             <part name="2.2k" crc="fedab568" length="0x8000" offset="0x8000" map="12"/>
