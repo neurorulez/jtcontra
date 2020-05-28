@@ -80,4 +80,6 @@
         <dip name="Service Mode" bits="18" ids="On,Off"/>
         <dip name="Sound" bits="19" ids="Mono,Stereo"/>
     </switches>
+    <buttons names="Fire,Jump,Start,Coin,Pause"
+        default="A,B,R,L,Start"/>
 </misterromdescription>

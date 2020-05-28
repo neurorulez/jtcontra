@@ -28,7 +28,7 @@
     <rbf>jtcontra</rbf>
     <setname>contraj</setname>
     <rom index="0" zip="contraj.zip|contra.zip" type="merged" md5="None">
-        <!-- maincpu -->        
+        <!-- maincpu -->
         <interleave output="16">
             <part name="633n03.18a" crc="fedab568" length="0x8000" offset="0x8000" map="12"/>
         </interleave>
@@ -77,4 +77,6 @@
         <dip name="Service Mode" bits="18" ids="On,Off"/>
         <dip name="Sound" bits="19" ids="Mono,Stereo"/>
     </switches>
+    <buttons names="Fire,Jump,Start,Coin,Pause"
+        default="A,B,R,L,Start"/>
 </misterromdescription>
