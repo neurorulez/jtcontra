@@ -34,7 +34,7 @@
         </interleave>
         <!-- banks -->
         <interleave output="16">
-            <part name="633j02.17a" crc="b5922f9a" offset="0x8000" map="12"/>
+            <part name="633j02.17a" crc="b5922f9a" map="12"/>
         </interleave>
         <interleave output="16">
             <part name="633j03.18a" crc="20919162" length="0x8000" offset="0" map="12"/>

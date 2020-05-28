@@ -29,28 +29,31 @@
     <setname>contrae</setname>
     <rom index="0" zip="contrae.zip|contra.zip" type="merged" md5="None">
         <!-- maincpu -->
-        <part name="633_e03.18a" crc="7ebdb314"/>
-        <part name="633_e02.17a" crc="9d5ebe66"/>
+        <interleave output="16">
+          <part name="633_e03.18a" crc="7ebdb314" length="0x8000" offset="0x8000" map="12"/>
+        </interleave>
+        <interleave output="16">
+            <part name="633_e02.17a" crc="9d5ebe66" map="12"/>
+        </interleave>
+        <interleave output="16">
+          <part name="633_e03.18a" crc="7ebdb314" length="0x8000" offset="0" map="12"/>
+        </interleave>
         <!-- audiocpu -->
-        <part name="633e01.12a" crc="d1549255"/>
+        <interleave output="16">
+            <part name="633e01.12a" crc="d1549255" length="0x8000" map="12"/>
+        </interleave>
+        <!-- GFX are the same as the original but in different
+             ROM chips. I just use the original ROMs for simplicity -->
         <!-- gfx1 -->
-        <part name="633_e04_a.7d" crc="e027f330"/>
-        <part name="633_e04_b.7d" crc="a71230f5"/>
-        <part name="633_e04_c.7d" crc="0b103d01"/>
-        <part name="633_e04_d.7d" crc="ab3faa60"/>
-        <part name="633_e05_a.7f" crc="81a70a77"/>
-        <part name="633_e05_b.7f" crc="55556f29"/>
-        <part name="633_e05_c.7f" crc="acba86bf"/>
-        <part name="633_e05_d.7f" crc="59cf234d"/>
+        <interleave output="16">
+            <part name="633e04.7d" crc="14ddc542" map="01"/>
+            <part name="633e05.7f" crc="42185044" map="10"/>
+        </interleave>
         <!-- gfx2 -->
-        <part name="633_e06_a.16d" crc="030079c5"/>
-        <part name="633_e06_b.16d" crc="e17d5807"/>
-        <part name="633_e06_c.16d" crc="7d6a28cd"/>
-        <part name="633_e06_d.16d" crc="83db378f"/>
-        <part name="633_e07_a.16f" crc="8fcd40e5"/>
-        <part name="633_e07_b.16f" crc="694e306e"/>
-        <part name="633_e07_c.16f" crc="fb33f3ff"/>
-        <part name="633_e07_d.16f" crc="cfab0988"/>
+        <interleave output="16">
+            <part name="633e06.16d" crc="9cf6faae" map="01"/>
+            <part name="633e07.16f" crc="f2d06638" map="10"/>
+        </interleave>
         <!-- proms -->
         <part name="633e08.10g" crc="9f0949fa"/>
         <part name="633e09.12g" crc="14ca5e19"/>
