@@ -57,19 +57,17 @@ reg  [ 8:0] xpos;
 reg  [ 9:0] scan_base;
 reg         obj_we;
 reg  [ 7:0] line_din;
-wire [ 9:0] line_addr;
+wire [ 8:0] line_addr;
 
 reg  [ 2:0] height_comb;
 reg  [ 8:0] upper_limit;
 reg  [ 4:0] vsub;
-reg         line;
-wire [ 9:0] line_dump = { ~line, hdump };
 reg  [ 2:0] size_attr;
 reg         hflip, vflip;
 reg  [ 8:0] pxl_cnt; // OBJ limit should be less than 64us*6MHz=384 pixels
 wire [ 8:0] vf;
 
-assign      line_addr = { line, flip ? 9'h0EF-xpos : xpos };
+assign      line_addr = { flip ? 9'h0EF-xpos : xpos };
 assign      scan_addr = scan_base + byte_sel;
 assign      vf        = vrender ^ {1'b0, {8{flip}}};
 
@@ -86,7 +84,6 @@ always @(posedge clk) begin
         pal     <= 4'd0;
         code    <= 13'd0;
         line_we <= 0;
-        line    <= 0;
         st      <= 3'd0;
         size_cnt<= 4'd0;
         dump_cnt<= 8'd0;
@@ -100,7 +97,6 @@ always @(posedge clk) begin
             scan_base <= 10'd0;
             byte_sel  <= 3'd4;      // get obj size
             pxl_cnt   <= 8'd0;
-            line      <= ~line;
         end else begin
             if(!done) st <= st + 4'd1;
             case( st )
@@ -213,12 +209,13 @@ jtframe_obj_buffer #(
     .BLANK(0)
 ) u_line(
     .clk    ( clk           ),
+    .LHBL   ( LHBL          ),
     // New data writes
     .wr_data( line_din      ),
     .wr_addr( line_addr     ),
     .we     ( line_we       ),
     // Old data reads (and erases)
-    .rd_addr( line_dump     ),
+    .rd_addr( hdump         ),
     .rd     ( pxl_cen       ),  // data will be erased after the rd event
     .rd_data( pxl           )
 );
