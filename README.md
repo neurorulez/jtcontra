@@ -6,14 +6,14 @@ namely FPGA systems.
 
 # Arcade Titles
 
-Name            |  Main CPU    | Sound CPU   | K007121 units | Audio
-----------------|--------------|-------------|---------------|-----------------
-Contra          |  HD63C09EP   | 68B09EP     | x2            | YM2151
-Combat School   |  6309        | Z80         | x2            | YM2203 + UPD7759
-MX5000          |  6309        | Z80         | x1            | YM2151 + K007232
-Haunted Castle  |  KONAMI      | Z80         | x2            | YM3812 + K051649
-Fast Lane       |  6309        | -           | x1 + K051733  | K007232 x 2
-Labyrinth Runner|  6309        | -           | x1 + K051733  | YM2203 x 2
+Name            |  JT Core | Main CPU   | Sound CPU   | K007121 units | Audio
+----------------|----------|------------|---------------|-----------------
+Contra          |          | HD63C09EP  | 68B09EP     | x2            | YM2151
+Combat School   |          | 6309       | Z80         | x2            | YM2203 + UPD7759
+MX5000          |          | 6309       | Z80         | x1            | YM2151 + K007232
+Haunted Castle  |          | KONAMI     | Z80         | x2            | YM3812 + K051649
+Fast Lane       |          | 6309       | -           | x1 + K051733  | K007232 x 2
+Labyrinth Runner|          | 6309       | -           | x1 + K051733  | YM2203 x 2
 
 # Supported FPGA Platforms
 
