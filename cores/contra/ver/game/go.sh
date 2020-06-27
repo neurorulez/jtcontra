@@ -29,10 +29,10 @@ fi
 
 # Generic simulation script from JTFRAME
 echo "Game ROM length: " $GAME_ROM_LEN
-../../modules/jtframe/bin/sim.sh -mist -d GAME_ROM_LEN=$GAME_ROM_LEN \
+sim.sh -mist -d GAME_ROM_LEN=$GAME_ROM_LEN \
     -sysname contra  \
     -d JTFRAME_DWNLD_PROM_ONLY \
     -d JT51_NODEBUG  \
-    -def $JTROOT/hdl/jtcontra.def \
+    -def ../../hdl/jtcontra.def \
     -videow 280 -videoh 240 -d VIDEO_START=1 \
     $*

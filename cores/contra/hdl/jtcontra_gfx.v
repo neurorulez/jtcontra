@@ -39,13 +39,12 @@ module jtcontra_gfx(
     input      [ 3:0]    prog_data,
     input                prom_we,
     // CPU      interface
-    input                vram_cs,
-    input                cfg_cs,
+    input                cs,
     input                cpu_rnw,
     input                cpu_cen,
-    input      [12:0]    cpu_addr,
+    input      [13:0]    addr,
     input      [ 7:0]    cpu_dout,
-    output     [ 7:0]    gfx_dout,
+    output reg [ 7:0]    dout,
     output reg           cpu_irqn,
     // SDRAM interface
     output reg [17:0]    rom_addr,
@@ -58,18 +57,20 @@ module jtcontra_gfx(
     input      [ 1:0]    gfx_en
 );
 
-parameter H0 = 9'h75; // initial value of hdump after H blanking
+parameter   H0 = 9'h75; // initial value of hdump after H blanking
+localparam  RCNT=96;
 
 reg         last_LVBL;
 wire        gfx_we = cpu_cen & ~cpu_rnw & vram_cs;
 wire        lyr, done, chr_we, scr_we;
+wire        vram_cs, cfg_cs;
 
 wire        line;
 wire [9:0]  line_addr;
 wire [7:0]  chr_pxl, scr_pxl, line_din;
 
 ////////// Memory Mapped Registers
-reg  [7:0]  mmr[0:7];
+reg  [7:0]  mmr[0:RCNT-1];
 wire [8:0]  hpos = { mmr[1][0], mmr[0] };
 wire [7:0]  vpos = mmr[2];
 wire        tile_msb   = mmr[3][0];
@@ -102,13 +103,11 @@ reg  [8:0]  scr_dump_end;
 
 // Scan
 wire [10:0] scan_addr;
-wire [10:0] ram_addr = { cpu_addr[11], cpu_addr[9:0] };
-wire        attr_we  = gfx_we & ~cpu_addr[10] & ~cpu_addr[12];
-wire        code_we  = gfx_we &  cpu_addr[10] & ~cpu_addr[12];
-wire        obj_we   = gfx_we &  cpu_addr[12];
-wire [7:0]  code_dout, attr_dout, obj_dout, obj_pxl;
-assign      gfx_dout = cpu_addr[12] ? obj_dout :
-                      (cpu_addr[10] ? code_dout : attr_dout);
+wire [10:0] ram_addr = { addr[11], addr[9:0] };
+wire        attr_we  = gfx_we & ~addr[10] & ~addr[12];
+wire        code_we  = gfx_we &  addr[10] & ~addr[12];
+wire        obj_we   = gfx_we &  addr[12];
+wire [ 7:0] code_dout, attr_dout, obj_dout, obj_pxl;
 wire [ 7:0] code_scan, attr_scan, obj_scan;
 
 reg  [ 7:0] vprom_addr;
@@ -127,6 +126,16 @@ reg         rom_scr_ok, rom_obj_ok;
 reg  [15:0] rom_scr_data, rom_obj_data;
 reg         ok_wait;
 reg  [ 1:0] last_cs;
+
+assign      cfg_cs  = addr[13:9]==5'd0 && cs;
+assign      vram_cs = addr[13] && cs;
+
+// Data bus mux. It'd be nice to latch this:
+always @(*) begin
+    dout = !addr[13] ? mmr[ addr[6:0] ]     // registers
+        : (addr[12] ? obj_dout :            // objects
+          (addr[10] ? code_dout : attr_dout)); // tiles
+end
 
 always @(posedge clk, posedge rst) begin
     if( rst ) begin
@@ -182,7 +191,7 @@ always @(posedge clk24) begin
         { mmr[3], mmr[2], mmr[1], mmr[0] } <= 32'd0;
     end else if(cpu_cen) begin
         if(!cpu_rnw && cfg_cs)
-            mmr[ cpu_addr[2:0] ] <= cpu_dout;
+            mmr[ addr[4:0] ] <= cpu_dout;
         // Apply layout
         if( layout ) begin
             // total 35*8 = 280 visible pixels: OCTAL!!
@@ -414,7 +423,7 @@ jtframe_dual_ram #(.aw(12)) u_obj_ram(
     .clk1   ( clk           ),
     // Port 0
     .data0  ( cpu_dout      ),
-    .addr0  ( cpu_addr[11:0]),
+    .addr0  ( addr[11:0]),
     .we0    ( obj_we        ),
     .q0     ( obj_dout      ),
     // Port 1

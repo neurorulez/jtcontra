@@ -79,13 +79,14 @@ wire [ 7:0] main_data, snd_data, snd_latch;
 wire [14:0] snd_addr;
 wire [16:0] main_addr;
 wire        cen12, prom_we;
+wire        gfx1_cs, gfx2_cs;
 
 wire [ 7:0] dipsw_a, dipsw_b;
 wire [ 3:0] dipsw_c;
 wire        LHBL, LVBL;
 
-wire [12:0] cpu_addr;
-wire        gfx_irqn, gfx1_cs, gfx2_cs, gfx1_cfg_cs, gfx2_cfg_cs, pal_cs;
+wire [15:0] cpu_addr;
+wire        gfx_irqn, gfx1_romcs, gfx2_romcs, gfx1_cfg_cs, gfx2_cfg_cs, pal_cs;
 wire        gfx1_vram_cs, gfx2_vram_cs;
 wire        cpu_cen, cpu_rnw, cpu_irqn;
 wire [ 7:0] gfx1_dout, gfx2_dout, pal_dout, cpu_dout;
@@ -131,18 +132,14 @@ u_dwnld(
 
 `ifdef GFX_ONLY
 jtcontra_simloader u_simloader(
-    .rst            ( rst           ),
-    .clk            ( clk24         ),
-    .cpu_cen        ( cpu_cen       ),
+    .rst        ( rst           ),
+    .clk        ( clk24         ),
+    .cpu_cen    ( cpu_cen       ),
     // GFX
-    .cpu_addr       ( cpu_addr      ),
-    .cpu_dout       ( cpu_dout      ),
-    .cpu_rnw        ( cpu_rnw       ),
-    .gfx1_vram_cs   ( gfx1_vram_cs  ),
-    .gfx2_vram_cs   ( gfx2_vram_cs  ),
-    .gfx1_cfg_cs    ( gfx1_cfg_cs   ),
-    .gfx2_cfg_cs    ( gfx2_cfg_cs   ),
-    .pal_cs         ( pal_cs        )
+    .cpu_addr   ( cpu_addr      ),
+    .cpu_dout   ( cpu_dout      ),
+    .cpu_rnw    ( cpu_rnw       ),
+    .pal_cs     ( pal_cs        )
 );
 `else
 `ifndef NOMAIN
@@ -170,10 +167,8 @@ jtcontra_main u_main(
     .cpu_dout       ( cpu_dout      ),
     .cpu_rnw        ( cpu_rnw       ),
     .gfx_irqn       ( cpu_irqn      ),
-    .gfx1_vram_cs   ( gfx1_vram_cs  ),
-    .gfx2_vram_cs   ( gfx2_vram_cs  ),
-    .gfx1_cfg_cs    ( gfx1_cfg_cs   ),
-    .gfx2_cfg_cs    ( gfx2_cfg_cs   ),
+    .gfx1_cs        ( gfx1_cs       ),
+    .gfx2_cs        ( gfx2_cs       ),
     .pal_cs         ( pal_cs        ),
 
     .gfx1_dout      ( gfx1_dout     ),
@@ -209,10 +204,8 @@ jtcontra_video u_video(
     .prog_data      ( prog_data[3:0]),
     // GFX - CPU interface
     .cpu_irqn       ( cpu_irqn      ),
-    .gfx1_vram_cs   ( gfx1_vram_cs  ),
-    .gfx2_vram_cs   ( gfx2_vram_cs  ),
-    .gfx1_cfg_cs    ( gfx1_cfg_cs   ),
-    .gfx2_cfg_cs    ( gfx2_cfg_cs   ),
+    .gfx1_cs        ( gfx1_cs       ),
+    .gfx2_cs        ( gfx2_cs       ),
     .pal_cs         ( pal_cs        ),
     .cpu_rnw        ( cpu_rnw       ),
     .cpu_cen        ( cpu_cen       ),
@@ -225,11 +218,11 @@ jtcontra_video u_video(
     .gfx1_addr      ( gfx1_addr     ),
     .gfx1_data      ( gfx1_data     ),
     .gfx1_ok        ( gfx1_ok       ),
-    .gfx1_cs        ( gfx1_cs       ),
+    .gfx1_romcs     ( gfx1_romcs    ),
     .gfx2_addr      ( gfx2_addr     ),
     .gfx2_data      ( gfx2_data     ),
     .gfx2_ok        ( gfx2_ok       ),
-    .gfx2_cs        ( gfx2_cs       ),
+    .gfx2_romcs     ( gfx2_romcs    ),
     // pixels
     .red            ( red           ),
     .green          ( green         ),
@@ -286,8 +279,8 @@ jtframe_rom #(
     .clk         ( clk           ),
     .vblank      ( ~LVBL         ),
 
-    .slot0_cs    ( gfx1_cs       ),
-    .slot1_cs    ( gfx2_cs       ),
+    .slot0_cs    ( gfx1_romcs       ),
+    .slot1_cs    ( gfx2_romcs       ),
     .slot2_cs    ( 1'b0          ), 
     .slot3_cs    ( 1'b0          ), // unused
     .slot4_cs    ( 1'b0          ), // unused

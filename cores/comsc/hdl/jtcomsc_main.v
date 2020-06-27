@@ -14,7 +14,7 @@
 
     Author: Jose Tejada Gomez. Twitter: @topapate
     Version: 1.0
-    Date: 2-12-2019 */
+    Date: 26-6-2020 */
 
 // Clocks are derived from H counter on the original PCB
 // Yet, that doesn't seem to be important and it only
@@ -22,7 +22,7 @@
 // E,Q: 3 MHz
 // Q is 1/4th of wave advanced
 
-module jtcontra_main(
+module jtcomsc_main(
     input               clk,        // 24 MHz
     input               rst,
     input               cen12,
@@ -42,12 +42,14 @@ module jtcontra_main(
     input       [ 5:0]  joystick2,
     input               service,
     // GFX
-    output      [15:0]  cpu_addr,
+    output      [12:0]  cpu_addr,
     output              cpu_rnw,
     output      [ 7:0]  cpu_dout,
     input               gfx_irqn,
-    input               gfx1_cs,
-    input               gfx2_cs,
+    output reg          gfx1_vram_cs,
+    output reg          gfx2_vram_cs,
+    output reg          gfx1_cfg_cs,
+    output reg          gfx2_cfg_cs,
     output reg          pal_cs,
 
     input   [7:0]       gfx1_dout,
@@ -64,32 +66,40 @@ wire [ 7:0] ram_dout;
 wire [15:0] A;
 reg  [ 7:0] cpu_din;
 wire        RnW, irq_n, irq_ack;
-reg         ram_cs, bank_cs, in_cs, out_cs;
+reg         ram_cs, bank_cs, in_cs, out_cs, io_cs;
 
 reg [3:0] bank;
 reg [7:0] port_in;
+reg       video_sel; // selects which video chip to write to
 
-assign cpu_addr = A[15:0];
+assign cpu_addr = A[12:0];
 assign cpu_rnw  = RnW;
 
 always @(*) begin
-    rom_cs      = (A[15] || A[15:13]==3'b011) && RnW;
-    bank_cs     = A[15:12] == 4'b0111 && !RnW;
-    ram_cs      = A[15:12] == 4'b0001;
-    pal_cs      = A[15:10] == 6'b0000_11;
-    in_cs       = A[15:10] == 6'b0000_00 && A[4] && RnW;  // 10 -1F
-    out_cs      = A[15:10] == 6'b0000_00 && A[4:3]==2'b11 && !RnW; // 18-1F
+    rom_cs      =  A[15]          &&  RnW; // 8000-FFFF
+    bank_cs     = !A[15] && A[14] && !RnW; // 4000-7FFF
+    mul_cs      = A[15:8]==8'h200;
+    ram_cs      = A[15:12] == 4'b0001;     // 1000-1FFF - also RAM below it?
+    gfx1_vram_cs= A[15:13] == 3'b001 && !video_sel; // 2000-3FFF
+    gfx2_vram_cs= A[15:13] == 3'b001 &&  video_sel;
+    gfx1_cfg_cs = ~|A[15:3] && !video_sel && ~RnW; // 00 - 07
+    gfx1_cfg_cs = ~|A[15:3] &&  video_sel && ~RnW; // 00 - 07
+    pal_cs      = A[15:8] == 8'h06; // 0600-06FF
+    // Line order important:
+    io_cs       = A[15:8] == 8'h04;
+    in_cs       = io_cs && !A[4] &&  RnW;
+    out_cs      = io_cs &&  A[4] && !RnW;
 end
 
 always @(*) begin   // consider latching
     case(1'b1)
-        rom_cs:  cpu_din = rom_data;
-        ram_cs:  cpu_din = ram_dout;
-        pal_cs:  cpu_din = pal_dout;
-        in_cs:   cpu_din = port_in;
-        gfx1_cs: cpu_din = gfx1_dout;
-        gfx2_cs: cpu_din = gfx2_dout;
-        default: cpu_din = 8'hff;
+        rom_cs:         cpu_din = rom_data;
+        ram_cs:         cpu_din = ram_dout;
+        pal_cs:         cpu_din = pal_dout;
+        in_cs:          cpu_din = port_in;
+        gfx1_vram_cs:   cpu_din = gfx1_dout;
+        gfx2_vram_cs:   cpu_din = gfx2_dout;
+        default:        cpu_din = 8'hff;
     endcase
 end
 
@@ -105,7 +115,6 @@ always @(posedge clk) begin
         3'b100: port_in <= dipsw_a;
         3'b101: port_in <= dipsw_b;
         3'b110: port_in <= { 4'hf, dipsw_c };
-        default: port_in <= 8'hFF;
     endcase
 end
 

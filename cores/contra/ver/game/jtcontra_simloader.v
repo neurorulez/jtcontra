@@ -21,13 +21,9 @@ module jtcontra_simloader(
     input               clk,
     output              cpu_cen,
     // GFX
-    output reg  [12:0]  cpu_addr,
+    output reg  [15:0]  cpu_addr,
     output reg          cpu_rnw,
     output reg  [ 7:0]  cpu_dout,
-    output reg          gfx1_vram_cs,
-    output reg          gfx2_vram_cs,
-    output reg          gfx1_cfg_cs,
-    output reg          gfx2_cfg_cs,
     output reg          pal_cs
 );
 
@@ -58,49 +54,39 @@ initial begin
     $readmemh("gfx_cfg.hex",gfx_cfg);
 end
 
+wire gfx_low = dump_cnt < 8*1024;
+
 always @(posedge clk) begin
     if( rst ) begin
-        dump_cnt     <= 0;
-        pal_cnt      <= 0;
-        cfg_cnt      <= 0;
-        cpu_addr     <= ~13'h0;
-        gfx1_cfg_cs  <= 0;
-        gfx2_cfg_cs  <= 0;
-        gfx1_vram_cs <= 0;
-        gfx2_vram_cs <= 0;
-        cpu_rnw      <= 1;
-        cpu_dout     <= 8'd0;
+        dump_cnt  <= 0;
+        pal_cnt   <= 0;
+        cfg_cnt   <= 0;
+        cpu_addr  <= 16'h1FFF;
+        cpu_rnw   <= 1;
+        cpu_dout  <= 8'd0;
+        pal_cs    <= 0;
     end else begin
         if( dump_cnt < 16*1024 ) begin
             dump_cnt     <= dump_cnt + 1;
-            cpu_addr     <= dump_cnt[12:0];
+            cpu_addr     <= { gfx_low ? 3'b01 : 3'b10, dump_cnt[12:0] };
             cpu_rnw      <= 0;
             cpu_dout     <= gfx_snap[ dump_cnt ];
-            gfx1_vram_cs <= dump_cnt < 8*1024;
-            gfx2_vram_cs <= dump_cnt >= 8*1024;
-        end else if( pal_cnt < 256 ) begin
+        end else if( pal_cnt < 256 ) begin            
             pal_cnt      <= pal_cnt + 1;
-            cpu_addr     <= { 5'hc, pal_cnt[7:0] };
+            cpu_addr     <= { 8'h0c, pal_cnt[7:0] };
             cpu_rnw      <= 0;
             cpu_dout     <= pal_snap[ pal_cnt ];
-            gfx1_vram_cs <= 0;
-            gfx2_vram_cs <= 0;
             pal_cs       <= 1;
         end else begin
-            gfx1_vram_cs <= 0;
-            gfx2_vram_cs <= 0;
-            pal_cs       <= 0;
-            cpu_addr[12:3] <= 0;
+            pal_cs         <= 0;
+            cpu_addr[15:3] <= 'd0;
             if( cfg_cnt < 16 ) begin
+                cpu_addr[6:5] <= {2{cfg_cnt[3]}};
                 cpu_addr[2:0] <= cfg_cnt[2:0];
                 cpu_rnw       <= 0;
                 cpu_dout      <= gfx_cfg[ cfg_cnt ];
                 cfg_cnt       <= cfg_cnt+1;
-                gfx1_cfg_cs   <= ~cfg_cnt[3];
-                gfx2_cfg_cs   <= cfg_cnt[3];
             end else begin
-                gfx1_cfg_cs   <= 0;
-                gfx2_cfg_cs   <= 0;
                 cpu_rnw       <= 1;
             end
         end

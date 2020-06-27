@@ -36,14 +36,12 @@ module jtcontra_video(
     input      [ 3:0]   prog_data,
     input               prom_we,
     // CPU      interface
-    input               gfx1_vram_cs,
-    input               gfx2_vram_cs,
-    input               gfx1_cfg_cs,
-    input               gfx2_cfg_cs,
+    output              gfx1_cs,
+    output              gfx2_cs,
     input               pal_cs,
     input               cpu_rnw,
     input               cpu_cen,
-    input      [12:0]   cpu_addr,
+    input      [15:0]   cpu_addr,
     input      [ 7:0]   cpu_dout,
     output     [ 7:0]   gfx1_dout,
     output     [ 7:0]   gfx2_dout,
@@ -53,11 +51,11 @@ module jtcontra_video(
     output     [17:0]   gfx1_addr,
     input      [15:0]   gfx1_data,
     input               gfx1_ok,
-    output              gfx1_cs,
+    output              gfx1_romcs,
     output     [17:0]   gfx2_addr,
     input      [15:0]   gfx2_data,
     input               gfx2_ok,
-    output              gfx2_cs,
+    output              gfx2_romcs,
     // Colours
     output     [ 4:0]   red,
     output     [ 4:0]   green,
@@ -66,8 +64,16 @@ module jtcontra_video(
     input      [ 3:0]   gfx_en
 );
 
-wire [8:0] vrender, vrender1, vdump, hdump;
-wire [6:0] gfx1_pxl, gfx2_pxl;
+wire [ 8:0] vrender, vrender1, vdump, hdump;
+wire [ 6:0] gfx1_pxl, gfx2_pxl;
+wire [13:0] gfx_addr;
+
+
+jtcontra_007766 u_decod(
+    .cpu_addr   ( cpu_addr             ),
+    .gfx_cs     ( { gfx2_cs, gfx1_cs } ),
+    .gfx_addr   ( gfx_addr             )
+);
 
 jtframe_cen48 u_cen(
     .clk        ( clk       ),    // 48 MHz
@@ -127,17 +133,16 @@ jtcontra_gfx u_gfx1(
     .vrender1   ( vrender1      ),
     .flip       ( flip          ),
     // CPU      interface
-    .vram_cs    ( gfx1_vram_cs  ),
-    .cfg_cs     ( gfx1_cfg_cs   ),
+    .cs         ( gfx1_cs       ),
     .cpu_rnw    ( cpu_rnw       ),
-    .cpu_addr   ( cpu_addr      ),
+    .addr       ( gfx_addr      ),
     .cpu_dout   ( cpu_dout      ),
-    .gfx_dout   ( gfx1_dout     ),
+    .dout       ( gfx1_dout     ),
     .cpu_irqn   ( cpu_irqn      ),
     // SDRAM interface
     .rom_addr   ( gfx1_addr     ),
     .rom_data   ( gfx1_data     ),
-    .rom_cs     ( gfx1_cs       ),
+    .rom_cs     ( gfx1_romcs    ),
     .rom_ok     ( gfx1_ok       ),
     .pxl_out    ( gfx1_pxl      ),
     // Test
@@ -166,17 +171,16 @@ jtcontra_gfx u_gfx2(
     .vrender1   ( vrender1      ),
     .flip       (               ),
     // CPU      interface
-    .vram_cs    ( gfx2_vram_cs  ),
-    .cfg_cs     ( gfx2_cfg_cs   ),
+    .cs         ( gfx2_cs       ),
     .cpu_rnw    ( cpu_rnw       ),
-    .cpu_addr   ( cpu_addr      ),
+    .addr       ( gfx_addr      ),
     .cpu_dout   ( cpu_dout      ),
-    .gfx_dout   ( gfx2_dout     ),
+    .dout       ( gfx2_dout     ),
     .cpu_irqn   (               ),
     // SDRAM interface
     .rom_addr   ( gfx2_addr     ),
     .rom_data   ( gfx2_data     ),
-    .rom_cs     ( gfx2_cs       ),
+    .rom_cs     ( gfx2_romcs    ),
     .rom_ok     ( gfx2_ok       ),
     .pxl_out    ( gfx2_pxl      ),
     // Test
