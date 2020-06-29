@@ -70,6 +70,20 @@ module jtcontra_game(
     input   [ 3:0]  gfx_en
 );
 
+// Defines which game to render
+`ifndef JTCONTRA_PCB
+`define  JTCONTRA_PCB 0
+`endif
+
+localparam GAME=`JTCONTRA_PCB;
+
+generate
+    case(GAME)
+        0: localparam PROM_START=25'h128_000; // Contra
+        1: localparam PROM_START=25'h128_000; // Combat School
+    endcase
+endgenerate
+
 wire        main_cs, snd_cs, snd_ok, main_ok, gfx1_ok, gfx2_ok;
 wire        snd_irq;
 wire [15:0] gfx1_data, gfx2_data;
@@ -90,6 +104,8 @@ wire        gfx_irqn, gfx1_romcs, gfx2_romcs, gfx1_cfg_cs, gfx2_cfg_cs, pal_cs;
 wire        gfx1_vram_cs, gfx2_vram_cs;
 wire        cpu_cen, cpu_rnw, cpu_irqn;
 wire [ 7:0] gfx1_dout, gfx2_dout, pal_dout, cpu_dout;
+wire [ 7:0] video_bank;
+wire        prio_latch;
 
 assign prog_rd    = 0;
 assign dwnld_busy = downloading;
@@ -115,7 +131,7 @@ jtframe_cen24 u_cen(
     .cen1p5b    (               )
 );
 
-jtframe_dwnld #(.PROM_START(25'h128_000))
+jtframe_dwnld #(.PROM_START(PROM_START))
 u_dwnld(
     .clk            ( clk           ),
     .downloading    ( downloading   ),
@@ -174,6 +190,9 @@ jtcontra_main u_main(
     .gfx1_dout      ( gfx1_dout     ),
     .gfx2_dout      ( gfx2_dout     ),
     .pal_dout       ( pal_dout      ),
+
+    .video_bank     ( video_bank    ),
+    .prio_latch     ( prio_latch    ),
     // DIP switches
     .dip_pause      ( dip_pause     ),
     .dipsw_a        ( dipsw_a       ),
@@ -183,7 +202,7 @@ jtcontra_main u_main(
 `endif
 `endif
 
-jtcontra_video u_video(
+jtcontra_video #(.GAME(GAME)) u_video (
     .rst            ( rst           ),
     .clk            ( clk           ),
     .clk24          ( clk24         ),
@@ -214,6 +233,8 @@ jtcontra_video u_video(
     .gfx1_dout      ( gfx1_dout     ),
     .gfx2_dout      ( gfx2_dout     ),
     .pal_dout       ( pal_dout      ),
+    .video_bank     ( video_bank    ),
+    .prio_latch     ( prio_latch    ),
     // SDRAM
     .gfx1_addr      ( gfx1_addr     ),
     .gfx1_data      ( gfx1_data     ),

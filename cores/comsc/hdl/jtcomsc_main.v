@@ -51,6 +51,7 @@ module jtcomsc_main(
     output reg          gfx1_cfg_cs,
     output reg          gfx2_cfg_cs,
     output reg          pal_cs,
+    output reg  [ 7:0]  video_bank, // Register at S78, select video ROM banks
 
     input   [7:0]       gfx1_dout,
     input   [7:0]       gfx2_dout,
@@ -62,44 +63,58 @@ module jtcomsc_main(
     input   [3:0]       dipsw_c
 );
 
-wire [ 7:0] ram_dout;
 wire [15:0] A;
+wire [ 7:0] ram_dout;
 reg  [ 7:0] cpu_din;
 wire        RnW, irq_n, irq_ack;
-reg         ram_cs, bank_cs, in_cs, out_cs, io_cs;
+reg         ram_cs, bank_cs, vbank_cs, in_cs, out_cs, gfx_cs, io_cs, snd_cs;
 
-reg [3:0] bank;
-reg [7:0] port_in;
-reg       video_sel; // selects which video chip to write to
+reg  [ 7:0] port_in;
+
+// Register at location S59
+reg  [ 3:0] bank;
+reg         video_sel; // selects which video chip to write to
+reg         prio;
 
 assign cpu_addr = A[12:0];
 assign cpu_rnw  = RnW;
 
+// K007556 decoder only looks at A15-A9
+// second decoder for IOCS outputs then looks at A[4:2]
+// but input /G2B could be A[5] as schematics scan don't show
+// a horizontal band around that position
 always @(*) begin
-    rom_cs      =  A[15]          &&  RnW; // 8000-FFFF
-    bank_cs     = !A[15] && A[14] && !RnW; // 4000-7FFF
-    mul_cs      = A[15:8]==8'h200;
-    ram_cs      = A[15:12] == 4'b0001;     // 1000-1FFF - also RAM below it?
-    gfx1_vram_cs= A[15:13] == 3'b001 && !video_sel; // 2000-3FFF
-    gfx2_vram_cs= A[15:13] == 3'b001 &&  video_sel;
-    gfx1_cfg_cs = ~|A[15:3] && !video_sel && ~RnW; // 00 - 07
-    gfx1_cfg_cs = ~|A[15:3] &&  video_sel && ~RnW; // 00 - 07
-    pal_cs      = A[15:8] == 8'h06; // 0600-06FF
+    rom_cs      = A[15] || A[15:14]==2'b01; // 4000-FFFF
+    ram_cs      = A[15:12] == 4'b0001;      // 1000-1FFF - also RAM below it?
     // Line order important:
-    io_cs       = A[15:8] == 8'h04;
-    in_cs       = io_cs && !A[4] &&  RnW;
-    out_cs      = io_cs &&  A[4] && !RnW;
+    io_cs       = A[15:9]==7'h2 && !A[5];  // 0400 - 041F
+    wdog_cs     = io_cs && A[4:2]==3'b111; // 041C
+    snd_cs      = io_cs && (A[4:2]==3'b110 || A[4:2]==3'b101); // 0414 - 0418
+    bank_cs     = io_cs && A[4:2]==3'b100; // 0410
+    vbank_cs    = io_cs && A[4:2]==3'b011; // 040C
+    out_cs      = io_cs && A[4:2]==3'b010; // 0408 - coin counters
+    // coin counters will fall here, // 0408
+    track_cs    = io_cs && A[4:2]==3'b001; // 0404
+    in_cs       = io_cs && A[4:2]==3'b000; // 0400
+
+    gfx_cs      = A[15:13] == 3'b001 || A[15:9]==7'h0;
+    gfx1_cs     = gfx_cs && !video_sel; // 2000-3FFF
+    gfx2_cs     = gfx_cs &&  video_sel;
+    dmp_cs      = A[15:9] == 7'h01; // 0200-0206
+    pal_cs      = A[15:9] == 7'h03; // 0600-06FF
 end
 
 always @(*) begin   // consider latching
     case(1'b1)
-        rom_cs:         cpu_din = rom_data;
-        ram_cs:         cpu_din = ram_dout;
-        pal_cs:         cpu_din = pal_dout;
-        in_cs:          cpu_din = port_in;
-        gfx1_vram_cs:   cpu_din = gfx1_dout;
-        gfx2_vram_cs:   cpu_din = gfx2_dout;
-        default:        cpu_din = 8'hff;
+        rom_cs:    cpu_din = rom_data;
+        ram_cs:    cpu_din = ram_dout;
+        pal_cs:    cpu_din = pal_dout;
+        in_cs:     cpu_din = port_in;
+        // track_cs:
+        //dmp_cs:
+        gfx1_cs:   cpu_din = gfx1_dout;
+        gfx2_cs:   cpu_din = gfx2_dout;
+        default:   cpu_din = 8'hff;
     endcase
 end
 
@@ -120,19 +135,25 @@ end
 
 always @(posedge clk) begin
     if( rst ) begin
+        video_sel <= 0;
+        prio_sel  <= 0;
+        bank_en   <= 0;
         bank      <= 4'd0;
         snd_irq   <= 0;
         snd_latch <= 8'd0;
+        video_bank<= 8'd0;
     end else if(cpu_cen) begin
         snd_irq   <= 0;
-        if( bank_cs ) bank <= cpu_dout[3:0];
-        if( out_cs  ) begin
-            case( A[2:1] )
-                // 2'b00: coin counters
-                2'b01: snd_irq   <= 1;
-                2'b10: snd_latch <= cpu_dout;
-                // 2'b11 watchdog
-            endcase
+        if( vbank_cs ) video_bank <= cpu_dout;
+        if( bank_cs ) begin
+            video_sel <= cpu_dout[6];
+            prio_sel  <= cpu_dout[5];
+            bank_en   <= cpu_dout[4];
+            bank      <= cpu_dout[3:0];
+        end
+        if( snd_cs  ) begin
+            snd_irq   <= A[3];
+            if(A[2]) snd_latch <= cpu_dout;
         end
     end
 end

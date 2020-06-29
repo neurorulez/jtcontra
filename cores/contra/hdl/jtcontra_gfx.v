@@ -47,6 +47,7 @@ module jtcontra_gfx(
     output reg [ 7:0]    dout,
     output reg           cpu_irqn,
     // SDRAM interface
+    output reg           rom_obj_sel,   // pin H2 of actual chip
     output reg [17:0]    rom_addr,
     input      [15:0]    rom_data,
     input                rom_ok,
@@ -139,27 +140,30 @@ end
 
 always @(posedge clk, posedge rst) begin
     if( rst ) begin
-        rom_cs   <= 0;
-        rom_addr <= 18'd0;
-        data_sel <= 2'b00;
-        ok_wait  <= 0;
+        rom_cs      <= 0;
+        rom_addr    <= 18'd0;
+        rom_obj_sel <= 0;
+        data_sel    <= 2'b00;
+        ok_wait     <= 0;
     end else begin
         last_cs <= { rom_obj_cs, rom_scr_cs };
         if( rom_obj_cs && !last_cs[1] ) rom_obj_ok<=0;
         if( rom_scr_cs && !last_cs[0] ) rom_scr_ok<=0;
         if( data_sel==2'b00 ) begin
             if( rom_scr_cs & gfx_en[0] ) begin
-                rom_cs     <= 1;
-                rom_addr   <= rom_scr_addr;
-                rom_scr_ok <= 0;
-                data_sel   <= 2'b01;
-                ok_wait    <= 0;
+                rom_cs      <= 1;
+                rom_addr    <= rom_scr_addr;
+                rom_obj_sel <= 0;
+                rom_scr_ok  <= 0;
+                data_sel    <= 2'b01;
+                ok_wait     <= 0;
             end else if( rom_obj_cs & gfx_en[1] ) begin
-                rom_cs     <= 1;
-                rom_addr   <= rom_obj_addr;
-                rom_obj_ok <= 0;
-                data_sel   <= 2'b10;
-                ok_wait    <= 0;
+                rom_cs      <= 1;
+                rom_addr    <= rom_obj_addr;
+                rom_obj_sel <= 1;
+                rom_obj_ok  <= 0;
+                data_sel    <= 2'b10;
+                ok_wait     <= 0;
             end
             else rom_cs <= 0;
         end else if( rom_ok & ok_wait) begin

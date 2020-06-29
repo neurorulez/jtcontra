@@ -2,6 +2,7 @@ jtcontra_simloader.v
 
 ../../hdl/jtcontra_game.v
 ../../hdl/jtcontra_main.v
+../../hdl/jtcontra_main_decoder.v
 ../../hdl/jtcontra_sound.v
 ../../hdl/jtcontra_video.v
 ../../hdl/jtcontra_gfx.v

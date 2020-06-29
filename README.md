@@ -10,8 +10,8 @@ Name            | JT Core | Main CPU   | Sound CPU  | K007121 units | Audio
 ----------------|---------|------------|------------|---------------|-------------
 Contra          | contra  | HD63C09EP  | 68B09EP    | x2            | YM2151
 Combat School   | comsc   | 6309       | Z80        | x2            | YM2203 + UPD7759
-MX5000          |         | 6309       | Z80        | x1            | YM2151 + K007232
 Haunted Castle  |         | KONAMI     | Z80        | x2            | YM3812 + K051649
+MX5000          |         | 6309       | Z80        | x1            | YM2151 + K007232
 Fast Lane       |         | 6309       | -          | x1 + K051733  | K007232 x 2
 Labyrinth Runner|         | 6309       | -          | x1 + K051733  | YM2203 x 2
 
@@ -39,7 +39,29 @@ Name          | Purpose           | Author  | URL
 JT51          | YM2151 sound      | jotego  | https://github.com/jotego/jt51
 JTFRAME       | FPGA framework    | jotego  | https://github.com/jotego/jtframe
 
-# KONAMI 007121 Register Map
+# KONAMI 007121
+
+## Pinout
+
+Pin Name | Number | I/O | Usage
+---------|--------|-----|-----------------------------------------------
+  H2     |  68    |  O  | 0=output ROM addr is for tilemaps, 1=objects
+  A13    | 109    |  I  | 0=internal config registers, 1=VRAM
+  A12    |  52    |  I  | 0=tilemaps, 1=objects
+  NXCS   |  63    |  I  | chip select
+  COA6   |  81    |  O  | palette RAM address 6
+  COA5   |  20    |  O  | palette RAM address 5
+  COA4   |  80    |  O  | palette RAM address 4
+  COA3   |  79    |  O  | palette RAM address 3
+  COA2   |  18    |  O  | palette RAM address 2
+  COA1   |  16    |  O  | palette RAM address 1
+  COA0   |  17    |  O  | palette RAM address 0
+  CK24   |   1    |  I  | 24MHz input clock
+  CK2    |   4    |  O  | CK24/4 (6MHz output clock)
+  NE     |  65    |  O  | E signal for M6809
+  NQ     |  66    |  O  | Q signal for M6809
+
+## Register Map
 
 There are likely to be 32 programmable registers
 

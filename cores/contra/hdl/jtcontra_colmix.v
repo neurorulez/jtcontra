@@ -17,6 +17,8 @@
     Date: 03-05-2020 */
 
 // Equivalent to KONAMI 007593
+// Plus priority decoding selected for each game 
+// with parameter GAME
 
 module jtcontra_colmix(
     input               rst,
@@ -36,6 +38,7 @@ module jtcontra_colmix(
     input      [ 7:0]   cpu_dout,
     output     [ 7:0]   pal_dout,
     // GFX colour requests
+    input               prio_latch, // Used by Combat School
     input      [ 6:0]   gfx1_pxl,
     input      [ 6:0]   gfx2_pxl,
     // Colours
@@ -44,18 +47,36 @@ module jtcontra_colmix(
     output     [ 4:0]   blue
 );
 
+parameter GAME=0; // 0 = Contra, 1 = Combat School
+
 wire        pal_we = cpu_cen & ~cpu_rnw & pal_cs;
 wire [ 7:0] col_data;
 wire [ 7:0] col_addr;
-wire        gfx_sel;
+reg         gfx_sel;
+reg         gfx_aux, gfx_other; // signals to help in priority equations
 reg         pal_half;
 reg  [14:0] pxl_aux;
-wire [ 6:0] gfx_mux;
+reg  [ 6:0] gfx_mux;
 wire [14:0] col_out;
 reg  [14:0] col_in;
+wire        gfx1_blank = gfx1_pxl[3:0]==4'h0;
+wire        gfx2_blank = gfx2_pxl[3:0]==4'h0;
 
-assign gfx_sel  = gfx1_pxl[3:0]==4'h0 || !gfx2_pxl[4];
-assign gfx_mux  = gfx_sel ? gfx2_pxl : gfx1_pxl;
+always @(*) begin
+    case( GAME )
+        1: begin // Combat School
+            gfx_aux  = ~gfx2_blank &  gfx1_pxl[4]; // NCHA1 in schematics
+            gfx_other= ~((~gfx1_blank | ~gfx2_pxl[4]) & ~prio_latch); // output of S21
+            gfx_sel  = ~( gfx_other& ~(gfx_aux&prio_latch) );
+            gfx_mux  = { gfx_sel, gfx_sel ? gfx2_pxl[5:0] : gfx1_pxl[5:0]};
+        end
+        default: begin // Contra
+            gfx_sel  = gfx1_blank || !gfx2_pxl[4];
+            gfx_mux  = gfx_sel ? gfx2_pxl : gfx1_pxl;
+        end
+    endcase // GAME
+end
+
 assign col_addr = { gfx_mux, pal_half };
 
 assign { blue, green, red } = col_out;

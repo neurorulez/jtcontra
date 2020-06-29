@@ -27,12 +27,12 @@ module jtcontra_main(
     input               rst,
     input               cen12,
     output              cpu_cen,
-    // communication with main CPU
-    output reg          snd_irq,
-    output reg  [ 7:0]  snd_latch,
+    // communication with sound CPU
+    output              snd_irq,
+    output      [ 7:0]  snd_latch,
     // ROM
-    output reg  [16:0]  rom_addr,
-    output      reg     rom_cs,
+    output      [16:0]  rom_addr,
+    output              rom_cs,
     input       [ 7:0]  rom_data,
     input               rom_ok,
     // cabinet I/O
@@ -48,87 +48,79 @@ module jtcontra_main(
     input               gfx_irqn,
     input               gfx1_cs,
     input               gfx2_cs,
-    output reg          pal_cs,
+    output              pal_cs,
 
-    input   [7:0]       gfx1_dout,
-    input   [7:0]       gfx2_dout,
-    input   [7:0]       pal_dout,
+    output     [7:0]    video_bank,
+    output              prio_latch,
+
+    input      [7:0]    gfx1_dout,
+    input      [7:0]    gfx2_dout,
+    input      [7:0]    pal_dout,
     // DIP switches
     input               dip_pause,
-    input   [7:0]       dipsw_a,
-    input   [7:0]       dipsw_b,
-    input   [3:0]       dipsw_c
+    input      [7:0]    dipsw_a,
+    input      [7:0]    dipsw_b,
+    input      [3:0]    dipsw_c
 );
 
-wire [ 7:0] ram_dout;
+parameter GAME=0;
+
+wire [ 7:0] ram_dout, cpu_din;
 wire [15:0] A;
-reg  [ 7:0] cpu_din;
 wire        RnW, irq_n, irq_ack;
-reg         ram_cs, bank_cs, in_cs, out_cs;
+wire        irq_trigger;
+wire        ram_cs;
 
-reg [3:0] bank;
-reg [7:0] port_in;
+assign irq_trigger = ~gfx_irqn & dip_pause;
+assign cpu_addr    = A;
+assign cpu_rnw     = RnW;
 
-assign cpu_addr = A[15:0];
-assign cpu_rnw  = RnW;
-
-always @(*) begin
-    rom_cs      = (A[15] || A[15:13]==3'b011) && RnW;
-    bank_cs     = A[15:12] == 4'b0111 && !RnW;
-    ram_cs      = A[15:12] == 4'b0001;
-    pal_cs      = A[15:10] == 6'b0000_11;
-    in_cs       = A[15:10] == 6'b0000_00 && A[4] && RnW;  // 10 -1F
-    out_cs      = A[15:10] == 6'b0000_00 && A[4:3]==2'b11 && !RnW; // 18-1F
-end
-
-always @(*) begin   // consider latching
-    case(1'b1)
-        rom_cs:  cpu_din = rom_data;
-        ram_cs:  cpu_din = ram_dout;
-        pal_cs:  cpu_din = pal_dout;
-        in_cs:   cpu_din = port_in;
-        gfx1_cs: cpu_din = gfx1_dout;
-        gfx2_cs: cpu_din = gfx2_dout;
-        default: cpu_din = 8'hff;
-    endcase
-end
-
-always @(*) begin
-    rom_addr = A[15] ? { 2'b00, A[14:0] } : { bank+4'b0100, A[12:0] }; // 13+4=17
-end
-
-always @(posedge clk) begin
-    case( A[2:0] )
-        3'b000: port_in <= {3'b111, start_button, service, coin_input };
-        3'b001: port_in <= {2'b11, joystick1[5:4], joystick1[2], joystick1[3], joystick1[0], joystick1[1]};
-        3'b010: port_in <= {2'b11, joystick2[5:4], joystick2[2], joystick2[3], joystick2[0], joystick2[1]};
-        3'b100: port_in <= dipsw_a;
-        3'b101: port_in <= dipsw_b;
-        3'b110: port_in <= { 4'hf, dipsw_c };
-        default: port_in <= 8'hFF;
-    endcase
-end
-
-always @(posedge clk) begin
-    if( rst ) begin
-        bank      <= 4'd0;
-        snd_irq   <= 0;
-        snd_latch <= 8'd0;
-    end else if(cpu_cen) begin
-        snd_irq   <= 0;
-        if( bank_cs ) bank <= cpu_dout[3:0];
-        if( out_cs  ) begin
-            case( A[2:1] )
-                // 2'b00: coin counters
-                2'b01: snd_irq   <= 1;
-                2'b10: snd_latch <= cpu_dout;
-                // 2'b11 watchdog
-            endcase
+generate
+    case( GAME )
+        0: begin ////////////// CONTRA
+            jtcontra_main_decoder u_decoder(
+                .clk            ( clk           ),        // 24 MHz
+                .rst            ( rst           ),
+                //.cen12          ( cen12         ),
+                .cpu_cen        ( cpu_cen       ),
+                .A              ( A             ),
+                .RnW            ( RnW           ),
+                .gfx1_cs        ( gfx1_cs       ),
+                .gfx2_cs        ( gfx2_cs       ),
+                .pal_cs         ( pal_cs        ),
+                // communication with main CPU
+                .snd_irq        ( snd_irq       ),
+                .snd_latch      ( snd_latch     ),
+                // ROM
+                .rom_addr       ( rom_addr      ),
+                .rom_cs         ( rom_cs        ),
+                .rom_data       ( rom_data      ),
+                .rom_ok         ( rom_ok        ),
+                // cabinet I/O
+                .start_button   ( start_button  ),
+                .coin_input     ( coin_input    ),
+                .joystick1      ( joystick1     ),
+                .joystick2      ( joystick2     ),
+                .service        ( service       ),
+                // Data bus
+                .cpu_dout       ( cpu_dout      ),
+                .pal_dout       ( pal_dout      ),
+                .gfx1_dout      ( gfx1_dout     ),
+                .gfx2_dout      ( gfx2_dout     ),
+                .ram_cs         ( ram_cs        ),
+                .cpu_din        ( cpu_din       ),
+                .ram_dout       ( ram_dout      ),
+                // DIP switches
+                .dipsw_a        ( dipsw_a       ),
+                .dipsw_b        ( dipsw_b       ),
+                .dipsw_c        ( dipsw_c       )
+            );
+            // Unused signals:
+            assign prio_latch = 0;
+            assign video_bank = 8'd0;
         end
-    end
-end
-
-wire irq_trigger = ~gfx_irqn & dip_pause;
+    endcase    
+endgenerate
 
 jtframe_ff u_ff(
     .clk      ( clk         ),
