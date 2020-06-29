@@ -1,0 +1,13 @@
+mist
+history
+*.png
+*.jpg
+*.hex
+*.lxt
+*.bin
+*.raw
+*.log
+*.wav
+*.xml
+sim
+test.shm

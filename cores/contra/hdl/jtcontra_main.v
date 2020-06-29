@@ -119,6 +119,47 @@ generate
             assign prio_latch = 0;
             assign video_bank = 8'd0;
         end
+        1: begin ////////////// Combat School
+            jtcomsc_main_decoder u_decoder(
+                .clk            ( clk           ),        // 24 MHz
+                .rst            ( rst           ),
+                //.cen12          ( cen12         ),
+                .cpu_cen        ( cpu_cen       ),
+                .A              ( A             ),
+                .RnW            ( RnW           ),
+                .gfx1_cs        ( gfx1_cs       ),
+                .gfx2_cs        ( gfx2_cs       ),
+                .pal_cs         ( pal_cs        ),
+                .prio_latch     ( prio_latch    ),
+                .video_bank     ( video_bank    ),
+                // communication with sound CPU
+                .snd_irq        ( snd_irq       ),
+                .snd_latch      ( snd_latch     ),
+                // ROM
+                .rom_addr       ( rom_addr      ),
+                .rom_cs         ( rom_cs        ),
+                .rom_data       ( rom_data      ),
+                .rom_ok         ( rom_ok        ),
+                // cabinet I/O
+                .start_button   ( start_button  ),
+                .coin_input     ( coin_input    ),
+                .joystick1      ( joystick1     ),
+                .joystick2      ( joystick2     ),
+                .service        ( service       ),
+                // Data bus
+                .cpu_dout       ( cpu_dout      ),
+                .pal_dout       ( pal_dout      ),
+                .gfx1_dout      ( gfx1_dout     ),
+                .gfx2_dout      ( gfx2_dout     ),
+                .ram_cs         ( ram_cs        ),
+                .cpu_din        ( cpu_din       ),
+                .ram_dout       ( ram_dout      ),
+                // DIP switches
+                .dipsw_a        ( dipsw_a       ),
+                .dipsw_b        ( dipsw_b       ),
+                .dipsw_c        ( dipsw_c       )
+            );
+        end
     endcase    
 endgenerate
 
