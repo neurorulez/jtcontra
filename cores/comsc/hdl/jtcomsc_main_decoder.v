@@ -106,7 +106,7 @@ always @(*) begin   // latching this seems to prevent system bootup
 end
 
 always @(*) begin
-    if( A[15:14] != 2'b01 ) begin // banked
+    if( A[15:14] == 2'b01 ) begin // banked
         if( bank_en )
             rom_addr = 18'h1_0000 + { 1'b0, bank[3:1], A[13:0] };
         else

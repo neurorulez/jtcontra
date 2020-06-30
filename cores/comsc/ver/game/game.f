@@ -1,14 +1,16 @@
 jtcontra_simloader.v
 
-../../hdl/jtcontra_game.v
-../../hdl/jtcontra_main.v
-../../hdl/jtcontra_sound.v
-../../hdl/jtcontra_video.v
-../../hdl/jtcontra_gfx.v
-../../hdl/jtcontra_gfx_tilemap.v
-../../hdl/jtcontra_gfx_obj.v
-../../hdl/jtcontra_colmix.v
-../../hdl/jtcontra_007766.v
+../../hdl/jtcomsc_main_decoder.v
+
+../../../contra/hdl/jtcontra_game.v
+../../../contra/hdl/jtcontra_main.v
+#../../../contra/hdl/jtcontra_sound.v
+../../../contra/hdl/jtcontra_video.v
+../../../contra/hdl/jtcontra_gfx.v
+../../../contra/hdl/jtcontra_gfx_tilemap.v
+../../../contra/hdl/jtcontra_gfx_obj.v
+../../../contra/hdl/jtcontra_colmix.v
+../../../contra/hdl/jtcontra_007766.v
 
 ../../../../modules/jtframe/hdl/video/jtframe_vtimer.v
 ../../../../modules/jtframe/hdl/video/jtframe_blank.v

@@ -10,7 +10,9 @@
 # done
 
 if [ ! -e sdram.hex ]; then
-    ln -sf ../../rom/contra.rom rom.bin
+    if [ ! -e rom.bin ]; then
+        ln -sf $JTROOT/rom/comsc.rom rom.bin
+    fi
     bin2hex <rom.bin >sdram.hex
 fi
 
@@ -19,7 +21,7 @@ export MEM_CHECK_TIME=210_000_000
 export BIN2PNG_OPTIONS="--scale"
 export CONVERT_OPTIONS="-resize 300%x300%"
 GAME_ROM_LEN=$(stat --dereference -c%s $GAME_ROM_PATH)
-export YM2151=1
+# export YM2203=1
 export M6809=1
 
 if [ ! -e $GAME_ROM_PATH ]; then
@@ -33,6 +35,6 @@ sim.sh -mist -d GAME_ROM_LEN=$GAME_ROM_LEN \
     -sysname contra  \
     -d JTFRAME_DWNLD_PROM_ONLY \
     -d JT51_NODEBUG  \
-    -def ../../hdl/jtcontra.def \
+    -def ../../hdl/jtcomsc.def \
     -videow 280 -videoh 240 -d VIDEO_START=1 \
     $*

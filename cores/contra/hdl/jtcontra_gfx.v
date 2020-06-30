@@ -62,7 +62,7 @@ parameter   H0 = 9'h75; // initial value of hdump after H blanking
 localparam  RCNT=96;
 
 reg         last_LVBL;
-wire        gfx_we = cpu_cen & ~cpu_rnw & vram_cs;
+wire        gfx_we;
 wire        lyr, done, chr_we, scr_we;
 wire        vram_cs, cfg_cs;
 
@@ -95,6 +95,7 @@ wire        char_en    = 1;
 // wire        char_en    =~mmr[7][4];     // undocumented by MAME
 
 assign      { code12_sel, code11_sel, code10_sel, code9_sel } = mmr[5];
+assign      gfx_we = cpu_cen & ~cpu_rnw & vram_cs;
 
 // Other configuration
 reg  [8:0]  chr_dump_start, chr_render_start;
