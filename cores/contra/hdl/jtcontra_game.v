@@ -76,13 +76,13 @@ module jtcontra_game(
 `endif
 
 localparam GAME=`JTCONTRA_PCB;
+localparam CONTRA=0;
 
-generate
-    case(GAME)
-        0: localparam PROM_START=25'h128_000; // Contra
-        1: localparam PROM_START=25'h128_000; // Combat School
-    endcase
-endgenerate
+// SDRAM offsets. 
+localparam SND_OFFSET  = (GAME==CONTRA ? 22'h2_0000 : 22'h3_0000) >> 1;
+localparam GFX1_OFFSET =  GAME==CONTRA ? (SND_OFFSET  + (22'h0_8000 >> 1)) : 22'h04_0000>>1;
+localparam GFX2_OFFSET =  GAME==CONTRA ? (GFX1_OFFSET + (22'h8_0000 >> 1)) : 22'h14_0000>>1;
+localparam PROM_START  =  GAME==CONTRA ? 25'h128_000 : 25'h24_0000;
 
 wire        main_cs, snd_cs, snd_ok, main_ok, gfx1_ok, gfx2_ok;
 wire        snd_irq;
@@ -91,7 +91,7 @@ wire [17:0] gfx1_addr, gfx2_addr;
 
 wire [ 7:0] main_data, snd_data, snd_latch;
 wire [14:0] snd_addr;
-wire [16:0] main_addr;
+wire [17:0] main_addr;
 wire        cen12, prom_we;
 wire        gfx1_cs, gfx2_cs;
 
@@ -111,9 +111,6 @@ assign prog_rd    = 0;
 assign dwnld_busy = downloading;
 assign { dipsw_c, dipsw_b, dipsw_a } = dipsw[19:0];
 
-localparam SND_OFFSET  = 22'h2_0000 >> 1;
-localparam GFX1_OFFSET = SND_OFFSET  + (22'h0_8000 >> 1);
-localparam GFX2_OFFSET = GFX1_OFFSET + (22'h8_0000 >> 1);
 
 jtframe_cen24 u_cen(
     .clk        ( clk24         ),    // 24 MHz
@@ -159,7 +156,7 @@ jtcontra_simloader u_simloader(
 );
 `else
 `ifndef NOMAIN
-jtcontra_main u_main(
+jtcontra_main #(.GAME(GAME)) u_main(
     .clk            ( clk24         ),        // 24 MHz
     .rst            ( rst           ),
     .cen12          ( cen12         ),
@@ -292,7 +289,7 @@ jtframe_rom #(
     .SLOT6_DW    (  8              ),
     .SLOT6_OFFSET( SND_OFFSET      ),
 
-    .SLOT7_AW    ( 17              ),
+    .SLOT7_AW    ( 18              ),
     .SLOT7_DW    (  8              ),
     .SLOT7_OFFSET(  0              )  // Main
 ) u_rom (

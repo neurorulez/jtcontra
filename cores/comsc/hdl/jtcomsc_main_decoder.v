@@ -25,11 +25,13 @@ module jtcomsc_main_decoder(
     output reg          gfx1_cs,
     output reg          gfx2_cs,
     output reg          pal_cs,
+    output reg          prio_latch, // PRIONG    in schematics
+    output reg  [ 7:0]  video_bank, // VCNG[7:0] in schematics
     // communication with sound CPU
     output reg          snd_irq,
     output reg  [ 7:0]  snd_latch,
     // ROM
-    output reg  [16:0]  rom_addr,
+    output reg  [17:0]  rom_addr,
     output reg          rom_cs,
     input       [ 7:0]  rom_data,
     input               rom_ok,
@@ -53,9 +55,15 @@ module jtcomsc_main_decoder(
     input      [3:0]    dipsw_c
 );
 
-reg       ram_cs, bank_cs, vbank_cs, in_cs, out_cs, gfx_cs, io_cs, snd_cs;
-reg [3:0] bank;
-reg [7:0] port_in;
+reg         bank_cs, vbank_cs, in_cs, out_cs, gfx_cs, io_cs, snd_cs,
+            track_cs, dmp_cs;
+reg  [ 3:0] bank;
+reg  [ 7:0] port_in;
+reg         bank_en; // called PBCANG in schematics
+reg         video_sel;
+// Protection circuit (multiplyer)
+reg  [ 7:0] mul_factor[0:1];
+reg  [15:0] mul;
 
 
 // K007556 decoder only looks at A15-A9
@@ -67,7 +75,7 @@ always @(*) begin
     ram_cs      = A[15:12] == 4'b0001;      // 1000-1FFF - also RAM below it?
     // Line order important:
     io_cs       = A[15:9]==7'h2 && !A[5];  // 0400 - 041F
-    wdog_cs     = io_cs && A[4:2]==3'b111; // 041C
+    //wdog_cs     = io_cs && A[4:2]==3'b111; // 041C
     snd_cs      = io_cs && (A[4:2]==3'b110 || A[4:2]==3'b101); // 0414 - 0418
     bank_cs     = io_cs && A[4:2]==3'b100; // 0410
     vbank_cs    = io_cs && A[4:2]==3'b011; // 040C
@@ -83,14 +91,14 @@ always @(*) begin
     pal_cs      = A[15:9] == 7'h03; // 0600-06FF
 end
 
-always @(*) begin   // consider latching
+always @(*) begin   // latching this seems to prevent system bootup
     case(1'b1)
         rom_cs:    cpu_din = rom_data;
         ram_cs:    cpu_din = ram_dout;
         pal_cs:    cpu_din = pal_dout;
         in_cs:     cpu_din = port_in;
         // track_cs:
-        //dmp_cs:
+        dmp_cs:    cpu_din = mul;
         gfx1_cs:   cpu_din = gfx1_dout;
         gfx2_cs:   cpu_din = gfx2_dout;
         default:   cpu_din = 8'hff;
@@ -98,7 +106,14 @@ always @(*) begin   // consider latching
 end
 
 always @(*) begin
-    rom_addr = A[15] ? { 2'b00, A[14:0] } : { bank+4'b0100, A[12:0] }; // 13+4=17
+    if( A[15:14] != 2'b01 ) begin // banked
+        if( bank_en )
+            rom_addr = 18'h1_0000 + { 1'b0, bank[3:1], A[13:0] };
+        else
+            rom_addr = { 3'b0, bank[0], A[13:0] };
+    end else begin // Non banked
+        rom_addr = { 2'b0, A };
+    end
 end
 
 always @(posedge clk) begin
@@ -114,25 +129,40 @@ end
 
 always @(posedge clk) begin
     if( rst ) begin
-        video_sel <= 0;
-        prio_sel  <= 0;
-        bank_en   <= 0;
-        bank      <= 4'd0;
-        snd_irq   <= 0;
-        snd_latch <= 8'd0;
-        video_bank<= 8'd0;
+        video_bank <= 0;
+        prio_latch <= 0;
+        bank_en    <= 0;
+        bank       <= 4'd0;
+        snd_irq    <= 0;
+        snd_latch  <= 8'd0;
+        video_bank <= 8'd0;
     end else if(cpu_cen) begin
         snd_irq   <= 0;
         if( vbank_cs ) video_bank <= cpu_dout;
         if( bank_cs ) begin
-            video_sel <= cpu_dout[6];
-            prio_sel  <= cpu_dout[5];
-            bank_en   <= cpu_dout[4];
-            bank      <= cpu_dout[3:0];
+            video_bank <= cpu_dout[6];
+            prio_latch <= cpu_dout[5];
+            bank_en    <= cpu_dout[4];
+            bank       <= cpu_dout[3:0];
         end
         if( snd_cs  ) begin
-            snd_irq   <= A[3];
+            snd_irq    <= A[3];
             if(A[2]) snd_latch <= cpu_dout;
+        end
+    end
+end
+
+always @(posedge clk) begin
+    if( rst ) begin
+        mul_factor[0] <= 8'd0;
+        mul_factor[1] <= 8'd0;
+        mul           <= 16'd0;
+    end else begin
+        // There goes one DSP cell:
+        mul <= mul_factor[0] * mul_factor[1];
+        if( dmp_cs && A[2:1]==2'b0 ) begin
+            if( !A[0] ) mul_factor[0]<=cpu_dout;
+            if(  A[0] ) mul_factor[1]<=cpu_dout;
         end
     end
 end

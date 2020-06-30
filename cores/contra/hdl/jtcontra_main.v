@@ -31,7 +31,7 @@ module jtcontra_main(
     output              snd_irq,
     output      [ 7:0]  snd_latch,
     // ROM
-    output      [16:0]  rom_addr,
+    output      [17:0]  rom_addr,
     output              rom_cs,
     input       [ 7:0]  rom_data,
     input               rom_ok,
@@ -92,7 +92,7 @@ generate
                 .snd_irq        ( snd_irq       ),
                 .snd_latch      ( snd_latch     ),
                 // ROM
-                .rom_addr       ( rom_addr      ),
+                .rom_addr       ( rom_addr[16:0]),
                 .rom_cs         ( rom_cs        ),
                 .rom_data       ( rom_data      ),
                 .rom_ok         ( rom_ok        ),
@@ -116,8 +116,9 @@ generate
                 .dipsw_c        ( dipsw_c       )
             );
             // Unused signals:
-            assign prio_latch = 0;
-            assign video_bank = 8'd0;
+            assign rom_addr[17] = 0;
+            assign prio_latch   = 0;
+            assign video_bank   = 8'd0;
         end
         1: begin ////////////// Combat School
             jtcomsc_main_decoder u_decoder(
