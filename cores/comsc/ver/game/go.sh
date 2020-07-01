@@ -30,5 +30,5 @@ fi
 sim.sh -mist -sysname contra  \
     -d JTFRAME_DWNLD_PROM_ONLY \
     -def ../../hdl/jtcomsc.def \
-    -videow 256 -videoh 240 -d VIDEO_START=1 \
+    -videow 280 -videoh 240 -d VIDEO_START=1 \
     $*
