@@ -72,7 +72,7 @@ parameter GAME=0;
 wire [ 8:0] vrender, vrender1, vdump, hdump;
 wire [ 6:0] gfx1_pxl, gfx2_pxl;
 wire [17:0] gfx1_pre, gfx2_pre;
-wire [13:0] gfx_addr;
+wire [13:0] gfx_addr_in;
 wire        gfx1_sel, gfx2_sel;
 
 
@@ -85,13 +85,14 @@ case( GAME )
     jtcontra_007766 u_decod(
         .cpu_addr   ( cpu_addr             ),
         .gfx_cs     ( { gfx2_cs, gfx1_cs } ),
-        .gfx_addr   ( gfx_addr             )
+        .gfx_addr_in( gfx_addr_in          )
     );
     end
     ////////////////////////// Combat School
     1: begin
     assign gfx1_addr[13:0] = gfx1_pre[13:0];
     assign gfx2_addr[13:0] = gfx2_pre[13:0];
+    assign gfx_addr_in     = cpu_addr[13:0];
 
     assign gfx1_addr[17:14] = gfx1_sel ? gfx1_pre[17:14] : (video_bank[7:4] & {4{gfx1_pre[14]}});
     assign gfx2_addr[17:14] = gfx2_sel ? gfx2_pre[17:14] : (video_bank[3:0] & {4{gfx2_pre[14]}});
@@ -159,7 +160,7 @@ jtcontra_gfx u_gfx1(
     // CPU      interface
     .cs         ( gfx1_cs       ),
     .cpu_rnw    ( cpu_rnw       ),
-    .addr       ( gfx_addr      ),
+    .addr       ( gfx_addr_in   ),
     .cpu_dout   ( cpu_dout      ),
     .dout       ( gfx1_dout     ),
     .cpu_irqn   ( cpu_irqn      ),
@@ -198,7 +199,7 @@ jtcontra_gfx u_gfx2(
     // CPU      interface
     .cs         ( gfx2_cs       ),
     .cpu_rnw    ( cpu_rnw       ),
-    .addr       ( gfx_addr      ),
+    .addr       ( gfx_addr_in   ),
     .cpu_dout   ( cpu_dout      ),
     .dout       ( gfx2_dout     ),
     .cpu_irqn   (               ),

@@ -72,7 +72,7 @@ reg  [15:0] mul;
 // a horizontal band around that position
 always @(*) begin
     rom_cs      = A[15] || A[15:14]==2'b01; // 4000-FFFF
-    ram_cs      = A[15:12] == 4'b0001;      // 1000-1FFF - also RAM below it?
+    ram_cs      = A[15:12] == 4'b0001 || A[15:11]==5'b0000_1; // 800-1FFF - also RAM below it?
     // Line order important:
     io_cs       = A[15:9]==7'h2 && !A[5];  // 0400 - 041F
     //wdog_cs     = io_cs && A[4:2]==3'b111; // 041C

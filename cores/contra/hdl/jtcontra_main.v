@@ -63,7 +63,8 @@ module jtcontra_main(
     input      [3:0]    dipsw_c
 );
 
-parameter GAME=0;
+parameter  GAME=0;
+localparam RAM_AW = GAME==0 ? 12 : 13;
 
 wire [ 7:0] ram_dout, cpu_din;
 wire [15:0] A;
@@ -176,7 +177,7 @@ jtframe_ff u_ff(
     .sigedge  ( irq_trigger )     // signal whose edge will trigger the FF
 );
 
-jtframe_sys6809 #(.RAM_AW(12)) u_cpu(
+jtframe_sys6809 #(.RAM_AW(RAM_AW)) u_cpu(
     .rstn       ( ~rst      ), 
     .clk        ( clk       ),
     .cen        ( cen12     ),   // This is normally the input clock to the CPU
