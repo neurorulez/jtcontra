@@ -46,8 +46,8 @@ module jtcontra_main(
     output              cpu_rnw,
     output      [ 7:0]  cpu_dout,
     input               gfx_irqn,
-    input               gfx1_cs,
-    input               gfx2_cs,
+    inout               gfx1_cs,
+    inout               gfx2_cs,
     output              pal_cs,
 
     output     [7:0]    video_bank,

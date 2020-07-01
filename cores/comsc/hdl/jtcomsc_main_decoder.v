@@ -129,7 +129,7 @@ end
 
 always @(posedge clk) begin
     if( rst ) begin
-        video_bank <= 0;
+        video_sel  <= 0;
         prio_latch <= 0;
         bank_en    <= 0;
         bank       <= 4'd0;
@@ -140,7 +140,7 @@ always @(posedge clk) begin
         snd_irq   <= 0;
         if( vbank_cs ) video_bank <= cpu_dout;
         if( bank_cs ) begin
-            video_bank <= cpu_dout[6];
+            video_sel  <= cpu_dout[6];
             prio_latch <= cpu_dout[5];
             bank_en    <= cpu_dout[4];
             bank       <= cpu_dout[3:0];
