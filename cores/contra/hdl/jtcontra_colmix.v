@@ -66,8 +66,8 @@ always @(*) begin
     case( GAME )
         1: begin // Combat School
             gfx_aux  = ~gfx2_blank &  gfx1_pxl[4]; // NCHA1 in schematics
-            gfx_other= ~((~gfx1_blank | ~gfx2_pxl[4]) & ~prio_latch); // output of S21
-            gfx_sel  = ( gfx_other& ~(gfx_aux&prio_latch) );
+            gfx_other= ~((gfx1_blank | ~gfx2_pxl[4]) & ~prio_latch); // output of S21
+            gfx_sel  = ~( gfx_other& ~(gfx_aux&prio_latch) );
             gfx_mux  = { gfx_sel, gfx_sel ? gfx2_pxl[5:0] : gfx1_pxl[5:0]};
         end
         default: begin // Contra

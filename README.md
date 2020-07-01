@@ -41,6 +41,14 @@ JTFRAME       | FPGA framework    | jotego  | https://github.com/jotego/jtframe
 
 # KONAMI 007121
 
+The internal register mapping has R/W access from the CPU. If the row scroll registers are prevented from reading, Combat School boots up with an error on "zure RAM", note that "zure" is Japanese for scroll.
+
+Address    |   Purpose
+-----------|------------
+20-3F      | zure RAM - row scroll
+2000-2FFF  | VRAM
+3000-3FFF  | OBJ RAM
+
 ## Pinout
 
 Pin Name | Number | I/O | Usage

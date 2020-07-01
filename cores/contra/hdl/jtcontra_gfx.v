@@ -76,12 +76,14 @@ wire [7:0]  chr_pxl, scr_pxl, line_din;
 
 ////////// Memory Mapped Registers
 reg  [7:0]  mmr[0:RCNT-1];
-wire [8:0]  hpos = { mmr[1][0], mmr[0] };
+wire [8:0]  hpos;
 wire [7:0]  vpos = mmr[2];
+wire        row_en     = mmr[1][1]; // row scroll enable
 wire        tile_msb   = mmr[3][0];
 wire        scrwin     = 1'b0;
 wire        obj_page   = mmr[3][3]; // select from which page to draw sprites
 wire        layout     = mmr[3][4]; // 1 for wide layout
+wire        narrow_en  = mmr[3][6] | row_en; // 1 for not displaying first and last columns
 wire [3:0]  extra_mask = mmr[4][7:4];
 wire [3:0]  extra_bits = mmr[4][3:0];
 wire [1:0]  code9_sel, code10_sel, code11_sel, code12_sel;
@@ -135,13 +137,16 @@ reg  [ 1:0] last_cs;
 
 assign      cfg_cs  = addr[13:0]<RCNT && cs;
 assign      vram_cs = addr[13] && cs;
+assign      hpos    = row_en ? {1'b0, mmr[ {2'b0, vrender[7:3]}+7'h20 ]} : { mmr[1][0], mmr[0] };
 
 // Data bus mux. It'd be nice to latch this:
 always @(*) begin
-    dout = !addr[13] ? mmr[ addr[6:0] ]     // registers
+    dout = !addr[13] ? 
+        mmr[ addr[6:0] ]     // registers, row_scr cannot be read (?)
         : (addr[12] ? obj_dout :            // objects
           (addr[10] ? code_dout : attr_dout)); // tiles
 end
+
 
 always @(posedge clk, posedge rst) begin
     if( rst ) begin
@@ -249,7 +254,8 @@ wire        obj_blank     = oprom_data[3:0] == 4'h0;
 wire        tile_blank    = vprom_data[3:0] == 4'h0;
 wire        chr_area      = hdump>=chr_dump_start && hdump<chr_dump_end;
 wire        scr_area      = hdump>=scr_dump_start && hdump<scr_dump_end;
-wire        blank_area    = vdump<9'o20;
+wire        border        = hdump<9'o30 || hdump>9'o410;
+wire        blank_area    = vdump<9'o20 || (!layout && narrow_en && border);
 reg         draw_scr;
 wire [11:0] obj_scan_addr;
 

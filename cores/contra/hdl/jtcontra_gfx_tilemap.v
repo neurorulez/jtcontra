@@ -78,10 +78,10 @@ assign      scan_addr = { lyr, vn[7:3], hn[7:3] }; // 1 + 5 + 5 = 11
 
 always @(*) begin
     bank[0] = attr_scan[7];
-    bank[1] = extra_en & extra_mask[0] ? extra_bits[0] : attr_scan[3+code9_sel ];
-    bank[2] = extra_en & extra_mask[1] ? extra_bits[1] : attr_scan[3+code10_sel];
-    bank[3] = extra_en & extra_mask[2] ? extra_bits[2] : attr_scan[3+code11_sel];
-    bank[4] = extra_en & extra_mask[3] ? extra_bits[3] : attr_scan[3+code12_sel];
+    bank[1] = (extra_en & extra_mask[0]) ? extra_bits[0] : attr_scan[3+code9_sel ];
+    bank[2] = (extra_en & extra_mask[1]) ? extra_bits[1] : attr_scan[3+code10_sel];
+    bank[3] = (extra_en & extra_mask[2]) ? extra_bits[2] : attr_scan[3+code11_sel];
+    bank[4] = (extra_en & extra_mask[3]) ? extra_bits[3] : attr_scan[3+code12_sel];
 end
 
 always @(posedge clk) begin

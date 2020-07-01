@@ -85,7 +85,7 @@ case( GAME )
     jtcontra_007766 u_decod(
         .cpu_addr   ( cpu_addr             ),
         .gfx_cs     ( { gfx2_cs, gfx1_cs } ),
-        .gfx_addr_in( gfx_addr_in          )
+        .gfx_addr   ( gfx_addr_in          )
     );
     end
     ////////////////////////// Combat School
@@ -94,8 +94,8 @@ case( GAME )
     assign gfx2_addr[13:0] = gfx2_pre[13:0];
     assign gfx_addr_in     = cpu_addr[13:0];
 
-    assign gfx1_addr[17:14] = gfx1_sel ? gfx1_pre[17:14] : (video_bank[7:4] & {4{gfx1_pre[14]}});
-    assign gfx2_addr[17:14] = gfx2_sel ? gfx2_pre[17:14] : (video_bank[3:0] & {4{gfx2_pre[14]}});
+    assign gfx1_addr[17:14] = gfx1_sel ? gfx1_pre[17:14] : (video_bank[3:0] & {4{gfx1_pre[14]}});
+    assign gfx2_addr[17:14] = gfx2_sel ? gfx2_pre[17:14] : (video_bank[7:4] & {4{gfx2_pre[14]}});
     end
 endcase
 endgenerate

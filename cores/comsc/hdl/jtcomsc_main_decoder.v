@@ -81,8 +81,8 @@ always @(*) begin
     vbank_cs    = io_cs && A[4:2]==3'b011; // 040C
     out_cs      = io_cs && A[4:2]==3'b010; // 0408 - coin counters
     // coin counters will fall here, // 0408
-    track_cs    = io_cs && A[4:2]==3'b001; // 0404
-    in_cs       = io_cs && A[4:2]==3'b000; // 0400
+    //track_cs    = io_cs && A[4:2]==3'b001; // 0404
+    in_cs       = io_cs && A[4:3]==2'b00; // 0400
 
     gfx_cs      = A[15:13] == 3'b001 || A[15:9]==7'h0;
     gfx1_cs     = gfx_cs && !video_sel; // 2000-3FFF
@@ -118,12 +118,12 @@ end
 
 always @(posedge clk) begin
     case( A[2:0] )
-        3'b000: port_in <= {3'b111, start_button, service, coin_input };
-        3'b001: port_in <= {2'b11, joystick1[5:4], joystick1[2], joystick1[3], joystick1[0], joystick1[1]};
-        3'b010: port_in <= {2'b11, joystick2[5:4], joystick2[2], joystick2[3], joystick2[0], joystick2[1]};
-        3'b100: port_in <= dipsw_a;
-        3'b101: port_in <= dipsw_b;
-        3'b110: port_in <= { 4'hf, dipsw_c };
+        3'b000: port_in <= {3'b111, coin_input, start_button[0], joystick1[5:4] };
+        3'b001: port_in <= { dipsw_c, 1'b1, start_button[1], joystick2[5:4] };
+        3'b010: port_in <= dipsw_a;
+        3'b011: port_in <= dipsw_b;
+        3'b100: port_in <= { joystick1[3:0], joystick2[3:0]};
+        default: port_in <= 8'hff;
     endcase
 end
 
