@@ -78,7 +78,7 @@ assign cpu_rnw     = RnW;
 
 generate
     case( GAME )
-        0: begin ////////////// CONTRA
+        0: begin : genblk1 ////////////// CONTRA
             jtcontra_main_decoder u_decoder(
                 .clk            ( clk           ),        // 24 MHz
                 .rst            ( rst           ),
@@ -121,7 +121,7 @@ generate
             assign prio_latch   = 0;
             assign video_bank   = 8'd0;
         end
-        1: begin ////////////// Combat School
+        1: begin : genblk2 ////////////// Combat School
             jtcomsc_main_decoder u_decoder(
                 .clk            ( clk           ),        // 24 MHz
                 .rst            ( rst           ),

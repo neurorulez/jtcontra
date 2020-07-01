@@ -19,6 +19,10 @@
 // Main features of Konami's 007121 hardware
 // Some elements have been factored out one level up (H/S timing...)
 
+//  IRQ triggers once per frame
+// FIRQ triggers once per ?
+//  NMI triggers once per ?
+
 module jtcontra_gfx(
     input                rst,
     input                clk,
@@ -129,7 +133,7 @@ reg  [15:0] rom_scr_data, rom_obj_data;
 reg         ok_wait;
 reg  [ 1:0] last_cs;
 
-assign      cfg_cs  = addr[13:9]==5'd0 && cs;
+assign      cfg_cs  = addr[13:0]<RCNT && cs;
 assign      vram_cs = addr[13] && cs;
 
 // Data bus mux. It'd be nice to latch this:
@@ -196,7 +200,7 @@ always @(posedge clk24) begin
         { mmr[3], mmr[2], mmr[1], mmr[0] } <= 32'd0;
     end else if(cpu_cen) begin
         if(!cpu_rnw && cfg_cs)
-            mmr[ addr[4:0] ] <= cpu_dout;
+            mmr[ addr[6:0] ] <= cpu_dout;
         // Apply layout
         if( layout ) begin
             // total 35*8 = 280 visible pixels: OCTAL!!
