@@ -1,8 +1,16 @@
 set_global_assignment -name QIP_FILE     [file join $::quartus(qip_path) ../../contra/hdl/jtcontra-base.qip ]
 
 set_global_assignment -name VERILOG_FILE [file join $::quartus(qip_path) ../hdl/jtcomsc_main_decoder.v ]
-# set_global_assignment -name VERILOG_FILE [file join $::quartus(qip_path) ../hdl/jtcomsc_sound.v         ]
+set_global_assignment -name VERILOG_FILE [file join $::quartus(qip_path) ../hdl/jtcomsc_sound.v        ]
+
+#Z80
+set_global_assignment -name VERILOG_FILE [file join $::quartus(qip_path) ../../../modules/jtframe/hdl/jtframe_z80wait.v ]
+set_global_assignment -name VERILOG_FILE [file join $::quartus(qip_path) ../../../modules/jtframe/hdl/cpu/jtframe_z80.v ]
 
 # JT12 (YM2203)
-# set_global_assignment -name QIP_FILE [file join $::quartus(qip_path) ../../../modules/jt12/hdl/jt03.qip   ]
+set_global_assignment -name QIP_FILE [file join $::quartus(qip_path) ../../../modules/jt12/hdl/jt03.qip                      ]
+set_global_assignment -name QIP_FILE [file join $::quartus(qip_path) ../../../modules/jtframe/hdl/cpu/t80/T80.qip            ]
+set_global_assignment -name VERILOG_FILE [file join $::quartus(qip_path) ../../../modules/jt12/hdl/mixer/jt12_mixer.v        ]
+set_global_assignment -name VERILOG_FILE [file join $::quartus(qip_path) ../../../modules/jt12/jt49/hdl/filter/jt49_dcrm2.v  ]
+
 

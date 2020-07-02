@@ -95,7 +95,7 @@ wire        pal_msb    = mmr[6][0];
 wire        hflip_en   = mmr[6][1];
 wire        vflip_en   = mmr[6][2];
 wire [1:0]  pal_bank   = mmr[6][5:4];
-wire        extra_en   = 0; // there must be a bit in the MMR that turns off all the extra_bits above
+wire        extra_en   = 1; // there must be a bit in the MMR that turns off all the extra_bits above
                             // because Contra doesn't need them but seems to write to them
 wire        char_en    = 1;
 // wire        char_en    =~mmr[7][4];     // undocumented by MAME
@@ -223,13 +223,13 @@ always @(posedge clk24) begin
                 scr_dump_end   <= 9'o450; // o400 = d256
             end
         end else begin
-            // total 32*8 = 256 visible pixels: OCTAL!!
+            // total 31*8 = 248 visible pixels: OCTAL!!
             chr_render_start <= 9'o020;
             scr_render_start <= 9'o020;
             chr_dump_start <= 9'o020;
-            chr_dump_end   <= 9'o420;
+            chr_dump_end   <= 9'o410;
             scr_dump_start <= 9'o020;
-            scr_dump_end   <= 9'o420;
+            scr_dump_end   <= 9'o410;
         end
     end
 end

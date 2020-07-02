@@ -297,8 +297,8 @@ jtframe_rom #(
     .clk         ( clk           ),
     .vblank      ( ~LVBL         ),
 
-    .slot0_cs    ( gfx1_romcs       ),
-    .slot1_cs    ( gfx2_romcs       ),
+    .slot0_cs    ( gfx1_romcs    ),
+    .slot1_cs    ( gfx2_romcs    ),
     .slot2_cs    ( 1'b0          ), 
     .slot3_cs    ( 1'b0          ), // unused
     .slot4_cs    ( 1'b0          ), // unused

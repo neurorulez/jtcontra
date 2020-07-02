@@ -49,6 +49,17 @@ Address    |   Purpose
 2000-2FFF  | VRAM
 3000-3FFF  | OBJ RAM
 
+## Tilemap
+
+Attribute byte
+
+Bits   | Usage            | Condition
+-------|------------------|------------------
+ 2:0   | Palette          |
+ 3     | Palette MSB      | MMR[6][0] high
+ 6:3   | Bank bits 4:1    | Enabled by MMR[4] and MMR[5]
+ 7     | Bank bit 0       |
+
 ## Pinout
 
 Pin Name | Number | I/O | Usage

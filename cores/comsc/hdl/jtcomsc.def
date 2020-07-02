@@ -16,7 +16,6 @@ JTFRAME_OSD_NOLOAD
 
 # For now...
 NOCREDITS
-NOSOUND
 
 [mist|sidi]
 # OSD credits cannot be used when
