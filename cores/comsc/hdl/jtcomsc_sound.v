@@ -53,7 +53,7 @@ reg                 mem_acc, mem_upper;
 wire signed [ 9:0]  psg2x; // DC-removed version of psg01
 
 assign rom_addr  = A[14:0];
-assign irq_ack   = !m1_n && !iorq_n && cen_fm2;
+assign irq_ack   = !m1_n && !iorq_n;
 assign snd_right = snd_left;
 
 always @(*) begin
@@ -154,7 +154,7 @@ jtframe_frac_cen u_adpcm_cen( // 640Hz
 );
 
 jt03 u_fm(
-    .rst        ( ~rst       ),
+    .rst        ( rst        ),
     // CPU interface
     .clk        ( clk        ),
     .cen        ( cen_fm     ),
