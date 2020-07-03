@@ -57,7 +57,7 @@ assign irq_ack   = !m1_n && !iorq_n && cen_fm2;
 assign snd_right = snd_left;
 
 always @(*) begin
-    mem_acc  = !mreq_n && !rfsh_n;
+    mem_acc  = !mreq_n && rfsh_n;
     rom_cs   = mem_acc && !A[15] && !rd_n;
     // Devices
     mem_upper= mem_acc &&  A[15];
