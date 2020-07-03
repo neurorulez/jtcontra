@@ -46,13 +46,13 @@
             <part name="633e06.16d" crc="9cf6faae" map="01"/>
             <part name="633e07.16f" crc="f2d06638" map="10"/>
         </interleave>
-        <!-- proms - starts at 0x128000 -->
+        <!-- pals - starts at 0x128000 -->
+        <part name="007766.20d.bin" crc=""/>
+        <!-- proms - starts at 0x128001 -->
         <part name="633e08.10g" crc="9f0949fa"/>
         <part name="633e09.12g" crc="14ca5e19"/>
         <part name="633f10.18g" crc="2b244d84"/>
         <part name="633f11.20g" crc="14ca5e19"/>
-        <!-- pals - starts at 0x128400 -->
-        <part name="007766.20d.bin" crc=""/>
         <!-- Total 0x128401 bytes - 1185 kBytes -->
     </rom>
     <!-- Vertical game -->

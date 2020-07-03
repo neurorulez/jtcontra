@@ -46,8 +46,10 @@ reg                 ram_cs, latch_cs, fm_cs, irq_cs;
 wire signed [15:0]  fm_snd;
 wire        [ 9:0]  psg_snd;
 wire                cen_fm, cen_fm2;
+wire                cen_640, cen_320;
 wire                cpu_cen, irq_ack;
 reg                 fm_rstn;
+reg                 mem_acc, mem_upper;
 wire signed [ 9:0]  psg2x; // DC-removed version of psg01
 
 assign rom_addr  = A[14:0];
@@ -55,11 +57,14 @@ assign irq_ack   = !m1_n && !iorq_n && cen_fm2;
 assign snd_right = snd_left;
 
 always @(*) begin
-    rom_cs   = !mreq_n && !A[15] && !rd_n;
-    ram_cs   = !mreq_n &&  A[15] && A[14:12]==3'd0; // 8xxx
-    fm_rstn  = !mreq_n &&  A[15] && A[14:12]==3'd1; // 9xxx
-    latch_cs = !mreq_n &&  A[15] && A[14:12]==3'd5; // Dxxx
-    fm_cs    = !mreq_n &&  A[15] && A[14:12]==3'd6; // Exxx
+    mem_acc  = !mreq_n && !rfsh_n;
+    rom_cs   = mem_acc && !A[15] && !rd_n;
+    // Devices
+    mem_upper= mem_acc &&  A[15];
+    ram_cs   = mem_upper && A[14:12]==3'd0; // 8xxx
+    fm_rstn  = mem_upper && A[14:12]==3'd1; // 9xxx
+    latch_cs = mem_upper && A[14:12]==3'd5; // Dxxx
+    fm_cs    = mem_upper && A[14:12]==3'd6; // Exxx
 end
 
 always @(*) begin
@@ -140,6 +145,14 @@ jtframe_frac_cen u_fmcen( // 3.57MHz
     .cenb       (                     )
 );
 
+jtframe_frac_cen u_adpcm_cen( // 640Hz
+    .clk        (  clk                ), // 24 MHz
+    .n          ( 10'd2               ),
+    .m          ( 10'd75              ),
+    .cen        ( { cen_320, cen_640 }),
+    .cenb       (                     )
+);
+
 jt03 u_fm(
     .rst        ( ~rst       ),
     // CPU interface
@@ -152,13 +165,13 @@ jt03 u_fm(
     .psg_snd    ( psg_snd    ),
     .fm_snd     ( fm_snd     ),
     .snd_sample ( sample     ),
-    // unused outputs
     .dout       ( fm_dout    ),
+    // unused outputs
     .irq_n      (            ),
-    .psg_A      (),
-    .psg_B      (),
-    .psg_C      (),
-    .snd        ()
+    .psg_A      (            ),
+    .psg_B      (            ),
+    .psg_C      (            ),
+    .snd        (            )
 );
 
 `ifdef SIMULATION

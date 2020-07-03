@@ -82,7 +82,7 @@ localparam CONTRA=0;
 localparam SND_OFFSET  = (GAME==CONTRA ? 22'h2_0000 : 22'h3_0000) >> 1;
 localparam GFX1_OFFSET =  GAME==CONTRA ? (SND_OFFSET  + (22'h0_8000 >> 1)) : 22'h04_0000>>1;
 localparam GFX2_OFFSET =  GAME==CONTRA ? (GFX1_OFFSET + (22'h8_0000 >> 1)) : 22'h14_0000>>1;
-localparam PROM_START  =  GAME==CONTRA ? 25'h128_000 : 25'h24_0000;
+localparam PROM_START  =  GAME==CONTRA ? 25'h128_000 : 25'h2C_0000;
 
 wire        main_cs, snd_cs, snd_ok, main_ok, gfx1_ok, gfx2_ok;
 wire        snd_irq;

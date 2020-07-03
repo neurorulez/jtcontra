@@ -11,11 +11,10 @@ mame2dip comsc.xml -rbf jtcomsc \
     -frac gfx1 2 \
     -frac gfx2 2 \
     -ignore plds \
-    -ignore upd \
     -start audiocpu 0x30000 \
     -start gfx1     0x40000 \
     -start gfx2     0x140000 \
-    -start proms    0x240000 \
+    -start proms    0x2C0000 \
     -swapbytes audiocpu \
     -swapbytes maincpu  \
     -dipbase 8
@@ -33,7 +32,7 @@ mame2dip hcastle.xml -rbf jtcastle \
     -start audiocpu 0x30000 \
     -start gfx1     0x40000 \
     -start gfx2     0x140000 \
-    -start proms    0x240000 \
+    -start proms    0x2C0000 \
     -swapbytes maincpu
 
 mame2dip mx5000.xml -rbf jtmx5000 \
@@ -47,3 +46,6 @@ mame2dip mx5000.xml -rbf jtmx5000 \
     -start gfx2     0x140000 \
     -start proms    0x240000 \
     -swapbytes maincpu
+
+# Delete Unknown DIP switches
+sed -i /Unknown/d 'Combat School (joystick).mra'
