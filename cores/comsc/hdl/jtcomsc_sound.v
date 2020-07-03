@@ -41,7 +41,7 @@ module jtcontra_sound(
 wire        [ 7:0]  cpu_dout, ram_dout, fm_dout;
 wire        [15:0]  A;
 reg         [ 7:0]  cpu_din;
-wire                m1_n, mreq_n, rd_n, wr_n, int_n;
+wire                m1_n, mreq_n, rd_n, wr_n, int_n, iorq_n, rfsh_n, busrq_n;
 reg                 ram_cs, latch_cs, fm_cs, irq_cs;
 wire signed [15:0]  fm_snd;
 wire        [ 9:0]  psg_snd;
@@ -79,7 +79,7 @@ end
 
 jt49_dcrm2 #(.sw(10)) u_dcrm (
     .clk    (  clk      ),
-    .cen    (  cenfm    ),
+    .cen    (  cen_fm   ),
     .rst    (  rst      ),
     .din    (  psg_snd  ),
     .dout   (  psg2x    )
@@ -87,7 +87,7 @@ jt49_dcrm2 #(.sw(10)) u_dcrm (
 
 jt12_mixer #(.w0(16),.w1(16),.w2(14),.w3(8),.wout(16)) u_mixer(
     .clk    ( clk          ),
-    .cen    ( cenfm        ),
+    .cen    ( cen_fm       ),
     .ch0    ( fm_snd       ),
     .ch1    ( 16'd0        ),
     .ch2    ( {psg2x, 4'b0}),
