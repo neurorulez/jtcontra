@@ -23,6 +23,8 @@ module jtcontra_sound(
     input           clk,        // 24 MHz
     input           rst,
     input           cen12,
+    input           cen3,
+    input           cen1p5,
     // communication with main CPU
     input           snd_irq,
     input   [ 7:0]  snd_latch,
@@ -55,6 +57,8 @@ wire signed [ 9:0]  psg2x; // DC-removed version of psg01
 assign rom_addr  = A[14:0];
 assign irq_ack   = !m1_n && !iorq_n;
 assign snd_right = snd_left;
+assign cen_fm    = cen3;
+assign cen_fm2   = cen1p5;
 
 always @(*) begin
     mem_acc  = !mreq_n && rfsh_n;
@@ -137,14 +141,6 @@ jtframe_sysz80 #(.RAM_AW(11)) u_cpu(
     .ram_cs     ( ram_cs    ),
     .rom_cs     ( rom_cs    ),
     .rom_ok     ( rom_ok    )
-);
-
-jtframe_frac_cen u_fmcen( // 3.57MHz
-    .clk        (  clk                ), // 24 MHz
-    .n          ( 10'd105             ),
-    .m          ( 10'd704             ),
-    .cen        ( { cen_fm2, cen_fm } ),
-    .cenb       (                     )
 );
 
 jtframe_frac_cen u_adpcm_cen( // 640Hz

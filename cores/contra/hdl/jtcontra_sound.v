@@ -26,6 +26,8 @@ module jtcontra_sound(
     input           clk,        // 24 MHz
     input           rst,
     input           cen12,
+    input           cen3,
+    input           cen1p5,
     // communication with main CPU
     input           snd_irq,
     input   [ 7:0]  snd_latch,

@@ -92,7 +92,7 @@ wire [17:0] gfx1_addr, gfx2_addr;
 wire [ 7:0] main_data, snd_data, snd_latch;
 wire [14:0] snd_addr;
 wire [17:0] main_addr;
-wire        cen12, prom_we;
+wire        cen12, cen3, cen1p5, prom_we;
 wire        gfx1_cs, gfx2_cs;
 
 wire [ 7:0] dipsw_a, dipsw_b;
@@ -117,9 +117,9 @@ jtframe_cen24 u_cen(
     .cen12      ( cen12         ),
     .cen6       (               ),
     .cen4       (               ),
-    .cen3       (               ),
+    .cen3       ( cen3          ),
     .cen3q      (               ), // 1/4 advanced with respect to cen3
-    .cen1p5     (               ),
+    .cen1p5     ( cen1p5        ),
     // 180 shifted signals
     .cen12b     (               ),
     .cen6b      (               ),
@@ -258,6 +258,8 @@ jtcontra_sound u_sound(
     .clk        ( clk24         ), // 24 MHz
     .rst        ( rst           ),
     .cen12      ( cen12         ),
+    .cen3       ( cen3          ),
+    .cen1p5     ( cen1p5        ),
     // communication with main CPU
     .snd_irq    ( snd_irq       ),
     .snd_latch  ( snd_latch     ),
