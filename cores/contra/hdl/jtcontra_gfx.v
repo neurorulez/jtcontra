@@ -135,7 +135,7 @@ reg  [15:0] rom_scr_data, rom_obj_data;
 reg         ok_wait;
 reg  [ 1:0] last_cs;
 
-assign      cfg_cs  = addr[13:0]<RCNT && cs;
+assign      cfg_cs  = (addr < RCNT) && cs;
 assign      vram_cs = addr[13] && cs;
 assign      hpos    = row_en ? {1'b0, mmr[ {2'b0, vrender[7:3]}+7'h20 ]} : { mmr[1][0], mmr[0] };
 

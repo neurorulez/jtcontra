@@ -36,10 +36,10 @@ module jtcontra_simloader(
 reg [7:0] gfx_snap[0:16383];
 reg [7:0] pal_snap[0:255  ];
 reg [7:0] gfx_cfg [0:127  ];
+reg [7:0] other   [0:1    ];
 
-`include "scene/video_bank.v"
-assign video_bank = `VIDEOBANK;
-assign prio_latch = `PRIOLATCH;
+assign video_bank = other[0];
+assign prio_latch = ~other[1][0];
 
 assign cpu_cen = 1;
 
@@ -67,6 +67,8 @@ initial begin
     file=$fopen("scene/gfx_cfg2.bin","rb");
     cnt=$fread(gfx_cfg,file,64,64);
     $fclose(file);
+
+    $readmemh("scene/other.hex",other);
 end
 
 wire gfx_low = dump_cnt < 8*1024-1;

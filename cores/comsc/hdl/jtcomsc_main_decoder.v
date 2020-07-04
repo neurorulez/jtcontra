@@ -55,8 +55,8 @@ module jtcomsc_main_decoder(
     input      [3:0]    dipsw_c
 );
 
-reg         bank_cs, vbank_cs, in_cs, out_cs, gfx_cs, io_cs, snd_cs,
-            track_cs, dmp_cs;
+reg         bank_cs,  vbank_cs, in_cs,    out_cs, gfx_cs, io_cs,
+            sdata_cs, son_cs,   track_cs, dmp_cs;
 reg  [ 3:0] bank;
 reg  [ 7:0] port_in;
 reg         bank_en; // called PBCANG in schematics
@@ -75,8 +75,9 @@ always @(*) begin
     ram_cs      = A[15:12] == 4'b0001 || A[15:11]==5'b0000_1; // 800-1FFF - also RAM below it?
     // Line order important:
     io_cs       = A[15:9]==7'h2 && !A[5];  // 0400 - 041F
-    //wdog_cs     = io_cs && A[4:2]==3'b111; // 041C
-    snd_cs      = io_cs && (A[4:2]==3'b110 || A[4:2]==3'b101); // 0414 - 0418
+    //wdog_cs   = io_cs && A[4:2]==3'b111; // 041C
+    sdata_cs    = io_cs && A[4:2]==3'b101; // 0414
+    son_cs      = io_cs && A[4:2]==3'b110; // 0418
     bank_cs     = io_cs && A[4:2]==3'b100; // 0410
     vbank_cs    = io_cs && A[4:2]==3'b011; // 040C
     out_cs      = io_cs && A[4:2]==3'b010; // 0408 - coin counters
@@ -137,20 +138,15 @@ always @(posedge clk) begin
         snd_latch  <= 8'd0;
         video_bank <= 8'd0;
     end else if(cpu_cen) begin
-        snd_irq   <= 0;
-        if( !RnW ) begin
-            if( vbank_cs ) video_bank <= cpu_dout;
-            if( bank_cs ) begin
-                video_sel  <= cpu_dout[6];
-                prio_latch <= cpu_dout[5];
-                bank_en    <= cpu_dout[4];
-                bank       <= cpu_dout[3:0];
-            end
-            if( snd_cs  ) begin
-                snd_irq    <= A[3];
-                if(A[2]) snd_latch <= cpu_dout;
-            end
+        snd_irq <= son_cs;
+        if( vbank_cs ) video_bank <= cpu_dout;
+        if( bank_cs ) begin
+            video_sel  <= cpu_dout[6];
+            prio_latch <= cpu_dout[5];
+            bank_en    <= cpu_dout[4];
+            bank       <= cpu_dout[3:0];
         end
+        if(sdata_cs) snd_latch <= cpu_dout;
     end
 end
 

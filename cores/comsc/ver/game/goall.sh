@@ -1,7 +1,7 @@
 #!/bin/bash
 
+rm -f scene
 for i in scene*; do
     s=${i#scene}
     govideo.sh -s $s
-    mv video-0.jpg $s.jpg
 done
