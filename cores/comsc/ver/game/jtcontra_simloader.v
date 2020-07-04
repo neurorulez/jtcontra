@@ -101,7 +101,7 @@ always @(posedge clk) begin
             gfx2_cs      <= 0;
         end else begin
             pal_cs         <= 0;
-            cpu_addr[15:7] <= 'd0;
+            cpu_addr[15:6] <= 'd0;
             if( cfg_cnt < 128 ) begin
                 gfx1_cs       <= ~cfg_cnt[6];
                 gfx2_cs       <=  cfg_cnt[6];

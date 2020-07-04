@@ -1,6 +1,7 @@
 #!/bin/bash
 
 OTHER=
+SCENE=1
 
 while [ $# -gt 0 ]; do
     case $1 in
@@ -10,11 +11,15 @@ while [ $# -gt 0 ]; do
                 echo "Cannot find scene #" $1
                 exit 1
             fi
-            ln -s scene${1} scene
+            SCENE=$1
             ;;
         *) OTHER="$OTHER $1";;
     esac
     shift
 done
 
-go.sh -d GFX_ONLY -d NOSOUND -video 2 -deep -d VIDEO_START=1 $OTHER
+rm -f scene
+ln -s scene${SCENE} scene
+go.sh -d GFX_ONLY -d NOSOUND -video 2 -deep $OTHER || exit $?
+mv video-0.jpg $SCENE.jpg
+rm video-1.jpg

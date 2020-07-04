@@ -15,6 +15,9 @@ jtcontra_simloader.v
 ../../../contra/hdl/jtcontra_colmix.v
 ../../../contra/hdl/jtcontra_007766.v
 
+# This file is parsed by some simulators even if not needed
+../../../contra/hdl/jtcontra_main_decoder.v
+
 ../../../../modules/jtframe/hdl/video/jtframe_vtimer.v
 ../../../../modules/jtframe/hdl/video/jtframe_blank.v
 ../../../../modules/jtframe/hdl/jtframe_sh.v

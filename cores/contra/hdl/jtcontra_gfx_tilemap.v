@@ -84,6 +84,7 @@ always @(*) begin
     bank[4] = (extra_en & extra_mask[3]) ? extra_bits[3] : attr_scan[3+code12_sel];
 end
 
+//initial bank=5'h2;
 always @(posedge clk) begin
     if( rst ) begin
         done    <= 1;

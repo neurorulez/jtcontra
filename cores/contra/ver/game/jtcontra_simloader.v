@@ -24,7 +24,11 @@ module jtcontra_simloader(
     output reg  [15:0]  cpu_addr,
     output reg          cpu_rnw,
     output reg  [ 7:0]  cpu_dout,
-    output reg          pal_cs
+    output reg          pal_cs,
+    input               gfx1_cs,
+    input               gfx2_cs,
+    output      [ 7:0]  video_bank,
+    output              prio_latch
 );
 
 reg [7:0] gfx_snap[0:16383];
@@ -34,6 +38,10 @@ reg [7:0] gfx_cfg[0:15];
 assign cpu_cen = 1;
 
 integer file, cnt, dump_cnt, pal_cnt, cfg_cnt;
+
+// These values are not used in Contra
+assign video_bank = 8'h0;
+assign prio_latch = 0;
 
 initial begin
     file=$fopen("gfx1.bin","rb");
