@@ -42,7 +42,7 @@ wire        [ 7:0]  cpu_dout, ram_dout, fm_dout;
 wire        [15:0]  A;
 reg         [ 7:0]  cpu_din;
 wire                m1_n, mreq_n, rd_n, wr_n, int_n, iorq_n, rfsh_n, busrq_n;
-reg                 ram_cs, latch_cs, fm_cs, irq_cs;
+reg                 ram_cs, latch_cs, fm_cs, irq_cs, pcm_busy_cs;
 wire signed [15:0]  fm_snd;
 wire        [ 9:0]  psg_snd;
 wire                cen_fm, cen_fm2;
