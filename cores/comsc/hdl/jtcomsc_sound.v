@@ -60,20 +60,22 @@ always @(*) begin
     mem_acc  = !mreq_n && rfsh_n;
     rom_cs   = mem_acc && !A[15] && !rd_n;
     // Devices
-    mem_upper= mem_acc &&  A[15];
-    ram_cs   = mem_upper && A[14:12]==3'd0; // 8xxx
-    fm_rstn  = mem_upper && A[14:12]==3'd1; // 9xxx
-    latch_cs = mem_upper && A[14:12]==3'd5; // Dxxx
-    fm_cs    = mem_upper && A[14:12]==3'd6; // Exxx
+    mem_upper   = mem_acc &&  A[15];
+    ram_cs      = mem_upper && A[14:12]==3'd0; // 8xxx
+    fm_rstn     = mem_upper && A[14:12]==3'd1; // 9xxx
+    pcm_busy_cs = mem_upper && A[14:12]==3'd3; // Bxxx
+    latch_cs    = mem_upper && A[14:12]==3'd5; // Dxxx
+    fm_cs       = mem_upper && A[14:12]==3'd6; // Exxx
 end
 
 always @(*) begin
     case(1'b1)
-        rom_cs:   cpu_din = rom_data;
-        ram_cs:   cpu_din = ram_dout;
-        latch_cs: cpu_din = snd_latch;
-        fm_cs:    cpu_din = fm_dout;
-        default:  cpu_din = 8'hff;
+        rom_cs:      cpu_din = rom_data;
+        ram_cs:      cpu_din = ram_dout;
+        latch_cs:    cpu_din = snd_latch;
+        fm_cs:       cpu_din = fm_dout;
+        pcm_busy_cs: cpu_din = 1'b0;        // To do:  add propper PCM
+        default:     cpu_din = 8'hff;
     endcase
 end
 
