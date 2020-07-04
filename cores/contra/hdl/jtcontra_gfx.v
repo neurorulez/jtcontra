@@ -72,7 +72,7 @@ wire        vram_cs, cfg_cs;
 
 wire        line;
 wire [9:0]  line_addr;
-wire [7:0]  chr_pxl, scr_pxl, line_din;
+wire [8:0]  chr_pxl, scr_pxl, line_din;
 
 ////////// Memory Mapped Registers
 reg  [7:0]  mmr[0:RCNT-1];
@@ -80,7 +80,6 @@ wire [8:0]  hpos;
 wire [7:0]  vpos = mmr[2];
 wire        row_en     = mmr[1][1]; // row scroll enable
 wire        tile_msb   = mmr[3][0];
-wire        scrwin     = 1'b0;
 wire        obj_page   = mmr[3][3]; // select from which page to draw sprites
 wire        layout     = mmr[3][4]; // 1 for wide layout
 wire        narrow_en  = mmr[3][6] | row_en; // 1 for not displaying first and last columns
@@ -94,6 +93,7 @@ assign      flip       = mmr[7][3];
 wire        pal_msb    = mmr[6][0];
 wire        hflip_en   = mmr[6][1];
 wire        vflip_en   = mmr[6][2];
+wire        scrwin_en  = mmr[6][3];
 wire [1:0]  pal_bank   = mmr[6][5:4];
 wire        extra_en   = 1; // there must be a bit in the MMR that turns off all the extra_bits above
                             // because Contra doesn't need them but seems to write to them
@@ -247,17 +247,19 @@ always @(posedge clk) begin
 end
 
 // Local colour mixer
-wire [ 7:0] scr_pxl_gated = scr_pxl;
-wire [ 7:0] chr_pxl_gated = chr_pxl;
+wire [ 7:0] scr_pxl_gated = scr_pxl[7:0];
+wire [ 7:0] chr_pxl_gated = chr_pxl[7:0];
 wire        chr_blank     = chr_pxl_gated[3:0] == 4'h0;
 wire        obj_blank     = oprom_data[3:0] == 4'h0;
 wire        tile_blank    = vprom_data[3:0] == 4'h0;
 wire        chr_area      = hdump>=chr_dump_start && hdump<chr_dump_end;
 wire        scr_area      = hdump>=scr_dump_start && hdump<scr_dump_end;
 wire        border        = hdump<9'o30 || hdump>9'o410;
-wire        blank_area    = vdump<9'o20 || (!layout && narrow_en && border);
+wire        blank_area    = vdump<9'o20 || (!layout /*&& narrow_en*/ && border);
 reg         draw_scr;
 wire [11:0] obj_scan_addr;
+wire        scrwin        = scr_pxl[8];
+wire        tile_prio     = scrwin_en && scrwin;
 
 always @(*) begin
     draw_scr <= ( chr_area && !scr_area) ? 1'b0 : (
@@ -276,7 +278,7 @@ always @(posedge clk) begin
                 pxl_out <= 7'd0;
             else begin
                 pxl_out[6:5] <= pal_bank;
-                if( obj_blank || (layout && chr_area) || (scrwin && !tile_blank))
+                if( obj_blank || (layout && chr_area) || (tile_prio && !tile_blank))
                     pxl_out[4:0] <= { 1'b1, vprom_data }; // Tilemap
                 else
                     pxl_out[4:0] <= { 1'b0, oprom_data }; // Object
@@ -295,6 +297,7 @@ jtcontra_gfx_tilemap u_tilemap(
     .vpos               ( vpos              ),
     .vrender            ( vrender           ),
     .flip               ( flip              ),
+    .scrwin_en          ( scrwin_en         ),
     .lyr                ( lyr               ),
     .line               ( line              ),
     .line_addr          ( line_addr         ),
@@ -373,7 +376,7 @@ jtframe_prom #(.dw(4),.aw(8) ) u_oprom(
 // Line buffers could work with only AW=9 but it would
 // make logic a bit more complex without any benefit in
 // the FPGA, as the minimum size BRAM available is normally AW=10
-jtframe_dual_ram #(.aw(10)) u_line_char(
+jtframe_dual_ram #(.dw(9),.aw(10)) u_line_char(
     .clk0   ( clk       ),
     .clk1   ( clk       ),
     // Port 0
@@ -388,7 +391,7 @@ jtframe_dual_ram #(.aw(10)) u_line_char(
     .q1     ( chr_pxl   )
 );
 
-jtframe_dual_ram #(.aw(10)) u_line_scr(
+jtframe_dual_ram #(.dw(9),.aw(10)) u_line_scr(
     .clk0   ( clk       ),
     .clk1   ( clk       ),
     // Port 0

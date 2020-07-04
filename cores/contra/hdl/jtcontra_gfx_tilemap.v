@@ -28,12 +28,13 @@ module jtcontra_gfx_tilemap(
     input       [ 7:0]   vpos,
     input       [ 8:0]   vrender,
     input                flip,
+    input                scrwin_en,
     output reg           lyr,
     output reg           line,
     output reg           done,
     output               chr_we,
     output               scr_we,
-    output reg  [ 7:0]   line_din,
+    output reg  [ 8:0]   line_din,
     output      [ 9:0]   line_addr,
     output      [10:0]   scan_addr,
     // SDRAM
@@ -62,6 +63,7 @@ reg  [ 3:0] pal;
 reg         line_we;
 reg  [ 2:0] st;
 reg         last_LHBL;
+reg         scrwin;
 reg  [ 8:0] hn, vn;
 reg  [ 4:0] bank;
 reg  [ 7:0] dump_cnt;
@@ -94,6 +96,7 @@ always @(posedge clk) begin
         line_we <= 0;
         st      <= 3'd0;
         line    <= 0;
+        scrwin  <= 0;
     end else begin
         last_LHBL <= LHBL;
         if( LHBL && !last_LHBL && LVBL) begin
@@ -114,6 +117,7 @@ always @(posedge clk) begin
                 2: begin
                     code   <= { bank, code_scan };
                     pal    <= { pal_msb & attr_scan[3], attr_scan[2:0] };
+                    scrwin <= attr_scan[6] && scrwin_en;
                     rom_cs <= 1;
                 end
                 4: begin
@@ -128,7 +132,7 @@ always @(posedge clk) begin
                     dump_cnt <= dump_cnt>>1;
                     pxl_data <= pxl_data << 4;
                     hrender  <= hrender + 9'd1;
-                    line_din <= { pal, pxl_data[15:12] };
+                    line_din <= { scrwin, pal, pxl_data[15:12] };
                     line_we  <= 1;
                 end
                 6: begin
