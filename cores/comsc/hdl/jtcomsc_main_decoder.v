@@ -98,7 +98,7 @@ always @(*) begin   // latching this seems to prevent system bootup
         pal_cs:    cpu_din = pal_dout;
         in_cs:     cpu_din = port_in;
         // track_cs:
-        dmp_cs:    cpu_din = mul;
+        dmp_cs:    cpu_din = !A[0] ? mul[7:0] : mul[15:8];
         gfx1_cs:   cpu_din = gfx1_dout;
         gfx2_cs:   cpu_din = gfx2_dout;
         default:   cpu_din = 8'hff;
@@ -138,16 +138,18 @@ always @(posedge clk) begin
         video_bank <= 8'd0;
     end else if(cpu_cen) begin
         snd_irq   <= 0;
-        if( vbank_cs ) video_bank <= cpu_dout;
-        if( bank_cs ) begin
-            video_sel  <= cpu_dout[6];
-            prio_latch <= cpu_dout[5];
-            bank_en    <= cpu_dout[4];
-            bank       <= cpu_dout[3:0];
-        end
-        if( snd_cs  ) begin
-            snd_irq    <= A[3];
-            if(A[2]) snd_latch <= cpu_dout;
+        if( !RnW ) begin
+            if( vbank_cs ) video_bank <= cpu_dout;
+            if( bank_cs ) begin
+                video_sel  <= cpu_dout[6];
+                prio_latch <= cpu_dout[5];
+                bank_en    <= cpu_dout[4];
+                bank       <= cpu_dout[3:0];
+            end
+            if( snd_cs  ) begin
+                snd_irq    <= A[3];
+                if(A[2]) snd_latch <= cpu_dout;
+            end
         end
     end
 end
@@ -160,7 +162,7 @@ always @(posedge clk) begin
     end else begin
         // There goes one DSP cell:
         mul <= mul_factor[0] * mul_factor[1];
-        if( dmp_cs && A[2:1]==2'b0 ) begin
+        if( dmp_cs && A[2:1]==2'b0 && !RnW) begin
             if( !A[0] ) mul_factor[0]<=cpu_dout;
             if(  A[0] ) mul_factor[1]<=cpu_dout;
         end
