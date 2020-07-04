@@ -152,7 +152,11 @@ jtcontra_simloader u_simloader(
     .cpu_addr   ( cpu_addr      ),
     .cpu_dout   ( cpu_dout      ),
     .cpu_rnw    ( cpu_rnw       ),
-    .pal_cs     ( pal_cs        )
+    .gfx1_cs    ( gfx1_cs       ),
+    .gfx2_cs    ( gfx2_cs       ),    
+    .pal_cs     ( pal_cs        ),
+    .video_bank ( video_bank    ),
+    .prio_latch ( prio_latch    )
 );
 `else
 `ifndef NOMAIN

@@ -10,7 +10,8 @@ while [ $# -gt 0 ]; do
                 echo "Cannot find scene #" $1
                 exit 1
             fi
-            cp scene${1}/* .;;
+            ln -s scene${1} scene
+            ;;
         *) OTHER="$OTHER $1";;
     esac
     shift
