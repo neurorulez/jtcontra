@@ -43,7 +43,7 @@ module jtcontra_sound(
 wire        [ 7:0]  cpu_dout, ram_dout, fm_dout;
 wire        [15:0]  A;
 reg         [ 7:0]  cpu_din;
-wire                m1_n, mreq_n, rd_n, wr_n, int_n, iorq_n, rfsh_n, busrq_n;
+wire                m1_n, mreq_n, rd_n, wr_n, int_n, iorq_n, rfsh_n;
 reg                 ram_cs, latch_cs, fm_cs, irq_cs, pcm_busy_cs;
 wire signed [15:0]  fm_snd;
 wire        [ 9:0]  psg_snd;
@@ -124,7 +124,7 @@ jtframe_sysz80 #(.RAM_AW(11)) u_cpu(
     .cpu_cen    ( cpu_cen   ),
     .int_n      ( int_n     ),
     .nmi_n      ( 1'b1      ),
-    .busrq_n    ( busrq_n   ),
+    .busrq_n    ( 1'b1      ),
     .m1_n       ( m1_n      ),
     .mreq_n     ( mreq_n    ),
     .iorq_n     ( iorq_n    ),
