@@ -17,6 +17,7 @@ mame2dip comsc.xml -rbf jtcomsc \
     -start proms    0x2C0000 \
     -swapbytes audiocpu \
     -swapbytes maincpu  \
+    -swapbytes upd  \
     -dipbase 8
 #    -start subcpu   0x28000 \
 #    -start audiocpu 0x30000 \
