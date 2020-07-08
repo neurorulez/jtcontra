@@ -36,7 +36,11 @@ module jtcontra_sound(
     output  reg     rom_cs,
     input   [ 7:0]  rom_data,
     input           rom_ok,
-
+    // ADPCM ROM - not used
+    output  [16:0]  pcm_addr,
+    output          pcm_cs,
+    input   [ 7:0]  pcm_data,
+    input           pcm_ok,
     // Sound output
     output signed [15:0] snd_left,
     output signed [15:0] snd_right,
@@ -52,6 +56,9 @@ reg         ram_cs, latch_cs, fm_cs, irq_cs;
 wire signed [15:0] xleft, xright;
 
 assign rom_addr  = A[14:0];
+
+assign pcm_addr = 17'd0;
+assign pcm_cs   = 0;
 
 // Sound has +6dB gain which seems needed at least for Contra
 // May produce distortion. Look here in case of trouble:

@@ -82,11 +82,15 @@ localparam CONTRA=0;
 localparam SND_OFFSET  = (GAME==CONTRA ? 22'h2_0000 : 22'h3_0000) >> 1;
 localparam GFX1_OFFSET =  GAME==CONTRA ? (SND_OFFSET  + (22'h0_8000 >> 1)) : 22'h04_0000>>1;
 localparam GFX2_OFFSET =  GAME==CONTRA ? (GFX1_OFFSET + (22'h8_0000 >> 1)) : 22'h14_0000>>1;
+localparam PCM_OFFSET  =  22'h1C0000>>1;
 localparam PROM_START  =  GAME==CONTRA ? 25'h128_000 : 25'h2C_0000;
 
 wire        main_cs, snd_cs, snd_ok, main_ok, gfx1_ok, gfx2_ok;
+wire        pcm_cs,  pcm_ok;
 wire        snd_irq;
 wire [15:0] gfx1_data, gfx2_data;
+wire [ 7:0] pcm_data;
+wire [16:0] pcm_addr;
 wire [17:0] gfx1_addr, gfx2_addr;
 
 wire [ 7:0] main_data, snd_data, snd_latch;
@@ -268,7 +272,11 @@ jtcontra_sound u_sound(
     .rom_cs     ( snd_cs        ),
     .rom_data   ( snd_data      ),
     .rom_ok     ( snd_ok        ),
-
+    // ADPCM ROM
+    .pcm_addr   ( pcm_addr      ),
+    .pcm_cs     ( pcm_cs        ),
+    .pcm_data   ( pcm_data      ),
+    .pcm_ok     ( pcm_ok        ),
     // Sound output
     .snd_left   ( snd_left      ),
     .snd_right  ( snd_right     ),
@@ -291,6 +299,10 @@ jtframe_rom #(
     .SLOT1_DW    ( 16              ),
     .SLOT1_OFFSET( GFX2_OFFSET     ),
 
+    .SLOT2_AW    ( 17              ), // ADPCM
+    .SLOT2_DW    (  8              ),
+    .SLOT2_OFFSET( PCM_OFFSET      ),
+
     .SLOT6_AW    ( 15              ), // Sound
     .SLOT6_DW    (  8              ),
     .SLOT6_OFFSET( SND_OFFSET      ),
@@ -305,7 +317,7 @@ jtframe_rom #(
 
     .slot0_cs    ( gfx1_romcs    ),
     .slot1_cs    ( gfx2_romcs    ),
-    .slot2_cs    ( 1'b0          ), 
+    .slot2_cs    ( pcm_cs        ), 
     .slot3_cs    ( 1'b0          ), // unused
     .slot4_cs    ( 1'b0          ), // unused
     .slot5_cs    ( 1'b0          ), // unused
@@ -315,7 +327,7 @@ jtframe_rom #(
 
     .slot0_ok    ( gfx1_ok       ),
     .slot1_ok    ( gfx2_ok       ),
-    .slot2_ok    (               ),
+    .slot2_ok    ( pcm_ok        ),
     .slot3_ok    (               ),
     .slot4_ok    (               ),
     .slot5_ok    (               ),
@@ -325,7 +337,7 @@ jtframe_rom #(
 
     .slot0_addr  ( gfx1_addr     ),
     .slot1_addr  ( gfx2_addr     ),
-    .slot2_addr  (               ),
+    .slot2_addr  ( pcm_addr      ),
     .slot3_addr  (               ),
     .slot4_addr  (               ),
     .slot5_addr  (               ),
@@ -335,7 +347,7 @@ jtframe_rom #(
 
     .slot0_dout  ( gfx1_data     ),
     .slot1_dout  ( gfx2_data     ),
-    .slot2_dout  (               ),
+    .slot2_dout  ( pcm_data      ),
     .slot3_dout  (               ),
     .slot4_dout  (               ),
     .slot5_dout  (               ),
