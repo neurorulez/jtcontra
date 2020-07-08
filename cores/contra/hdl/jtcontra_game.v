@@ -204,9 +204,19 @@ jtcontra_main #(.GAME(GAME)) u_main(
     .dipsw_b        ( dipsw_b       ),
     .dipsw_c        ( dipsw_c       )
 );
+`else
+// load a sound code for simulation
+assign snd_latch = 8'h22;
+reg pre_irq=0;
+initial begin
+    #100_000_000 pre_irq=1;
+end
+
+assign snd_irq = pre_irq;
 `endif
 `endif
 
+`ifndef NOVIDEO
 jtcontra_video #(.GAME(GAME)) u_video (
     .rst            ( rst           ),
     .clk            ( clk           ),
@@ -256,6 +266,7 @@ jtcontra_video #(.GAME(GAME)) u_video (
     // Test
     .gfx_en         ( gfx_en        )
 );
+`endif
 
 `ifndef NOSOUND
 jtcontra_sound u_sound(

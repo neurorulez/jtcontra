@@ -196,7 +196,7 @@ jt03 u_fm(
     .snd        (            )
 );
 
-jt7759 UUT(
+jt7759 u_pcm(
     .rst        ( comb_rst  ),
     .clk        ( clk       ),
     .cen        ( cen_640   ),  // 640kHz

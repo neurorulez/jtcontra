@@ -19,6 +19,7 @@ fi
 export MEM_CHECK_TIME=210_000_000
 export CONVERT_OPTIONS="-resize 300%x300%"
 export YM2203=1
+export UDP7759=1
 export M6809=1
 
 if [ ! -e $GAME_ROM_PATH ]; then
