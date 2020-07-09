@@ -115,18 +115,18 @@ jt49_dcrm2 #(.sw(10)) u_dcrm (
     .dout   (  psg2x    )
 );
 
-jt12_mixer #(.w0(16),.w1(14),.w2(14),.w3(8),.wout(16)) u_mixer(
-    .clk    ( clk             ),
-    .cen    ( cen_fm          ),
-    .ch0    ( fm_snd          ),
-    .ch1    ( {pcm_snd,5'd0}  ),
-    .ch2    ( {psg2x,  4'b0}  ),
-    .ch3    ( 8'd0            ),
-    .gain0  ( 8'h40           ),
-    .gain1  ( 8'h40           ),
-    .gain2  ( 8'h40           ),
-    .gain3  ( 8'd0            ),
-    .mixed  ( snd_left        )
+jtframe_mixer #(.W0(16),.W1(9),.W2(10)) u_mixer(
+    .clk    ( clk        ),
+    .cen    ( cen_fm     ),
+    .ch0    ( fm_snd     ),
+    .ch1    ( pcm_snd    ),
+    .ch2    ( psg2x      ),
+    .ch3    ( 16'd0      ),
+    .gain0  ( 8'h40      ),
+    .gain1  ( 8'h18      ),
+    .gain2  ( 8'h10      ),
+    .gain3  ( 8'd0       ),
+    .mixed  ( snd_left   )
 );
 
 jtframe_ff u_ff(
