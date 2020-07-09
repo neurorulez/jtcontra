@@ -3,7 +3,6 @@ jtcontra_simloader.v
 ../../hdl/jtcomsc_main_decoder.v
 ../../hdl/jtcomsc_sound.v
 
-../../../../modules/jt12/hdl/mixer/jt12_mixer.v
 ../../../../modules/jt12/jt49/hdl/filter/jt49_dcrm2.v
 
 ../../../contra/hdl/jtcontra_game.v
@@ -31,6 +30,7 @@ jtcontra_simloader.v
 ../../../../modules/jtframe/hdl/sdram/jtframe_rom.v
 ../../../../modules/jtframe/hdl/sdram/jtframe_romrq.v
 ../../../../modules/jtframe/hdl/sdram/jtframe_dwnld.v
+../../../../modules/jtframe/hdl/sound/jtframe_mixer.v
 ../../../../modules/jtframe/hdl/jtframe_z80wait.v
 ../../../../modules/jtframe/hdl/cpu/jtframe_z80.v
 ../../../../modules/jtframe/hdl/jtframe_ff.v
