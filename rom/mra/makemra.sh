@@ -18,11 +18,14 @@ mame2dip comsc.xml -rbf jtcomsc \
     -swapbytes audiocpu \
     -swapbytes maincpu  \
     -swapbytes upd  \
-    -dipbase 8
+    -dipbase 8 \
+    -dipshift DSW3 4 
 #    -start subcpu   0x28000 \
 #    -start audiocpu 0x30000 \
 #    -start mcu      0x38000 \
 #    -start proms    0xC0000 \
+mra -A -s 'Combat School (joystick).mra'
+sed -i /Unknown/d 'Combat School (joystick).arc'
 
 mame2dip hcastle.xml -rbf jtcastle \
     -frac gfx1 2 \

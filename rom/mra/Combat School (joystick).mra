@@ -70,8 +70,8 @@
         <dip name="Difficulty" bits="13,14" ids="Very Difficult,Difficult,Normal,Easy"/>
         <dip name="Demo Sounds" bits="15" ids="On,Off"/>
         <!-- DSW3 -->
-        <dip name="Flip Screen" bits="20" ids="On,Off"/>
-        <dip name="Service Mode" bits="22" ids="On,Off"/>
+        <dip name="Flip Screen" bits="16" ids="On,Off"/>
+        <dip name="Service Mode" bits="18" ids="On,Off"/>
     </switches>
     <buttons names="Fire,Jump,Start,Coin,Pause" default="A,B,R,L,Start"/>
 </misterromdescription>

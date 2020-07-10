@@ -118,9 +118,9 @@ jt49_dcrm2 #(.sw(10)) u_dcrm (
 jtframe_mixer #(.W0(16),.W1(9),.W2(10)) u_mixer(
     .clk    ( clk        ),
     .cen    ( cen_fm     ),
-    .ch0    ( fm_snd     ),
+    //.ch0    ( fm_snd     ),
     .ch1    ( pcm_snd    ),
-    .ch2    ( psg2x      ),
+    //.ch2    ( psg2x      ),
     .ch3    ( 16'd0      ),
     .gain0  ( 8'h40      ),
     .gain1  ( 8'h18      ),
