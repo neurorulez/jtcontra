@@ -145,6 +145,7 @@ jtframe_sysz80 #(.RAM_AW(11)) u_cpu(
     .rst_n      ( ~rst      ), 
     .clk        ( clk       ),
     .cen        ( cen_fm2   ), // 1.5MHz, there is a clock divider in schematics
+//    .cen        ( cen_fm    ), // 3MHz, see if melody pace gets faster
     .cpu_cen    ( cpu_cen   ),
     .int_n      ( int_n     ),
     .nmi_n      ( 1'b1      ),

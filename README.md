@@ -91,6 +91,24 @@ Register | Bits   | R/W | Games         | Meaning
  C       |   -    | R/W | Contra        | affects the barrels
  D       |   -    | R/W | Contra        | affects the barrels
 
+## Combat School
+
+Blank cells refer to 0/0.
+
+Id |Image                                   | 1-1 | 1-3 | 3-2 | 3-5 | 3-6 | ZURERAM 2
+---|----------------------------------------|-----|-----|-----|-----|-----|-----------
+ 1 |![](cores/comsc/ver/game/scene1/1.png)  |     | 1/1 | 1/1 | 1/1 |     |
+ 2 |![](cores/comsc/ver/game/scene2/2.png)  |     | 1/1 | 1/1 | 1/1 |     |
+ 3 |![](cores/comsc/ver/game/scene3/3.png)  |     | 1/1 | 1/1 | 1/1 |     |
+ 4 |![](cores/comsc/ver/game/scene4/4.png)  |     | 1/1 | 1/1 | 1/1 | 1/1 |
+ 5 |![](cores/comsc/ver/game/scene5/5.png)  |     | 1/1 | 1/1 | 1/1 | 1/1 |
+ 6 |![](cores/comsc/ver/game/scene6/6.png)  |     | 1/1 | 1/1 | 1/1 | 1/1 |
+ 7 |![](cores/comsc/ver/game/scene7/7.png)  |     | 1/1 | 1/1 | 1/1 | 1/1 |
+ 8 |![](cores/comsc/ver/game/scene8/8.png)  | 1/0 | 1/1 | 1/1 | 1/1 | 1/1 |
+ 9 |![](cores/comsc/ver/game/scene9/9.png)  |     | 1/1 | 1/1 | 1/1 | 1/1 |
+10 |![](cores/comsc/ver/game/scene10/10.png)|     | 1/1 | 1/1 | 1/1 |     |
+11 |![](cores/comsc/ver/game/scene11/11.png)| 1/1 | 1/1 | 1/1 | 1/1 | 1/1 | 00-12-48 / 00-14
+12 |![](cores/comsc/ver/game/scene12/12.png)|     |     | 1/1 | 1/1 |     | 00-d9-18-48 / 00-d9-18
 
 # Support
 
@@ -98,8 +116,8 @@ The *jotego* nickname had already been used by other people so on some networks
 you will find me as *topapate*.
 
 Contact via:
-    https://twitter.com/topapate
-    https://github.com/discord
+* https://twitter.com/topapate
+* https://github.com/discord
 
 You can show your appreciation through
 * Patreon: https://patreon.com/topapate

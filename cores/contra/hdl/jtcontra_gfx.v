@@ -79,6 +79,7 @@ reg  [7:0]  mmr[0:RCNT-1];
 wire [8:0]  hpos;
 wire [7:0]  vpos = mmr[2];
 wire        row_en     = mmr[1][1]; // row scroll enable
+wire        ch_tx_enb  = mmr[1][3]; // char layer transparency (enable low)
 wire        tile_msb   = mmr[3][0];
 wire        obj_page   = mmr[3][3]; // select from which page to draw sprites
 wire        layout     = mmr[3][4]; // 1 for wide layout
@@ -254,8 +255,9 @@ wire        obj_blank     = oprom_data[3:0] == 4'h0;
 wire        tile_blank    = vprom_data[3:0] == 4'h0;
 wire        chr_area      = hdump>=chr_dump_start && hdump<chr_dump_end;
 wire        scr_area      = hdump>=scr_dump_start && hdump<scr_dump_end;
-wire        border        = hdump<9'o30 || hdump>9'o410;
-wire        blank_area    = vdump<9'o20 || (!layout /*&& narrow_en*/ && border);
+wire        border_narrow = (hdump<9'o30 || hdump>=9'o410) && narrow_en;
+wire        border_wide   = hdump<9'o20 || hdump>=9'o420;
+wire        blank_area    = vdump<9'o20 || (!layout && (border_narrow||border_wide));
 reg         draw_scr;
 wire [11:0] obj_scan_addr;
 wire        scrwin        = scr_pxl[8];

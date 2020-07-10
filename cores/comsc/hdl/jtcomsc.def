@@ -14,9 +14,6 @@ BUTTONS=2
 JTFRAME_OSD_NOLOAD
 #JTFRAME_RELEASE
 
-# For now...
-NOCREDITS
-
 [mist|sidi]
 # OSD credits cannot be used when
 # DIP base is less than 13
