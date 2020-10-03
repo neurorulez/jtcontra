@@ -11,13 +11,13 @@ Name            | JT Core | Main CPU   | Sound CPU  | K007121 units | Audio
 Contra          | contra  | HD63C09EP  | 68B09EP    | x2            | YM2151
 Combat School   | comsc   | 6309       | Z80        | x2            | YM2203 + UPD7759
 Haunted Castle  |         | KONAMI     | Z80        | x2            | YM3812 + K051649
+Fast Lane       |         | 6309       | -          | x2 + K051733  | K007232 x 2
 MX5000          |         | 6309       | Z80        | x1            | YM2151 + K007232
-Fast Lane       |         | 6309       | -          | x1 + K051733  | K007232 x 2
 Labyrinth Runner|         | 6309       | -          | x1 + K051733  | YM2203 x 2
 
 # Supported FPGA Platforms
 
-Binary RBF files for MiST, MiSTer and SiDi will be provided for in 
+Binary RBF files for MiST, MiSTer and SiDi will be provided for in
 https://github.com/jotego/jtbin
 
 # Compiling
@@ -84,7 +84,7 @@ Pin Name | Number | I/O | Usage
 
 There are likely to be 32 programmable registers
 
-Register | Bits   | R/W | Games         | Meaning  
+Register | Bits   | R/W | Games         | Meaning
 ---------|--------|-----|---------------|----------------
  A       |   -    | R/W | Contra        | affects the barrels
  B       |   -    | R/W | Contra        | affects the barrels
