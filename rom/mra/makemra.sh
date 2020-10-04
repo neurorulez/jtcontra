@@ -35,7 +35,7 @@ if [[ $MAKELIST = all ||  $MAKELIST = labrun ]]; then
     fi
     ALT=_alt/"Labyrinth Runner"
     mkdir -p $ALT
-    COMMON="labrun.xml -rbf jtlabrun -swapbytes maincpu"
+    COMMON="labrun.xml -rbf jtlabrun -swapbytes maincpu -dipbase 8"
 
     mame2dip $COMMON \
         -machine tricktrp \

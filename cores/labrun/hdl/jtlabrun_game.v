@@ -71,19 +71,14 @@ module jtlabrun_game(
 
 // SDRAM offsets.
 localparam GFX_OFFSET =  22'h2_0000>>1;
-localparam PROM_START  =  22'h6_0000;
+localparam PROM_START =  22'h6_0000;
 
 wire        main_cs, main_ok, gfx_ok;
-wire        pcm_cs,  pcm_ok;
-wire        snd_irq;
-wire [15:0] gfx_data, gfx2_data;
-wire [ 7:0] pcm_data;
-wire [16:0] pcm_addr;
-wire [17:0] gfx_addr, gfx2_addr;
+wire [15:0] gfx_data;
+wire [17:0] gfx_addr;
 
-wire [ 7:0] main_data, snd_data, snd_latch;
-wire [14:0] snd_addr;
-wire [17:0] main_addr;
+wire [ 7:0] main_data;
+wire [16:0] main_addr;
 wire        cen12, cen3, cen1p5, prom_we;
 wire        gfx_cs, gfx2_cs;
 
@@ -91,13 +86,10 @@ wire [ 7:0] dipsw_a, dipsw_b;
 wire [ 3:0] dipsw_c;
 wire        LHBL, LVBL;
 
-wire [15:0] cpu_addr;
-wire        gfx_irqn, gfx_romcs, gfx2_romcs, gfx_cfg_cs, gfx2_cfg_cs, pal_cs;
-wire        gfx_vram_cs, gfx2_vram_cs;
+wire [12:0] cpu_addr;
+wire        gfx_irqn, gfx_romcs, pal_cs;
 wire        cpu_cen, cpu_rnw, cpu_irqn;
-wire [ 7:0] gfx_dout, gfx2_dout, pal_dout, cpu_dout;
-wire [ 7:0] video_bank;
-wire        prio_latch;
+wire [ 7:0] gfx_dout, pal_dout, cpu_dout;
 
 assign prog_rd    = 0;
 assign dwnld_busy = downloading;
@@ -135,24 +127,8 @@ u_dwnld(
     .sdram_ack      ( sdram_ack     )
 );
 
-`ifdef GFX_ONLY
-jtcontra_simloader u_simloader(
-    .rst        ( rst           ),
-    .clk        ( clk24         ),
-    .cpu_cen    ( cpu_cen       ),
-    // GFX
-    .cpu_addr   ( cpu_addr      ),
-    .cpu_dout   ( cpu_dout      ),
-    .cpu_rnw    ( cpu_rnw       ),
-    .gfx_cs    ( gfx_cs       ),
-    .gfx2_cs    ( gfx2_cs       ),
-    .pal_cs     ( pal_cs        ),
-    .video_bank ( video_bank    ),
-    .prio_latch ( prio_latch    )
-);
-`else
 `ifndef NOMAIN
-jtcontra_main #(.GAME(GAME)) u_main(
+jtlabrun_main u_main(
     .clk            ( clk24         ),        // 24 MHz
     .rst            ( rst           ),
     .cen12          ( cen12         ),
@@ -172,40 +148,31 @@ jtcontra_main #(.GAME(GAME)) u_main(
     .joystick2      ( joystick2     ),
     .service        ( 1'b1          ),
     // GFX
-    .cpu_addr       ( cpu_addr      ),
+    .gfx_addr       ( cpu_addr      ),
     .cpu_dout       ( cpu_dout      ),
     .cpu_rnw        ( cpu_rnw       ),
     .gfx_irqn       ( cpu_irqn      ),
-    .gfx_cs        ( gfx_cs       ),
-    .gfx2_cs        ( gfx2_cs       ),
+    .gfx_cs         ( gfx_cs        ),
     .pal_cs         ( pal_cs        ),
 
-    .gfx_dout      ( gfx_dout     ),
-    .gfx2_dout      ( gfx2_dout     ),
+    .gfx_dout       ( gfx_dout      ),
     .pal_dout       ( pal_dout      ),
 
-    .video_bank     ( video_bank    ),
-    .prio_latch     ( prio_latch    ),
     // DIP switches
     .dip_pause      ( dip_pause     ),
     .dipsw_a        ( dipsw_a       ),
     .dipsw_b        ( dipsw_b       ),
-    .dipsw_c        ( dipsw_c       )
+    .dipsw_c        ( dipsw_c       ),
+    // Sound
+    .snd            ( snd           ),
+    .sample         ( sample        )
 );
 `else
-// load a sound code for simulation
-assign snd_latch = 8'h22;
-reg pre_irq=0;
-initial begin
-    #100_000_000 pre_irq=1;
-end
-
-assign snd_irq = pre_irq;
-`endif
+assign main_cs = 0;
 `endif
 
 `ifndef NOVIDEO
-jtcontra_video #(.GAME(GAME)) u_video (
+jtlabrun_video u_video (
     .rst            ( rst           ),
     .clk            ( clk           ),
     .clk24          ( clk24         ),
@@ -226,27 +193,19 @@ jtcontra_video #(.GAME(GAME)) u_video (
     .prog_data      ( prog_data[3:0]),
     // GFX - CPU interface
     .cpu_irqn       ( cpu_irqn      ),
-    .gfx_cs        ( gfx_cs       ),
-    .gfx2_cs        ( gfx2_cs       ),
+    .gfx_cs         ( gfx_cs        ),
     .pal_cs         ( pal_cs        ),
     .cpu_rnw        ( cpu_rnw       ),
     .cpu_cen        ( cpu_cen       ),
     .cpu_addr       ( cpu_addr      ),
     .cpu_dout       ( cpu_dout      ),
-    .gfx_dout      ( gfx_dout     ),
-    .gfx2_dout      ( gfx2_dout     ),
+    .gfx_dout       ( gfx_dout      ),
     .pal_dout       ( pal_dout      ),
-    .video_bank     ( video_bank    ),
-    .prio_latch     ( prio_latch    ),
     // SDRAM
-    .gfx_addr      ( gfx_addr     ),
-    .gfx_data      ( gfx_data     ),
-    .gfx_ok        ( gfx_ok       ),
-    .gfx_romcs     ( gfx_romcs    ),
-    .gfx2_addr      ( gfx2_addr     ),
-    .gfx2_data      ( gfx2_data     ),
-    .gfx2_ok        ( gfx2_ok       ),
-    .gfx2_romcs     ( gfx2_romcs    ),
+    .gfx_addr       (  gfx_addr     ),
+    .gfx_data       (  gfx_data     ),
+    .gfx_ok         (  gfx_ok       ),
+    .gfx_romcs      (  gfx_romcs    ),
     // pixels
     .red            ( red           ),
     .green          ( green         ),
@@ -261,7 +220,7 @@ jtframe_rom #(
     .SLOT0_DW    ( 16              ),
     .SLOT0_OFFSET( GFX_OFFSET      ),
 
-    .SLOT7_AW    ( 18              ),
+    .SLOT7_AW    ( 17              ),
     .SLOT7_DW    (  8              ),
     .SLOT7_OFFSET(  0              )  // Main
 ) u_rom (

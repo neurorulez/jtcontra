@@ -31,8 +31,8 @@ module jtlabrun_main(
     output              snd_irq,
     output      [ 7:0]  snd_latch,
     // ROM
-    output      [17:0]  rom_addr,
-    output              rom_cs,
+    output reg  [16:0]  rom_addr,
+    output reg          rom_cs,
     input       [ 7:0]  rom_data,
     input               rom_ok,
     // cabinet I/O
@@ -42,15 +42,12 @@ module jtlabrun_main(
     input       [ 5:0]  joystick2,
     input               service,
     // GFX
-    output      [15:0]  cpu_addr,
+    output reg  [12:0]  gfx_addr,
     output              cpu_rnw,
     output      [ 7:0]  cpu_dout,
     input               gfx_irqn,
-    output              gfx_cs,
-    output              pal_cs,
-
-    output     [7:0]    video_bank,
-    output              prio_latch,
+    output reg          gfx_cs,
+    output reg          pal_cs,
 
     input      [7:0]    gfx_dout,
     input      [7:0]    pal_dout,
@@ -58,23 +55,27 @@ module jtlabrun_main(
     input               dip_pause,
     input      [7:0]    dipsw_a,
     input      [7:0]    dipsw_b,
-    input      [3:0]    dipsw_c
+    input      [3:0]    dipsw_c,
+    // Sound
+    output signed [15:0] snd,
+    output               sample
 );
 
 localparam RAM_AW = 11;
 
-wire [ 7:0] ram_dout, cpu_din;
+wire [ 7:0] ram_dout, prot_dout, ym0_dout, ym1_dout;
 wire [15:0] A;
 wire        RnW, irq_n, irq_ack;
 wire        irq_trigger;
-wire        ram_cs;
+reg         bank_cs, in_cs, pre_gfx, pre_cfg, ym0_cs, ym1_cs, ram_cs, prot_cs, sys_cs;
+reg  [ 2:0] bank;
+reg  [ 7:0] port_in, cpu_din, ym_dout, cabinet;
+wire [15:0] fm0_snd, fm1_snd;
+wire [ 9:0] psg0_snd, psg1_snd;
+
 
 assign irq_trigger = ~gfx_irqn & dip_pause;
-assign cpu_addr    = A;
 assign cpu_rnw     = RnW;
-reg       bank_cs, in_cs, out_cs, pre_gfx, pre_cfg;
-reg [3:0] bank;
-reg [7:0] port_in;
 
 always @(*) begin
     rom_cs  = (A[15] || A[15:14]==2'b01) && RnW;
@@ -82,8 +83,6 @@ always @(*) begin
     pre_gfx = A[15:13] == 3'b001; // 2xxx 3xxx
     pre_cfg = A[15:8] == 8'd0;
     pal_cs  = A[15:11] == 5'b00010; // 10xx-17xx
-    //in_cs       = A[15:10] == 6'b0000_00 && A[4] && RnW;  // 10 -1F
-    //out_cs      = A[15:10] == 6'b0000_00 && A[4:3]==2'b11 && !RnW; // 18-1F
     ym0_cs  = 0;
     ym1_cs  = 0;
     bank_cs = 0;
@@ -120,14 +119,14 @@ always @(*) begin   // doesn't boot up if latched
 end
 
 always @(*) begin
-    rom_addr = A[15] ? { 2'b00, A[14:0] } : { bank+4'b0100, A[12:0] }; // 13+4=17
+    rom_addr = A[15] ? { 2'b00, A[14:0] } : { bank+3'b100, A[12:0] }; // 13+4=17
 end
 
 wire [7:0] sys_dout ={ ~5'd0, service, coin_input };
 
 always @(posedge clk) begin
     ym_dout <= ym0_cs ? ym0_dout : ym1_dout;
-    cabiner <= A[0] ? {2'b11, joystick1[5:4], joystick1[2], joystick1[3], joystick1[0], joystick1[1]} :
+    cabinet <= A[0] ? {2'b11, joystick1[5:4], joystick1[2], joystick1[3], joystick1[0], joystick1[1]} :
                       {2'b11, joystick2[5:4], joystick2[2], joystick2[3], joystick2[0], joystick2[1]};
     port_in <= rom_cs ? rom_data : (
                ram_cs ? ram_dout : (
@@ -140,20 +139,9 @@ end
 
 always @(posedge clk) begin
     if( rst ) begin
-        bank      <= 4'd0;
-        snd_irq   <= 0;
-        snd_latch <= 8'd0;
+        bank      <= 3'd0;
     end else if(cpu_cen) begin
-        snd_irq   <= 0;
-        if( bank_cs ) bank <= cpu_dout[3:0];
-        if( out_cs  ) begin
-            case( A[2:1] )
-                // 2'b00: coin counters
-                2'b01: snd_irq   <= 1;
-                2'b10: snd_latch <= cpu_dout;
-                // 2'b11 watchdog
-            endcase
-        end
+        if( bank_cs ) bank <= cpu_dout[2:0];
     end
 end
 
@@ -193,6 +181,17 @@ jtframe_sys6809 #(.RAM_AW(RAM_AW)) u_cpu(
     .ram_dout   ( ram_dout  ),
     .cpu_dout   ( cpu_dout  ),
     .cpu_din    ( cpu_din   )
+);
+
+jt051733 u_prot(
+    .clk    ( clk       ),
+    .rst    ( rst       ),
+    .cen    ( cpu_cen   ),
+    .addr   ( A[4:0]    ),
+    .wr_n   ( RnW       ),
+    .cs     ( prot_cs   ),
+    .din    ( cpu_dout  ),
+    .dout   ( prot_dout )
 );
 
 jt03 u_fm0(
@@ -239,6 +238,22 @@ jt03 u_fm1(
     .psg_B      (            ),
     .psg_C      (            ),
     .snd        (            )
+);
+
+jtframe_mixer #(.W0(16),.W1(16),.W2(10),.W3(10)) u_mixer(
+    .clk    ( clk       ),
+    .cen    ( cen1p5    ),
+    // input signals
+    .ch0    ( fm0_snd   ),
+    .ch1    ( fm1_snd   ),
+    .ch2    ( psg0_snd  ),
+    .ch3    ( psg1_snd  ),
+    // gain for each channel in 4.4 fixed point format
+    .gain0  ( 8'h10     ),
+    .gain1  ( 8'h10     ),
+    .gain2  ( 8'h10     ),
+    .gain3  ( 8'h10     ),
+    .mixed  ( snd       )
 );
 
 endmodule

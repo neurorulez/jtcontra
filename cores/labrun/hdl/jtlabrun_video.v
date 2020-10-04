@@ -40,7 +40,7 @@ module jtlabrun_video(
     input               pal_cs,
     input               cpu_rnw,
     input               cpu_cen,
-    input      [15:0]   cpu_addr,
+    input      [12:0]   cpu_addr,
     input      [ 7:0]   cpu_dout,
     output     [ 7:0]   gfx_dout,
     output     [ 7:0]   pal_dout,
@@ -121,26 +121,23 @@ jtcontra_gfx u_gfx(
     .vrender1   ( vrender1      ),
     .flip       ( flip          ),
     // CPU      interface
-    .cs         ( gfx_cs       ),
+    .cs         ( gfx_cs        ),
     .cpu_rnw    ( cpu_rnw       ),
     .addr       ( gfx_addr_in   ),
     .cpu_dout   ( cpu_dout      ),
-    .dout       ( gfx_dout     ),
+    .dout       ( gfx_dout      ),
     .cpu_irqn   ( cpu_irqn      ),
     // SDRAM interface
-    .rom_obj_sel( gfx_sel      ),
-    .rom_addr   ( gfx_pre      ),
-    .rom_data   ( gfx_data     ),
-    .rom_cs     ( gfx_romcs    ),
-    .rom_ok     ( gfx_ok       ),
-    .pxl_out    ( gfx_pxl      ),
+    .rom_obj_sel( gfx_sel       ),
+    .rom_addr   ( gfx_pre       ),
+    .rom_data   ( gfx_data      ),
+    .rom_cs     ( gfx_romcs     ),
+    .rom_ok     ( gfx_ok        ),
+    .pxl_out    ( gfx_pxl       ),
     // Test
     .gfx_en     ( gfx_en[1:0]   )
 );
 
-
-wire [4:0] cm_red, cm_green, cm_blue;
-wire       cm_LHBL, cm_LVBL;
 
 jtlabrun_colmix u_colmix(
     .rst        ( rst           ),
@@ -151,8 +148,8 @@ jtlabrun_colmix u_colmix(
     .pxl_cen    ( pxl_cen       ),
     .LHBL       ( LHBL          ),
     .LVBL       ( LVBL          ),
-    .LHBL_dly   ( cm_LHBL       ),
-    .LVBL_dly   ( cm_LVBL       ),
+    .LHBL_dly   ( LHBL_dly      ),
+    .LVBL_dly   ( LVBL_dly      ),
     // CPU      interface
     .pal_cs     ( pal_cs        ),
     .cpu_rnw    ( cpu_rnw       ),
@@ -160,48 +157,10 @@ jtlabrun_colmix u_colmix(
     .cpu_dout   ( cpu_dout      ),
     .pal_dout   ( pal_dout      ),
     // Colours
-    .prio_latch ( prio_latch    ), // unused
     .gfx_pxl    ( gfx_pxl       ),
-    .red        ( cm_red        ),
-    .green      ( cm_green      ),
-    .blue       ( cm_blue       )
+    .red        ( red           ),
+    .green      ( green         ),
+    .blue       ( blue          )
 );
-
-`ifdef SIMULATION
-`define NOCREDITS
-`endif
-
-//`ifdef MISTER_NOHDMI
-//`define NOCREDITS
-//`endif
-
-`ifndef NOCREDITS
-wire [23:0] colmix_rgb = { cm_red, cm_green, cm_blue }; // shouldn't it be 15:0?
-
-jtframe_credits #(
-    .PAGES  (      3 ),
-    .COLW   (      5 ),
-    .BLKPOL (      0 )
-) u_credits(
-    .rst        ( rst           ),
-    .clk        ( clk           ),
-    .pxl_cen    ( pxl_cen       ),
-
-    // input image
-    .HB         ( cm_LHBL       ),
-    .VB         ( cm_LVBL       ),
-    .rgb_in     ( colmix_rgb    ),
-    .enable     ( ~dip_pause    ),
-    .toggle     ( start_button  ),
-
-    // output image
-    .HB_out     ( LHBL_dly      ),
-    .VB_out     ( LVBL_dly      ),
-    .rgb_out    ( {red, green, blue } )
-);
-`else
-assign {red, green, blue }    = { cm_red, cm_green, cm_blue };
-assign { LHBL_dly, LVBL_dly } = { cm_LHBL, cm_LVBL };
-`endif
 
 endmodule
