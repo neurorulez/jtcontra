@@ -30,10 +30,10 @@
             <part name="771e04" crc="ba2c7e20"  length="0x8000" offset="0x8000"  map="12"/>
         </interleave>
         <interleave output="16">
-            <part name="771e03" crc="d0d68036" map="12"/>
+            <part name="771e04" crc="ba2c7e20"  length="0x8000" offset="0x0"  map="12"/>
         </interleave>
         <interleave output="16">
-            <part name="771e04" crc="ba2c7e20"  length="0x8000" offset="0x0"  map="12"/>
+            <part name="771e03" crc="d0d68036" map="12"/>
         </interleave>
         <!-- gfx1 - starts at 0x20000 -->
         <interleave output="16">

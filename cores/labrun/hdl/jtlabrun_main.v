@@ -118,7 +118,7 @@ always @(*) begin   // doesn't boot up if latched
 end
 
 always @(*) begin
-    rom_addr = A[15] ? { 2'b00, A[14:0] } : { bank+3'b100, A[12:0] }; // 13+4=17
+    rom_addr = A[15] ? { 2'b00, A[14:0] } : { bank+3'b10, A[13:0] }; // 14+3=17
 end
 
 wire [7:0] sys_dout ={ ~5'd0, service, coin_input };
