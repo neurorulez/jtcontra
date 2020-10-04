@@ -1,7 +1,7 @@
 #!/bin/bash
 
 if [ ! -e sdram.hex ]; then
-    ln -sf ../../rom/tricktrp.rom rom.bin
+    ln -sf $ROM/tricktrp.rom rom.bin
     bin2hex <rom.bin >sdram.hex
 fi
 

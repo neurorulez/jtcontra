@@ -99,6 +99,7 @@ assign { dipsw_c, dipsw_b, dipsw_a } = dipsw[19:0];
 jtframe_cen24 u_cen(
     .clk        ( clk24         ),    // 24 MHz
     .cen12      ( cen12         ),
+    .cen8       (               ),
     .cen6       (               ),
     .cen4       (               ),
     .cen3       ( cen3          ),

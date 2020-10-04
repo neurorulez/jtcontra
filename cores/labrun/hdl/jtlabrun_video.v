@@ -97,9 +97,7 @@ jtframe_vtimer u_timer(
     .VS         ( VS            )
 );
 
-wire gfx_prom_we = ~prog_addr[9] & prom_we;
-
-jtcontra_gfx u_gfx(
+jtcontra_gfx #(.BYPASS_VPROM(1)) u_gfx(
     .rst        ( rst           ),
     .clk        ( clk           ),
     .clk24      ( clk24         ),
@@ -111,7 +109,7 @@ jtcontra_gfx u_gfx(
     .HS         ( HS            ),
     .VS         ( VS            ),
     // PROMs
-    .prom_we    ( gfx_prom_we  ),
+    .prom_we    ( prom_we       ),
     .prog_addr  ( prog_addr[8:0]),
     .prog_data  ( prog_data[3:0]),
     // Screen position

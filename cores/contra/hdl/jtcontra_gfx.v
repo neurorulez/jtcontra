@@ -63,6 +63,7 @@ module jtcontra_gfx(
 );
 
 parameter   H0 = 9'h75; // initial value of hdump after H blanking
+parameter   BYPASS_VPROM=0;
 localparam  RCNT=96;
 
 reg         last_LVBL;
@@ -142,7 +143,7 @@ assign      hpos    = row_en ? {1'b0, mmr[ {2'b0, vrender[7:3]}+7'h20 ]} : { mmr
 
 // Data bus mux. It'd be nice to latch this:
 always @(*) begin
-    dout = !addr[13] ? 
+    dout = !addr[13] ?
         mmr[ addr[6:0] ]     // registers, row_scr cannot be read (?)
         : (addr[12] ? obj_dout :            // objects
           (addr[10] ? code_dout : attr_dout)); // tiles
@@ -355,15 +356,21 @@ assign obj_scan_addr[10] = 1'b0;
 
 // Colour PROMs
 
-jtframe_prom #(.dw(4),.aw(8) ) u_vprom(
-    .clk        ( clk                       ),
-    .cen        ( 1'b1                      ),
-    .data       ( prog_data                 ),
-    .rd_addr    ( vprom_addr                ),
-    .wr_addr    ( prog_addr[7:0]            ),
-    .we         ( prom_we & prog_addr[8]    ),
-    .q          ( vprom_data                )
-);
+generate
+    if( BYPASS_VPROM ) begin : bypass_vprom
+        assign vprom_data = vprom_addr;
+    end else begin : uses_vprom
+        jtframe_prom #(.dw(4),.aw(8) ) u_vprom(
+            .clk        ( clk                       ),
+            .cen        ( 1'b1                      ),
+            .data       ( prog_data                 ),
+            .rd_addr    ( vprom_addr                ),
+            .wr_addr    ( prog_addr[7:0]            ),
+            .we         ( prom_we & prog_addr[8]    ),
+            .q          ( vprom_data                )
+        );
+    end
+endgenerate
 
 jtframe_prom #(.dw(4),.aw(8) ) u_oprom(
     .clk        ( clk                       ),

@@ -230,7 +230,7 @@ jt03 u_fm1(
     .snd_sample ( sample     ),
     .dout       ( ym1_dout   ),
     .IOA_in     ( 8'h00      ),
-    .IOB_in     ( dipsw_c    ),
+    .IOB_in     ( { 4'hf, dipsw_c } ),
     // unused outputs
     .irq_n      (            ),
     .psg_A      (            ),

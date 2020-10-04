@@ -10,7 +10,7 @@
 # done
 
 if [ ! -e sdram.hex ]; then
-    ln -sf ../../rom/contra.rom rom.bin
+    ln -sf $ROM/contra.rom rom.bin
     bin2hex <rom.bin >sdram.hex
 fi
 

@@ -20,5 +20,6 @@
 ../../../../modules/jtframe/hdl/sdram/jtframe_rom.v
 ../../../../modules/jtframe/hdl/sdram/jtframe_romrq.v
 ../../../../modules/jtframe/hdl/sdram/jtframe_dwnld.v
+../../../../modules/jtframe/hdl/sound/jtframe_mixer.v
 ../../../../modules/jtframe/hdl/jtframe_z80wait.v
 ../../../../modules/jtframe/hdl/jtframe_ff.v

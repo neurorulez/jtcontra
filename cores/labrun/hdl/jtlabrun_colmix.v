@@ -36,7 +36,6 @@ module jtlabrun_colmix(
     input      [ 7:0]   cpu_dout,
     output     [ 7:0]   pal_dout,
     // GFX colour requests
-    input               prio_latch, // Used by Combat School
     input      [ 6:0]   gfx_pxl,
     // Colours
     output     [ 4:0]   red,
