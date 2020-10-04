@@ -133,7 +133,7 @@ jtcontra_gfx #(.BYPASS_VPROM(1)) u_gfx(
     .cpu_irqn   (               ),
     // SDRAM interface
     .rom_obj_sel( gfx_sel       ),
-    .rom_addr   ( gfx_pre       ),
+    .rom_addr   ( gfx_addr      ),
     .rom_data   ( gfx_data      ),
     .rom_cs     ( gfx_romcs     ),
     .rom_ok     ( gfx_ok        ),
