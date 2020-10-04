@@ -40,7 +40,7 @@ module jtlabrun_video(
     input               pal_cs,
     input               cpu_rnw,
     input               cpu_cen,
-    input      [12:0]   cpu_addr,
+    input      [13:0]   cpu_addr,
     input      [ 7:0]   cpu_dout,
     output     [ 7:0]   gfx_dout,
     output     [ 7:0]   pal_dout,
@@ -61,7 +61,6 @@ module jtlabrun_video(
 wire [ 8:0] vrender, vrender1, vdump, hdump;
 wire [ 6:0] gfx_pxl;
 wire [17:0] gfx_pre;
-wire [13:0] gfx_addr_in;
 wire        gfx_sel;
 
 jtframe_cen48 u_cen(
@@ -121,7 +120,7 @@ jtcontra_gfx #(.BYPASS_VPROM(1)) u_gfx(
     // CPU      interface
     .cs         ( gfx_cs        ),
     .cpu_rnw    ( cpu_rnw       ),
-    .addr       ( gfx_addr_in   ),
+    .addr       ( cpu_addr      ),
     .cpu_dout   ( cpu_dout      ),
     .dout       ( gfx_dout      ),
     .cpu_irqn   ( cpu_irqn      ),

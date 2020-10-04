@@ -50,6 +50,17 @@ assign next_rng = rng + mem[5'h13];
 
 //integer aux;
 
+`ifdef SIMULATION
+always @(posedge cs) if(wr_n) begin
+    $display("op = %5d - %5d - %5d",op1,op2,op3);
+    $display("rad   = %d",rad);
+    $display("obj1 = %5d - %5d",xobj1,yobj1);
+    $display("obj2 = %5d - %5d",xobj2,yobj2);
+    $display("xdiff = %d",xdiff);
+    $display("div = %5d\tmod = %5d\tsqr = %5d",div,mod,sqr);
+end
+`endif
+
 always @(posedge clk, posedge rst) begin
     if( rst ) begin
         //for( aux=0; aux<32; aux=aux+1 ) mem[aux] <= 8'd0;

@@ -86,7 +86,7 @@ wire [ 7:0] dipsw_a, dipsw_b;
 wire [ 3:0] dipsw_c;
 wire        LHBL, LVBL;
 
-wire [12:0] cpu_addr;
+wire [13:0] cpu_addr;
 wire        gfx_irqn, gfx_romcs, pal_cs;
 wire        cpu_cen, cpu_rnw, cpu_irqn;
 wire [ 7:0] gfx_dout, pal_dout, cpu_dout;

@@ -40,7 +40,7 @@ module jtlabrun_main(
     input       [ 5:0]  joystick2,
     input               service,
     // GFX
-    output reg  [12:0]  gfx_addr,
+    output reg  [13:0]  gfx_addr,
     output              cpu_rnw,
     output      [ 7:0]  cpu_dout,
     input               gfx_irqn,
@@ -103,7 +103,7 @@ end
 
 always @(posedge clk) begin
     gfx_cs   <= pre_gfx | pre_cfg;
-    gfx_addr <= { ~A[12] & pre_gfx, A[11:0] };
+    gfx_addr <= { pre_gfx, ~A[12], A[11:0] };
 end
 
 always @(*) begin   // doesn't boot up if latched
