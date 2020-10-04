@@ -54,7 +54,6 @@ reg         pal_half;
 reg  [14:0] pxl_aux;
 wire [14:0] col_out;
 reg  [14:0] col_in;
-wire        gfx_blank = gfx_pxl[3:0]==4'h0;
 
 assign col_addr = { gfx_pxl, pal_half };
 

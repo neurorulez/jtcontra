@@ -44,16 +44,18 @@ wire [15:0] yobj2 = { mem[12],mem[13] };
 wire [15:0] xobj2 = { mem[14],mem[15] };
 
 reg  [15:0] xrad1, yrad1, xrad2, yrad2, xdiff;
+reg  [31:0] prod;
 
 assign next_rng = rng + mem[5'h13];
 
-integer aux;
+//integer aux;
 
 always @(posedge clk, posedge rst) begin
     if( rst ) begin
-        for( aux=0; aux<32; aux=aux+1 ) mem[aux] <= 8'd0;
+        //for( aux=0; aux<32; aux=aux+1 ) mem[aux] <= 8'd0;
         rng   <= 8'd0;
         upsqr <= 0;
+        dout  <= 8'd0;
     end else begin
         if(cs && !wr_n && cen) begin
             mem[addr] <= din;
@@ -64,7 +66,8 @@ always @(posedge clk, posedge rst) begin
         // This is highly inneficient, but games using this device
         // are so small that unused resources are plentiful anyway
         div   <= op1/op2;
-        mod   <= op1%op2;
+        prod  <= op2*div;
+        mod   <= op1-prod[15:0];
 
         xrad1 <= xobj1+rad;
         yrad1 <= yobj1+rad;
@@ -111,7 +114,7 @@ always @(posedge clk, posedge rst) begin
             idle <= 1;
         end else if( !idle && step != 15'd0 ) begin
             if( sqr2 == op3ext ) begin
-                step <= 16'd0; // sqr found
+                step <= 15'd0; // sqr found
             end else begin
                 if( sqr2 > op3ext )
                     sqr <= sqr - {1'b0, step};

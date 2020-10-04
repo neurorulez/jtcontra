@@ -132,10 +132,8 @@ jtlabrun_main u_main(
     .clk            ( clk24         ),        // 24 MHz
     .rst            ( rst           ),
     .cen12          ( cen12         ),
+    .cen3           ( cen3          ),
     .cpu_cen        ( cpu_cen       ),
-    // communication with main CPU
-    .snd_irq        ( snd_irq       ),
-    .snd_latch      ( snd_latch     ),
     // ROM
     .rom_addr       ( main_addr     ),
     .rom_cs         ( main_cs       ),

@@ -26,10 +26,8 @@ module jtlabrun_main(
     input               clk,        // 24 MHz
     input               rst,
     input               cen12,
+    input               cen3,
     output              cpu_cen,
-    // communication with sound CPU
-    output              snd_irq,
-    output      [ 7:0]  snd_latch,
     // ROM
     output reg  [16:0]  rom_addr,
     output reg          rom_cs,
@@ -88,6 +86,7 @@ always @(*) begin
     bank_cs = 0;
     in_cs   = 0;
     prot_cs = 0;
+    sys_cs  = 0;
     if( A[15:12]==4'd0 && A[11] ) begin
         case(A[10:8])
             3'd0: ym0_cs  = 1;
@@ -198,15 +197,15 @@ jt03 u_fm0(
     .rst        ( rst        ),
     // CPU interface
     .clk        ( clk        ),
-    .cen        ( cen_fm     ),
+    .cen        ( cen3       ),
     .din        ( cpu_dout   ),
     .addr       ( A[0]       ),
     .cs_n       ( ~ym0_cs    ),
-    .wr_n       ( wr_n       ),
+    .wr_n       ( RnW        ),
     .psg_snd    ( psg0_snd   ),
     .fm_snd     ( fm0_snd    ),
     .snd_sample ( sample     ),
-    .dout       ( fm0_dout   ),
+    .dout       ( ym0_dout   ),
     .IOA_in     ( dipsw_a    ),
     .IOB_in     ( dipsw_b    ),
     // unused outputs
@@ -221,15 +220,15 @@ jt03 u_fm1(
     .rst        ( rst        ),
     // CPU interface
     .clk        ( clk        ),
-    .cen        ( cen_fm     ),
+    .cen        ( cen3       ),
     .din        ( cpu_dout   ),
     .addr       ( A[0]       ),
     .cs_n       ( ~ym1_cs    ),
-    .wr_n       ( wr_n       ),
+    .wr_n       ( RnW        ),
     .psg_snd    ( psg1_snd   ),
     .fm_snd     ( fm1_snd    ),
     .snd_sample ( sample     ),
-    .dout       ( fm1_dout   ),
+    .dout       ( ym1_dout   ),
     .IOA_in     ( 8'h00      ),
     .IOB_in     ( dipsw_c    ),
     // unused outputs
@@ -242,7 +241,7 @@ jt03 u_fm1(
 
 jtframe_mixer #(.W0(16),.W1(16),.W2(10),.W3(10)) u_mixer(
     .clk    ( clk       ),
-    .cen    ( cen1p5    ),
+    .cen    ( cen3      ),
     // input signals
     .ch0    ( fm0_snd   ),
     .ch1    ( fm1_snd   ),
