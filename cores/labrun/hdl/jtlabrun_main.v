@@ -70,6 +70,7 @@ reg  [ 2:0] bank;
 reg  [ 7:0] port_in, cpu_din, ym_dout, cabinet;
 wire [15:0] fm0_snd, fm1_snd;
 wire [ 9:0] psg0_snd, psg1_snd;
+wire        fm0_irq_n, fm1_irq_n;
 
 
 assign irq_trigger = ~gfx_irqn & dip_pause;
@@ -106,17 +107,6 @@ always @(posedge clk) begin
     gfx_addr <= { pre_gfx, ~A[12], A[11:0] };
 end
 
-always @(*) begin   // doesn't boot up if latched
-    case(1'b1)
-        rom_cs:  cpu_din = rom_data;
-        ram_cs:  cpu_din = ram_dout;
-        pal_cs:  cpu_din = pal_dout;
-        in_cs:   cpu_din = port_in;
-        gfx_cs:  cpu_din = gfx_dout;
-        default: cpu_din = 8'hff;
-    endcase
-end
-
 always @(*) begin
     rom_addr = A[15] ? { 2'b00, A[14:0] } : { bank+3'b10, A[13:0] }; // 14+3=17
 end
@@ -127,7 +117,7 @@ always @(posedge clk) begin
     ym_dout <= ym0_cs ? ym0_dout : ym1_dout;
     cabinet <= A[0] ? {2'b11, joystick1[5:4], joystick1[2], joystick1[3], joystick1[0], joystick1[1]} :
                       {2'b11, joystick2[5:4], joystick2[2], joystick2[3], joystick2[0], joystick2[1]};
-    port_in <= rom_cs ? rom_data : (
+    cpu_din <= rom_cs ? rom_data : (
                ram_cs ? ram_dout : (
                gfx_cs ? gfx_dout : (
                in_cs  ? cabinet  : (
@@ -209,7 +199,7 @@ jt03 u_fm0(
     .IOA_in     ( dipsw_a    ),
     .IOB_in     ( dipsw_b    ),
     // unused outputs
-    .irq_n      (            ),
+    .irq_n      ( fm0_irq_n  ),
     .psg_A      (            ),
     .psg_B      (            ),
     .psg_C      (            ),
@@ -232,7 +222,7 @@ jt03 u_fm1(
     .IOA_in     ( 8'h00      ),
     .IOB_in     ( { 4'hf, dipsw_c } ),
     // unused outputs
-    .irq_n      (            ),
+    .irq_n      ( fm1_irq_n  ),
     .psg_A      (            ),
     .psg_B      (            ),
     .psg_C      (            ),

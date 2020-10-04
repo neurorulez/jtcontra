@@ -63,6 +63,13 @@ wire [ 6:0] gfx_pxl;
 wire [17:0] gfx_pre;
 wire        gfx_sel;
 
+// According to MAME, there are interrupts at 240Hz,
+// which I assume should mean 4 interrupts per frame
+// No schematics, no PCB, no gfx chip decap yet as of today
+// so I am just aligning this to match LVBL nicely and
+// leaving this function out of jtcontra_gfx for now
+assign cpu_irqn = vdump[5:3]!=3'b110;
+
 jtframe_cen48 u_cen(
     .clk        ( clk       ),    // 48 MHz
     .cen12      ( pxl2_cen  ),
@@ -123,7 +130,7 @@ jtcontra_gfx #(.BYPASS_VPROM(1)) u_gfx(
     .addr       ( cpu_addr      ),
     .cpu_dout   ( cpu_dout      ),
     .dout       ( gfx_dout      ),
-    .cpu_irqn   ( cpu_irqn      ),
+    .cpu_irqn   (               ),
     // SDRAM interface
     .rom_obj_sel( gfx_sel       ),
     .rom_addr   ( gfx_pre       ),
