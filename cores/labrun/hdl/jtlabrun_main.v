@@ -115,8 +115,8 @@ wire [7:0] sys_dout ={ ~5'd0, service, coin_input };
 
 always @(posedge clk) begin
     ym_dout <= ym0_cs ? ym0_dout : ym1_dout;
-    cabinet <= A[0] ? {2'b11, joystick1[5:4], joystick1[2], joystick1[3], joystick1[0], joystick1[1]} :
-                      {2'b11, joystick2[5:4], joystick2[2], joystick2[3], joystick2[0], joystick2[1]};
+    cabinet <= A[0] ? {start_button[0],1'b1, joystick1[5:4], joystick1[2], joystick1[3], joystick1[0], joystick1[1]} :
+                      {start_button[1],1'b1, joystick2[5:4], joystick2[2], joystick2[3], joystick2[0], joystick2[1]};
     cpu_din <= rom_cs ? rom_data : (
                ram_cs ? ram_dout : (
                gfx_cs ? gfx_dout : (

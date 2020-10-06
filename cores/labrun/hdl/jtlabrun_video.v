@@ -68,7 +68,7 @@ wire        gfx_sel;
 // No schematics, no PCB, no gfx chip decap yet as of today
 // so I am just aligning this to match LVBL nicely and
 // leaving this function out of jtcontra_gfx for now
-assign cpu_irqn = vdump[5:3]!=3'b110;
+//assign cpu_irqn = vdump==9'hf0; //vdump[5:3]!=3'b110;
 
 jtframe_cen48 u_cen(
     .clk        ( clk       ),    // 48 MHz
@@ -130,7 +130,7 @@ jtcontra_gfx #(.BYPASS_VPROM(1)) u_gfx(
     .addr       ( cpu_addr      ),
     .cpu_dout   ( cpu_dout      ),
     .dout       ( gfx_dout      ),
-    .cpu_irqn   (               ),
+    .cpu_irqn   ( cpu_irqn      ),
     // SDRAM interface
     .rom_obj_sel( gfx_sel       ),
     .rom_addr   ( gfx_addr      ),
