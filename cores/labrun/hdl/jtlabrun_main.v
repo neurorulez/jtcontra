@@ -104,7 +104,7 @@ end
 
 always @(posedge clk) begin
     gfx_cs   <= pre_gfx | pre_cfg;
-    gfx_addr <= { pre_gfx, ~A[12], A[11:0] };
+    gfx_addr <= { pre_gfx, ~A[12] & pre_gfx, A[11:0] };
 end
 
 always @(*) begin
