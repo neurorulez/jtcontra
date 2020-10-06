@@ -123,7 +123,8 @@ always @(posedge clk) begin
                in_cs  ? cabinet  : (
                (ym0_cs | ym1_cs) ? ym_dout  : (
                sys_cs            ? sys_dout :
-               prot_cs           ? prot_dout : 8'hff )))));
+               pal_cs            ? pal_dout : (
+               prot_cs           ? prot_dout : 8'hff ))))));
 end
 
 always @(posedge clk) begin
