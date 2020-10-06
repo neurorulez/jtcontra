@@ -37,12 +37,12 @@
         </interleave>
         <!-- gfx1 - starts at 0x20000 -->
         <interleave output="16">
-            <part name="771e01a" crc="103ffa0d" map="01"/>
-            <part name="771e01c" crc="cfec5be9" map="10"/>
+            <part name="771e01c" crc="cfec5be9" map="01"/>
+            <part name="771e01a" crc="103ffa0d" map="10"/>
         </interleave>
         <interleave output="16">
-            <part name="771d01b" crc="07f2a71c" map="01"/>
-            <part name="771d01d" crc="f6810a49" map="10"/>
+            <part name="771d01d" crc="f6810a49" map="01"/>
+            <part name="771d01b" crc="07f2a71c" map="10"/>
         </interleave>
         <!-- proms - starts at 0x60000 -->
         <part name="771d02.08d" crc="3d34bb5a"/>
