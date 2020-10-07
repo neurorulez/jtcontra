@@ -46,7 +46,7 @@ module jtlabrun_video(
     output     [ 7:0]   pal_dout,
     output              cpu_irqn,
     // SDRAM interface
-    output     [17:0]   gfx_addr,
+    output     [16:0]   gfx_addr,
     input      [15:0]   gfx_data,
     input               gfx_ok,
     output              gfx_romcs,
@@ -60,8 +60,7 @@ module jtlabrun_video(
 
 wire [ 8:0] vrender, vrender1, vdump, hdump;
 wire [ 6:0] gfx_pxl;
-wire [17:0] gfx_pre;
-wire        gfx_sel;
+wire        gfx_sel, nc;
 
 // According to MAME, there are interrupts at 240Hz,
 // which I assume should mean 4 interrupts per frame
@@ -133,7 +132,7 @@ jtcontra_gfx #(.BYPASS_VPROM(1)) u_gfx(
     .cpu_irqn   ( cpu_irqn      ),
     // SDRAM interface
     .rom_obj_sel( gfx_sel       ),
-    .rom_addr   ( gfx_addr      ),
+    .rom_addr   ( {nc, gfx_addr}),
     .rom_data   ( gfx_data      ),
     .rom_cs     ( gfx_romcs     ),
     .rom_ok     ( gfx_ok        ),

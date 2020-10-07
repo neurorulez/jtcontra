@@ -75,7 +75,7 @@ localparam PROM_START =  22'h6_0000;
 
 wire        main_cs, main_ok, gfx_ok;
 wire [15:0] gfx_data;
-wire [17:0] gfx_addr;
+wire [16:0] gfx_addr;
 
 wire [ 7:0] main_data;
 wire [16:0] main_addr;
@@ -215,7 +215,7 @@ jtlabrun_video u_video (
 `endif
 
 jtframe_rom #(
-    .SLOT0_AW    ( 18              ),
+    .SLOT0_AW    ( 17              ),
     .SLOT0_DW    ( 16              ),
     .SLOT0_OFFSET( GFX_OFFSET      ),
 
