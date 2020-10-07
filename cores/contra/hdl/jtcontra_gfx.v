@@ -245,8 +245,13 @@ always @(posedge clk, posedge rst) begin
         if( !LVBL && last_LVBL ) begin
             if( irq_en ) cpu_irqn <= 0;
         end
-        else if( LHBL ) cpu_irqn <= 1;
-        cpu_nmin <= !(vdump[5:3]==3'b110 && nmi_en);
+        else if( LHBL || !irq_en ) cpu_irqn <= 1;
+        if( !nmi_en || vdump[5:4]!=2'b11 )
+            cpu_nmin <= 1;
+        else begin
+            if( vdump[5:0]==6'b11_0000 && nmi_en )
+                cpu_nmin <= 0;
+        end
     end
 end
 

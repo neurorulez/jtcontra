@@ -231,19 +231,30 @@ jt03 u_fm1(
     .snd        (            )
 );
 
-jtframe_mixer #(.W0(16),.W1(16),.W2(10),.W3(10)) u_mixer(
+wire [10:0] psg_snd = {1'b0,psg0_snd} + {1'b0,psg1_snd};
+wire signed [10:0] psg2x;
+
+jt49_dcrm2 #(.sw(11)) u_dcrm (
+    .rst    (  rst      ),
+    .clk    (  clk      ),
+    .cen    (  cen3     ),
+    .din    (  psg_snd  ),
+    .dout   (  psg2x    )
+);
+
+jtframe_mixer #(.W0(16),.W1(16),.W2(11)) u_mixer(
     .clk    ( clk       ),
     .cen    ( cen3      ),
     // input signals
     .ch0    ( fm0_snd   ),
     .ch1    ( fm1_snd   ),
-    .ch2    ( psg0_snd  ),
-    .ch3    ( psg1_snd  ),
+    .ch2    ( psg2x     ),
+    .ch3    (           ),
     // gain for each channel in 4.4 fixed point format
-    .gain0  ( 8'h10     ),
-    .gain1  ( 8'h10     ),
-    .gain2  ( 8'h10     ),
-    .gain3  ( 8'h10     ),
+    .gain0  ( 8'hC0     ),
+    .gain1  ( 8'hC0     ),
+    .gain2  ( 8'hC0     ),
+    .gain3  ( 8'h00     ),
     .mixed  ( snd       )
 );
 
