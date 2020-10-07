@@ -358,7 +358,7 @@ assign obj_scan_addr[10] = 1'b0;
 
 generate
     if( BYPASS_VPROM ) begin : bypass_vprom
-        assign vprom_data = vprom_addr;
+        assign vprom_data = vprom_addr[3:0];
     end else begin : uses_vprom
         jtframe_prom #(.dw(4),.aw(8) ) u_vprom(
             .clk        ( clk                       ),

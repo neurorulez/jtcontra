@@ -47,7 +47,7 @@ parameter GAME=0; // 0 = Contra, 1 = Combat School
 
 wire        pal_we = cpu_cen & ~cpu_rnw & pal_cs;
 wire [ 7:0] col_data;
-wire [ 7:0] col_addr;
+wire [ 7:0] col_addr, fixed_addr;
 reg         gfx_aux, gfx_other; // signals to help in priority equations
 reg         pal_half;
 reg  [14:0] pxl_aux;
@@ -57,13 +57,14 @@ reg  [14:0] col_in;
 assign col_addr = { gfx_pxl, pal_half };
 
 assign { blue, green, red } = col_out;
+assign fixed_addr = cpu_addr ^ 8'd1; // LSB inverted
 
 jtframe_dual_ram #(.aw(8)) u_ram(
     .clk0   ( clk24     ),
     .clk1   ( clk       ),
     // Port 0
     .data0  ( cpu_dout  ),
-    .addr0  ( cpu_addr  ),
+    .addr0  ( fixed_addr),
     .we0    ( pal_we    ),
     .q0     ( pal_dout  ),
     // Port 1

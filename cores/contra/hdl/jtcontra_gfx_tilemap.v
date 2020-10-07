@@ -116,7 +116,7 @@ always @(posedge clk) begin
                 end
                 2: begin
                     code   <= { bank, code_scan };
-                    pal    <= { pal_msb & attr_scan[3], attr_scan[2:0] };
+                    pal    <= { /*pal_msb & attr_scan[3]*/1'b1, attr_scan[2:0] };
                     scrwin <= attr_scan[6] && scrwin_en;
                     rom_cs <= 1;
                 end
