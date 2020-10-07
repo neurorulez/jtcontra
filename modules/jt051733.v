@@ -30,8 +30,8 @@ module jt051733(
 reg  [ 7:0] mem[0:31];
 reg  [ 7:0] rng;
 reg  [15:0] div, mod, sqr;
-reg         upsqr;
-
+reg         upsqr, div_start;
+wire        div_ack;
 wire [ 7:0] next_rng;
 
 wire [15:0] op1   = { mem[ 0],mem[ 1] };
@@ -44,7 +44,7 @@ wire [15:0] yobj2 = { mem[12],mem[13] };
 wire [15:0] xobj2 = { mem[14],mem[15] };
 
 reg  [15:0] xrad1, yrad1, xrad2, yrad2, xdiff;
-reg  [31:0] prod;
+wire [15:0] quo, rem;
 
 assign next_rng = rng + mem[5'h13];
 
@@ -61,30 +61,46 @@ always @(posedge cs) if(wr_n) begin
 end
 `endif
 
+divfunc #(.XLEN(16), .STAGE_LIST(16'h1111)) u_div(
+    .clk    ( clk       ),
+    .rst    ( rst       ),
+    .a      ( op1       ),
+    .b      ( op2       ),
+    .vld    ( div_start ),
+    .quo    ( quo       ),
+    .rem    ( rem       ),
+    .ack    ( div_ack   )
+
+);
+
 always @(posedge clk, posedge rst) begin
     if( rst ) begin
         //for( aux=0; aux<32; aux=aux+1 ) mem[aux] <= 8'd0;
-        rng   <= 8'd0;
-        upsqr <= 0;
-        dout  <= 8'd0;
+        rng       <= 8'd0;
+        upsqr     <= 0;
+        dout      <= 8'd0;
+        div_start <= 0;
+        div       <= 16'd0;
+        mod       <= 16'd0;
     end else begin
         if(cs && !wr_n && cen) begin
             mem[addr] <= din;
             upsqr     <= addr==5'd4 || addr==5'd5;
+            div_start <= 1; // The division is always updated
         end else begin
             upsqr     <= 0;
+            div_start <= 0;
         end
-        // This is highly inneficient, but games using this device
-        // are so small that unused resources are plentiful anyway
-        div   <= op1/op2;
-        prod  <= op2*div;
-        mod   <= op1-prod[15:0];
-
         xrad1 <= xobj1+rad;
         yrad1 <= yobj1+rad;
         xrad2 <= xobj2+rad;
         yrad2 <= yobj2+rad;
         xdiff <= xobj2 - xobj1;
+
+        if( div_ack ) begin
+            div <= quo;
+            mod <= rem;
+        end
 
         case( addr )
             0: dout <= div[15:8];

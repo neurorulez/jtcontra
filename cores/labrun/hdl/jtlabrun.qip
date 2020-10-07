@@ -5,6 +5,7 @@ set_global_assignment -name VERILOG_FILE [file join $::quartus(qip_path) ../hdl/
 
 # Protection device / Math coprocessor
 set_global_assignment -name VERILOG_FILE [file join $::quartus(qip_path) ../../../modules/jt051733.v            ]
+set_global_assignment -name VERILOG_FILE [file join $::quartus(qip_path) ../../../modules/divfunc.v             ]
 
 # GFX
 set_global_assignment -name VERILOG_FILE [file join $::quartus(qip_path) ../../contra/hdl/jtcontra_gfx.v          ]

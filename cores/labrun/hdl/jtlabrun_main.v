@@ -251,8 +251,8 @@ jtframe_mixer #(.W0(16),.W1(16),.W2(11)) u_mixer(
     .ch2    ( psg2x     ),
     .ch3    (           ),
     // gain for each channel in 4.4 fixed point format
-    .gain0  ( 8'hC0     ),
-    .gain1  ( 8'hC0     ),
+    .gain0  ( 8'hF0     ),
+    .gain1  ( 8'hF0     ),
     .gain2  ( 8'hC0     ),
     .gain3  ( 8'h00     ),
     .mixed  ( snd       )

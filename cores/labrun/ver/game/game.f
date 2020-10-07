@@ -3,6 +3,7 @@
 ../../hdl/jtlabrun_video.v
 ../../hdl/jtlabrun_colmix.v
 ../../../modules/jt051733.v
+../../../modules/divfunc.v
 ../../../contra/hdl/jtcontra_gfx.v
 ../../../contra/hdl/jtcontra_gfx_tilemap.v
 ../../../contra/hdl/jtcontra_gfx_obj.v
