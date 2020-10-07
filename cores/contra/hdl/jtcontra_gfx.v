@@ -236,7 +236,7 @@ always @(posedge clk24) begin
     end
 end
 
-always @(posedge clk) begin
+always @(posedge clk, posedge rst) begin
     if( rst ) begin
         cpu_irqn <= 1;
         cpu_nmin <= 1;
@@ -246,7 +246,7 @@ always @(posedge clk) begin
             if( irq_en ) cpu_irqn <= 0;
         end
         else if( LHBL ) cpu_irqn <= 1;
-        cpu_nmin <= !(vdump[5:3]!=3'b110 && nmi_en);
+        cpu_nmin <= !(vdump[5:3]==3'b110 && nmi_en);
     end
 end
 
@@ -272,7 +272,7 @@ always @(*) begin
                  chr_blank ? 1'b1 : 1'b0 ));
 end
 
-always @(posedge clk) begin
+always @(posedge clk, posedge rst) begin
     if( rst ) begin
         pxl_out    <= ~7'd0;
         vprom_addr <= 8'd0;
