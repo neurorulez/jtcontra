@@ -105,7 +105,6 @@ wire        char_en    = 1;
 
 assign      { code12_sel, code11_sel, code10_sel, code9_sel } = mmr[5];
 assign      gfx_we   = cpu_cen & ~cpu_rnw & vram_cs;
-assign      cpu_nmin = !(vdump[5:3]!=3'b110 && nmi_en);
 // Other configuration
 reg  [8:0]  chr_dump_start, chr_render_start;
 reg  [8:0]  chr_dump_end;
@@ -240,12 +239,14 @@ end
 always @(posedge clk) begin
     if( rst ) begin
         cpu_irqn <= 1;
+        cpu_nmin <= 1;
     end else if(pxl_cen) begin
         last_LVBL <= LVBL;
         if( !LVBL && last_LVBL ) begin
             if( irq_en ) cpu_irqn <= 0;
         end
         else if( LHBL ) cpu_irqn <= 1;
+        cpu_nmin <= !(vdump[5:3]!=3'b110 && nmi_en);
     end
 end
 
