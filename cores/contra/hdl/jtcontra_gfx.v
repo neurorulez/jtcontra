@@ -50,6 +50,7 @@ module jtcontra_gfx(
     input      [ 7:0]    cpu_dout,
     output reg [ 7:0]    dout,
     output reg           cpu_irqn,
+    output reg           cpu_nmin,
     // SDRAM interface
     output reg           rom_obj_sel,   // pin H2 of actual chip
     output reg [17:0]    rom_addr,
@@ -103,8 +104,8 @@ wire        char_en    = 1;
 // wire        char_en    =~mmr[7][4];     // undocumented by MAME
 
 assign      { code12_sel, code11_sel, code10_sel, code9_sel } = mmr[5];
-assign      gfx_we = cpu_cen & ~cpu_rnw & vram_cs;
-
+assign      gfx_we   = cpu_cen & ~cpu_rnw & vram_cs;
+assign      cpu_nmin = !(vdump[5:3]!=3'b110 && nmi_en);
 // Other configuration
 reg  [8:0]  chr_dump_start, chr_render_start;
 reg  [8:0]  chr_dump_end;

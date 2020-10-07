@@ -44,6 +44,7 @@ module jtlabrun_main(
     output              cpu_rnw,
     output      [ 7:0]  cpu_dout,
     input               gfx_irqn,
+    input               gfx_nmin,
     output reg          gfx_cs,
     output reg          pal_cs,
 
@@ -156,7 +157,7 @@ jtframe_sys6809 #(.RAM_AW(RAM_AW)) u_cpu(
     // Interrupts
     .nIRQ       ( irq_n     ),
     .nFIRQ      ( 1'b1      ),
-    .nNMI       ( 1'b1      ),
+    .nNMI       ( gfx_nmin  ),
     .irq_ack    ( irq_ack   ),
     // Bus sharing
     .bus_busy   ( 1'b0      ),

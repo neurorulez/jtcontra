@@ -45,6 +45,7 @@ module jtlabrun_video(
     output     [ 7:0]   gfx_dout,
     output     [ 7:0]   pal_dout,
     output              cpu_irqn,
+    output              cpu_nmin,
     // SDRAM interface
     output     [16:0]   gfx_addr,
     input      [15:0]   gfx_data,
@@ -61,13 +62,6 @@ module jtlabrun_video(
 wire [ 8:0] vrender, vrender1, vdump, hdump;
 wire [ 6:0] gfx_pxl;
 wire        gfx_sel, nc;
-
-// According to MAME, there are interrupts at 240Hz,
-// which I assume should mean 4 interrupts per frame
-// No schematics, no PCB, no gfx chip decap yet as of today
-// so I am just aligning this to match LVBL nicely and
-// leaving this function out of jtcontra_gfx for now
-//assign cpu_irqn = vdump==9'hf0; //vdump[5:3]!=3'b110;
 
 jtframe_cen48 u_cen(
     .clk        ( clk       ),    // 48 MHz
@@ -130,6 +124,7 @@ jtcontra_gfx #(.BYPASS_VPROM(1)) u_gfx(
     .cpu_dout   ( cpu_dout      ),
     .dout       ( gfx_dout      ),
     .cpu_irqn   ( cpu_irqn      ),
+    .cpu_nmin   ( cpu_nmin      ),
     // SDRAM interface
     .rom_obj_sel( gfx_sel       ),
     .rom_addr   ( {nc, gfx_addr}),

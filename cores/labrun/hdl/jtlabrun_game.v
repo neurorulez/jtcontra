@@ -88,7 +88,7 @@ wire        LHBL, LVBL;
 
 wire [13:0] cpu_addr;
 wire        gfx_irqn, gfx_romcs, pal_cs;
-wire        cpu_cen, cpu_rnw, cpu_irqn;
+wire        cpu_cen, cpu_rnw, cpu_irqn, cpu_nmin;
 wire [ 7:0] gfx_dout, pal_dout, cpu_dout;
 
 assign prog_rd    = 0;
@@ -151,6 +151,7 @@ jtlabrun_main u_main(
     .cpu_dout       ( cpu_dout      ),
     .cpu_rnw        ( cpu_rnw       ),
     .gfx_irqn       ( cpu_irqn      ),
+    .gfx_nmin       ( cpu_nmin      ),
     .gfx_cs         ( gfx_cs        ),
     .pal_cs         ( pal_cs        ),
 
@@ -192,6 +193,7 @@ jtlabrun_video u_video (
     .prog_data      ( prog_data[3:0]),
     // GFX - CPU interface
     .cpu_irqn       ( cpu_irqn      ),
+    .cpu_nmin       ( cpu_nmin      ),
     .gfx_cs         ( gfx_cs        ),
     .pal_cs         ( pal_cs        ),
     .cpu_rnw        ( cpu_rnw       ),
