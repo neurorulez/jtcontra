@@ -69,10 +69,10 @@ wire        irq_trigger;
 reg         bank_cs, in_cs, pre_gfx, pre_cfg, ym0_cs, ym1_cs, ram_cs, prot_cs, sys_cs;
 reg  [ 2:0] bank;
 reg  [ 7:0] port_in, cpu_din, ym_dout, cabinet;
-wire [15:0] fm0_snd, fm1_snd;
 wire [ 9:0] psg0_snd, psg1_snd;
 wire        fm0_irq_n, fm1_irq_n;
 
+wire signed [15:0] fm0_snd, fm1_snd;
 
 assign irq_trigger = ~gfx_irqn & dip_pause;
 assign cpu_rnw     = RnW;
@@ -219,7 +219,7 @@ jt03 u_fm1(
     .wr_n       ( RnW        ),
     .psg_snd    ( psg1_snd   ),
     .fm_snd     ( fm1_snd    ),
-    .snd_sample ( sample     ),
+    .snd_sample (            ),
     .dout       ( ym1_dout   ),
     .IOA_in     ( 8'hff      ),
     .IOB_in     ( { 4'hf, dipsw_c } ),

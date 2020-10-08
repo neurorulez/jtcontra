@@ -24,3 +24,4 @@
 ../../../../modules/jtframe/hdl/sound/jtframe_mixer.v
 ../../../../modules/jtframe/hdl/jtframe_z80wait.v
 ../../../../modules/jtframe/hdl/jtframe_ff.v
+../../../../modules/jt12/jt49/hdl/filter/jt49_dcrm2.v

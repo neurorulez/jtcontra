@@ -201,10 +201,24 @@ always @(posedge clk, posedge rst) begin
     end
 end
 
+`ifdef SIMULATION
+always @(posedge cfg_cs) begin
+    if( cpu_rnw )
+        $display("K007121 CFG read  %2X (%4X)",addr[6:0], mmr[addr[6:0]]);
+    else
+        $display("K007121 CFG write %2X (%4X)",addr[6:0], cpu_dout);
+end
+`endif
+
 always @(posedge clk24) begin
     if( rst ) begin
         { mmr[7], mmr[6], mmr[5], mmr[4] } <= 32'd0;
         { mmr[3], mmr[2], mmr[1], mmr[0] } <= 32'd0;
+        // Unknown extra registers:
+        { mmr[23], mmr[22], mmr[21], mmr[20] } <= ~32'd0;
+        { mmr[19], mmr[18], mmr[17], mmr[16] } <= ~32'd0;
+        { mmr[15], mmr[14], mmr[13], mmr[12] } <= ~32'd0;
+        { mmr[11], mmr[10], mmr[ 9], mmr[ 8] } <= ~32'd0;
     end else if(cpu_cen) begin
         if(!cpu_rnw && cfg_cs)
             mmr[ addr[6:0] ] <= cpu_dout;
@@ -466,5 +480,13 @@ jtframe_dual_ram #(.aw(12)) u_obj_ram(
     .we1    ( 1'b0          ),
     .q1     ( obj_scan      )
 );
+
+// `ifdef SIMULATION
+// always @(posedge obj_we) begin
+//     if( addr[10] ) begin
+//         $display("K007121 extra RAM write at %04X (%02X)", addr[11:0], cpu_dout );
+//     end
+// end
+// `endif
 
 endmodule
