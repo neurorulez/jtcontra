@@ -33,7 +33,7 @@ if [[ $MAKELIST = all ||  $MAKELIST = labrun ]]; then
     if [ ! -e labrun.xml ]; then
         mamefilter labyrunr > labrun.xml || exit $?
     fi
-    ALT=_alt/"Labyrinth Runner"
+    ALT=_alt/"_Labyrinth Runner"
     mkdir -p $ALT
     COMMON="labrun.xml -rbf jtlabrun -swapbytes maincpu -dipbase 8"
 

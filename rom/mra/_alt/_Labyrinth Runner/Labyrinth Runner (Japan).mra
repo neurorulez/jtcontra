@@ -21,25 +21,23 @@
 
 <misterromdescription>
     <about author="jotego" webpage="https://patreon.com/topapate" source="https://github.com/jotego" twitter="@topapate"/>
-    <name>Labyrinth Runner (World Ver. K)</name>
-    <setname>labyrunrk</setname>
+    <name>Labyrinth Runner (Japan)</name>
+    <setname>labyrunr</setname>
     <rbf>jtlabrun</rbf>
-    <rom index="0" zip="labyrunrk.zip|tricktrp.zip" type="merged" md5="None">
+    <rom index="0" zip="labyrunr.zip|tricktrp.zip" type="merged" md5="None">
         <!-- maincpu - starts at 0x0 -->
         <interleave output="16">
-            <part name="771k04.10f" crc="9816ab35" map="12"/>
+            <part name="771j04.10f" crc="354a41d0"  length="0x8000" offset="0x8000"  map="12"/>
         </interleave>
         <interleave output="16">
-            <part name="771k03.8f" crc="48d732ae" map="12"/>
+            <part name="771j04.10f" crc="354a41d0"  length="0x8000" offset="0x0"  map="12"/>
+        </interleave>
+        <interleave output="16">
+            <part name="771j03.8f" crc="12b49044" map="12"/>
         </interleave>
         <!-- gfx1 - starts at 0x20000 -->
         <interleave output="16">
-            <part name="771d01a.13a" crc="0cd1ed1a" map="01"/>
-            <part name="771d01c.13a" crc="d75521fe" map="10"/>
-        </interleave>
-        <interleave output="16">
-            <part name="771d01b" crc="07f2a71c" map="01"/>
-            <part name="771d01d" crc="f6810a49" map="10"/>
+            <part name="771d01.14a" crc="15c8f5f9" map="12"/>
         </interleave>
         <!-- proms - starts at 0x60000 -->
         <part name="771d02.08d" crc="3d34bb5a"/>
