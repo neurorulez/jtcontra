@@ -80,12 +80,12 @@ wire [8:0]  chr_pxl, scr_pxl, line_din;
 reg  [7:0]  mmr[0:RCNT-1];
 wire [8:0]  hpos;
 wire [7:0]  vpos = mmr[2];
-wire        row_en     = mmr[1][1]; // row scroll enable
+wire        strip_en   = mmr[1][1]; // row scroll enable
 wire        ch_tx_enb  = mmr[1][3]; // char layer transparency (enable low)
 wire        tile_msb   = mmr[3][0];
 wire        obj_page   = mmr[3][3]; // select from which page to draw sprites
 wire        layout     = mmr[3][4]; // 1 for wide layout
-wire        narrow_en  = mmr[3][6] | row_en; // 1 for not displaying first and last columns
+wire        narrow_en  = mmr[3][6] | strip_en; // 1 for not displaying first and last columns
 wire [3:0]  extra_mask = mmr[4][7:4];
 wire [3:0]  extra_bits = mmr[4][3:0];
 wire [1:0]  code9_sel, code10_sel, code11_sel, code12_sel;
@@ -123,6 +123,9 @@ wire [ 7:0] code_scan, attr_scan, obj_scan;
 reg  [ 7:0] vprom_addr;
 wire [ 3:0] vprom_data, oprom_data;
 
+wire [ 7:0] strip_pos;
+wire [ 4:0] strip_addr;
+
 wire [9:0]  line_dump;
 
 wire        rom_obj_cs, rom_scr_cs;
@@ -137,9 +140,10 @@ reg  [15:0] rom_scr_data, rom_obj_data;
 reg         ok_wait;
 reg  [ 1:0] last_cs;
 
-assign      cfg_cs  = (addr < RCNT) && cs;
-assign      vram_cs = addr[13] && cs;
-assign      hpos    = row_en ? {1'b0, mmr[ {2'b0, vrender[7:3]}+7'h20 ]} : { mmr[1][0], mmr[0] };
+assign cfg_cs    = (addr < RCNT) && cs;
+assign vram_cs   = addr[13] && cs;
+assign hpos      = { mmr[1][0], mmr[0] };
+assign strip_pos = mmr[ { 2'b1, strip_addr} ];
 
 // Data bus mux. It'd be nice to latch this:
 always @(*) begin
@@ -337,6 +341,10 @@ jtcontra_gfx_tilemap u_tilemap(
     .rom_data           ( rom_scr_data      ),
     .attr_scan          ( attr_scan         ),
     .code_scan          ( code_scan         ),
+    // Strip scroll
+    .strip_en           ( strip_en          ),
+    .strip_pos          ( strip_pos         ),
+    .strip_addr         ( strip_addr        ),
     // Configuration
     .chr_dump_start     ( chr_render_start  ),
     .scr_dump_start     ( scr_render_start  ),

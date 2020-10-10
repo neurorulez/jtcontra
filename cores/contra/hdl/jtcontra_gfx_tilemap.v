@@ -44,6 +44,10 @@ module jtcontra_gfx_tilemap(
     input       [15:0]   rom_data,
     input       [ 7:0]   attr_scan,
     input       [ 7:0]   code_scan,
+    // Strip scroll
+    input                strip_en,
+    input       [ 7:0]   strip_pos,
+    output      [ 4:0]   strip_addr,
     // Configuration
     input       [ 8:0]   chr_dump_start,
     input       [ 8:0]   scr_dump_start,
@@ -69,14 +73,15 @@ reg  [ 4:0] bank;
 reg  [ 7:0] dump_cnt;
 reg  [15:0] pxl_data;
 reg  [8:0]  hrender;
-assign      line_addr = { line, flip ? 9'h117-hrender  : hrender };
 
-wire [ 9:0] lyr_hn0 = lyr ? 9'd0 : hpos;
+wire [ 9:0] lyr_hn0 = lyr ? 9'd0 : hpos + (strip_en ? {1'b0,strip_pos} : 9'd0);
 
-assign      chr_we = line_we &  lyr;
-assign      scr_we = line_we & ~lyr;
-assign      rom_addr  = { tile_msb, code, vn[2:0], hn[2] }; // 13+3+1 = 17!
-assign      scan_addr = { lyr, vn[7:3], hn[7:3] }; // 1 + 5 + 5 = 11
+assign line_addr  = { line, flip ? 9'h117-hrender  : hrender };
+assign chr_we     = line_we &  lyr;
+assign scr_we     = line_we & ~lyr;
+assign rom_addr   = { tile_msb, code, vn[2:0], hn[2] }; // 13+3+1 = 17!
+assign scan_addr  = { lyr, vn[7:3], hn[7:3] }; // 1 + 5 + 5 = 11
+assign strip_addr = vrender[7:3];
 
 always @(*) begin
     bank[0] = attr_scan[7];
