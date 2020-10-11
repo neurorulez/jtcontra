@@ -85,10 +85,10 @@ always @(posedge clk) begin
             gfx_cs       <= 0;
         end else begin
             pal_cs         <= 0;
-            cpu_addr[13:5] <= 'd0;
+            cpu_addr[13:0] <= 'd0;
             if( cfg_cnt < 64 ) begin
                 gfx_cs        <= 1;
-                cpu_addr[4:0] <= cfg_cnt[4:0];
+                cpu_addr[5:0] <= cfg_cnt[5:0];
                 cpu_rnw       <= 0;
                 cpu_dout      <= gfx_cfg[ cfg_cnt ];
                 cfg_cnt       <= cfg_cnt+1;
