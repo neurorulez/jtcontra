@@ -80,7 +80,8 @@ wire [8:0]  chr_pxl, scr_pxl, line_din;
 reg  [7:0]  mmr[0:RCNT-1];
 wire [8:0]  hpos;
 wire [7:0]  vpos = mmr[2];
-wire        strip_en   = mmr[1][1]; // row scroll enable
+wire        strip_en   = mmr[1][1]; // strip scroll enable
+wire        strip_col  = mmr[1][2]; // strip scroll applies to columns (1) or rows (0)
 wire        ch_tx_enb  = mmr[1][3]; // char layer transparency (enable low)
 wire        tile_msb   = mmr[3][0];
 wire        obj_page   = mmr[3][3]; // select from which page to draw sprites
@@ -343,6 +344,7 @@ jtcontra_gfx_tilemap u_tilemap(
     .code_scan          ( code_scan         ),
     // Strip scroll
     .strip_en           ( strip_en          ),
+    .strip_col          ( strip_col         ),
     .strip_pos          ( strip_pos         ),
     .strip_addr         ( strip_addr        ),
     // Configuration

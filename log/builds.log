@@ -204,3 +204,10 @@ labrun        	sidi	20201009	1	PASS	85ee87a	23c8dd4
 labrun        	mist	20201009	1	PASS	85ee87a	23c8dd4
 labrun        	mister	20201009	1	PASS	85ee87a	23c8dd4
 comsc         	mist	20201010	1	PASS	aa40fd8	23c8dd4
+comsc         	mist	20201010	1	PASS	f819bef	23c8dd4
+contra        	mist	20201011	1	PASS	f819bef	23c8dd4
+comsc         	mist	20201011	1	FAIL	f819bef	23c8dd4
+labrun        	mist	20201011	1	FAIL	f819bef	23c8dd4
+comsc         	mist	20201011	1	PASS	f819bef	23c8dd4
+labrun        	mist	20201011	1	PASS	f819bef	23c8dd4
+labrun        	mist	20201011	1	PASS	f819bef	23c8dd4

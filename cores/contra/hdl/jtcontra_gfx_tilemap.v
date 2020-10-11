@@ -46,6 +46,7 @@ module jtcontra_gfx_tilemap(
     input       [ 7:0]   code_scan,
     // Strip scroll
     input                strip_en,
+    input                strip_col,
     input       [ 7:0]   strip_pos,
     output      [ 4:0]   strip_addr,
     // Configuration
@@ -69,19 +70,22 @@ reg  [ 2:0] st;
 reg         last_LHBL;
 reg         scrwin;
 reg  [ 8:0] hn, vn;
+wire [ 8:0] lyr_vn, vpos_sum;
 reg  [ 4:0] bank;
 reg  [ 7:0] dump_cnt;
 reg  [15:0] pxl_data;
 reg  [8:0]  hrender;
 
-wire [ 9:0] lyr_hn0 = lyr ? 9'd0 : hpos + (strip_en ? {1'b0,strip_pos} : 9'd0);
+wire [ 9:0] lyr_hn0 = lyr ? 9'd0 : hpos + ((strip_en && !strip_col)? {1'b0,strip_pos} : 9'd0);
 
 assign line_addr  = { line, flip ? 9'h117-hrender  : hrender };
 assign chr_we     = line_we &  lyr;
 assign scr_we     = line_we & ~lyr;
 assign rom_addr   = { tile_msb, code, vn[2:0], hn[2] }; // 13+3+1 = 17!
 assign scan_addr  = { lyr, vn[7:3], hn[7:3] }; // 1 + 5 + 5 = 11
-assign strip_addr = vrender[7:3];
+assign strip_addr = strip_col ? hrender[7:3] : vrender[7:3];
+assign vpos_sum   = {1'd0,vpos} + ((strip_en && strip_col) ? {1'd0,strip_pos} : 9'd0);
+assign lyr_vn     = (vrender^{1'b0,{9{flip}}}) + (lyr ? 9'd0 : vpos_sum);
 
 always @(*) begin
     bank[0] = attr_scan[7];
@@ -114,7 +118,7 @@ always @(posedge clk) begin
             if(!done) st <= st + 3'd1;
             case( st )
                 0: begin
-                    vn <= (vrender^{1'b0,{9{flip}}}) + (lyr ? 9'd0 : {1'b0, vpos});
+                    vn <= lyr_vn;
                     hn <= lyr_hn0[8:0];
                     hrender <= ( lyr ? chr_dump_start : scr_dump_start )
                                - { 7'd0, lyr_hn0[1:0] } - 9'd1;
@@ -150,6 +154,7 @@ always @(posedge clk) begin
                             st      <= 3; // wait for new ROM data
                         end else begin
                             st      <= 1; // collect tile info
+                            vn      <= lyr_vn; // in case there is column scroll
                         end
                     end else begin
                         st  <= 0;
