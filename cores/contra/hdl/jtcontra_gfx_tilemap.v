@@ -83,7 +83,7 @@ assign chr_we     = line_we &  lyr;
 assign scr_we     = line_we & ~lyr;
 assign rom_addr   = { tile_msb, code, vn[2:0], hn[2] }; // 13+3+1 = 17!
 assign scan_addr  = { lyr, vn[7:3], hn[7:3] }; // 1 + 5 + 5 = 11
-assign strip_addr = strip_col ? hrender[7:3] : vrender[7:3];
+assign strip_addr = strip_col ? hn[7:3] : vrender[7:3];
 assign vpos_sum   = {1'd0,vpos} + ((strip_en && strip_col) ? {1'd0,strip_pos} : 9'd0);
 assign lyr_vn     = (vrender^{1'b0,{9{flip}}}) + (lyr ? 9'd0 : vpos_sum);
 
