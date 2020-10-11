@@ -128,6 +128,19 @@ u_dwnld(
     .sdram_ack      ( sdram_ack     )
 );
 
+`ifdef GFX_ONLY
+jtlabrun_simloader u_simloader(
+    .rst        ( rst           ),
+    .clk        ( clk24         ),
+    .cpu_cen    ( cpu_cen       ),
+    // GFX
+    .cpu_addr   ( cpu_addr      ),
+    .cpu_dout   ( cpu_dout      ),
+    .cpu_rnw    ( cpu_rnw       ),
+    .gfx_cs     ( gfx_cs        ),
+    .pal_cs     ( pal_cs        )
+);
+`else
 `ifndef NOMAIN
 jtlabrun_main u_main(
     .clk            ( clk24         ),        // 24 MHz
@@ -169,6 +182,7 @@ jtlabrun_main u_main(
 );
 `else
 assign main_cs = 0;
+`endif
 `endif
 
 `ifndef NOVIDEO

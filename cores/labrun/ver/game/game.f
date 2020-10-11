@@ -1,3 +1,4 @@
+jtlabrun_simloader.v
 ../../hdl/jtlabrun_game.v
 ../../hdl/jtlabrun_main.v
 ../../hdl/jtlabrun_video.v
