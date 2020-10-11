@@ -69,7 +69,7 @@ reg         line_we;
 reg  [ 2:0] st;
 reg         last_LHBL;
 reg         scrwin;
-reg  [ 8:0] hn, vn;
+reg  [ 8:0] hn, vn, hn_aux;
 wire [ 8:0] lyr_vn, vpos_sum;
 reg  [ 4:0] bank;
 reg  [ 7:0] dump_cnt;
@@ -77,13 +77,12 @@ reg  [15:0] pxl_data;
 reg  [8:0]  hrender;
 
 wire [ 9:0] lyr_hn0 = lyr ? 9'd0 : hpos + ((strip_en && !strip_col)? {1'b0,strip_pos} : 9'd0);
-
 assign line_addr  = { line, flip ? 9'h117-hrender  : hrender };
 assign chr_we     = line_we &  lyr;
 assign scr_we     = line_we & ~lyr;
 assign rom_addr   = { tile_msb, code, vn[2:0], hn[2] }; // 13+3+1 = 17!
 assign scan_addr  = { lyr, vn[7:3], hn[7:3] }; // 1 + 5 + 5 = 11
-assign strip_addr = strip_col ? hn[7:3] : vrender[7:3];
+assign strip_addr = strip_col ? hn_aux[7:3] : vrender[7:3];
 assign vpos_sum   = {1'd0,vpos} + ((strip_en && strip_col) ? {1'd0,strip_pos} : 9'd0);
 assign lyr_vn     = (vrender^{1'b0,{9{flip}}}) + (lyr ? 9'd0 : vpos_sum);
 
@@ -118,25 +117,28 @@ always @(posedge clk) begin
             if(!done) st <= st + 3'd1;
             case( st )
                 0: begin
-                    vn <= lyr_vn;
                     hn <= lyr_hn0[8:0];
+                    hn_aux <= lyr_hn0[8:0];
                     hrender <= ( lyr ? chr_dump_start : scr_dump_start )
                                - { 7'd0, lyr_hn0[1:0] } - 9'd1;
                 end
-                2: begin
+                1: begin
+                    vn <= lyr_vn;
+                end
+                3: begin
                     code   <= { bank, code_scan };
-                    pal    <= { /*pal_msb & attr_scan[3]*/1'b1, attr_scan[2:0] };
+                    pal    <= { pal_msb & attr_scan[3], attr_scan[2:0] };
                     scrwin <= attr_scan[6] && scrwin_en;
                     rom_cs <= 1;
                 end
-                4: begin
+                5: begin
                     if( rom_ok ) begin
                         pxl_data <= rom_data;
                         rom_cs   <= 0;
                         dump_cnt <= 4'h7;
                     end else st <= st;
                 end
-                5: begin // dumps 4 pixels
+                6: begin // dumps 4 pixels
                     if( dump_cnt[0] ) st<=st;
                     dump_cnt <= dump_cnt>>1;
                     pxl_data <= pxl_data << 4;
@@ -144,17 +146,17 @@ always @(posedge clk) begin
                     line_din <= { scrwin, pal, pxl_data[15:12] };
                     line_we  <= 1;
                 end
-                6: begin
+                7: begin
                     line_we <= 0;
                     if( hrender < 9'd320 ) begin
                         hn      <= hn + 9'd4;
-                        st      <= 7;
                         if( !hn[2] ) begin
                             rom_cs  <= 1;
-                            st      <= 3; // wait for new ROM data
+                            st      <= 4; // wait for new ROM data
                         end else begin
-                            st      <= 1; // collect tile info
+                            st      <= 2; // collect tile info
                             vn      <= lyr_vn; // in case there is column scroll
+                            hn_aux  <= hn;
                         end
                     end else begin
                         st  <= 0;
