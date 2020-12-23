@@ -44,7 +44,7 @@ module jtcontra_sound(
     // Sound output
     output signed [15:0] snd_left,
     output signed [15:0] snd_right,
-    output               sample    
+    output               sample
 );
 
 wire [ 7:0] cpu_dout, ram_dout, fm_dout;
@@ -59,11 +59,6 @@ assign rom_addr  = A[14:0];
 
 assign pcm_addr = 17'd0;
 assign pcm_cs   = 0;
-
-// Sound has +6dB gain which seems needed at least for Contra
-// May produce distortion. Look here in case of trouble:
-assign snd_left  = xleft  << 1;
-assign snd_right = xright << 1;
 
 wire cen_fm, cen_fm2;
 wire cpu_cen;
@@ -100,7 +95,7 @@ jtframe_ff u_ff(
 );
 
 jtframe_sys6809 #(.RAM_AW(11)) u_cpu(
-    .rstn       ( ~rst      ), 
+    .rstn       ( ~rst      ),
     .clk        ( clk       ),
     .cen        ( cen12     ),   // This is normally the input clock to the CPU
     .cpu_cen    ( cpu_cen   ),   // 1/4th of cen -> 3MHz
@@ -151,8 +146,8 @@ jt51 u_jt51(
     .left       (           ),
     .right      (           ),
     // Full resolution output
-    .xleft      ( xleft     ),
-    .xright     ( xright    ),
+    .xleft      ( snd_left  ),
+    .xright     ( snd_right ),
     // unsigned outputs for sigma delta converters, full resolution
     .dacleft    (           ),
     .dacright   (           )
