@@ -59,7 +59,7 @@ module jtcontra_game(
     input           dip_pause,
     inout           dip_flip,
     input           dip_test,
-    input   [ 1:0]  dip_fxlevel, // Not a DIP on the original PCB   
+    input   [ 1:0]  dip_fxlevel, // Not a DIP on the original PCB
     // Sound output
     output  signed [15:0] snd_left,
     output  signed [15:0] snd_right,
@@ -78,7 +78,7 @@ module jtcontra_game(
 localparam GAME=`JTCONTRA_PCB;
 localparam CONTRA=0;
 
-// SDRAM offsets. 
+// SDRAM offsets.
 localparam SND_OFFSET  = (GAME==CONTRA ? 22'h2_0000 : 22'h3_0000) >> 1;
 localparam GFX1_OFFSET =  GAME==CONTRA ? (SND_OFFSET  + (22'h0_8000 >> 1)) : 22'h04_0000>>1;
 localparam GFX2_OFFSET =  GAME==CONTRA ? (GFX1_OFFSET + (22'h8_0000 >> 1)) : 22'h14_0000>>1;
@@ -157,7 +157,7 @@ jtcontra_simloader u_simloader(
     .cpu_dout   ( cpu_dout      ),
     .cpu_rnw    ( cpu_rnw       ),
     .gfx1_cs    ( gfx1_cs       ),
-    .gfx2_cs    ( gfx2_cs       ),    
+    .gfx2_cs    ( gfx2_cs       ),
     .pal_cs     ( pal_cs        ),
     .video_bank ( video_bank    ),
     .prio_latch ( prio_latch    )
@@ -293,7 +293,7 @@ jtcontra_sound u_sound(
     .snd_right  ( snd_right     ),
     .sample     ( sample        )
 );
-`else 
+`else
 assign snd_cs   = 0;
 assign snd_addr = 15'd0;
 assign snd_left = 16'd0;
@@ -328,7 +328,7 @@ jtframe_rom #(
 
     .slot0_cs    ( gfx1_romcs    ),
     .slot1_cs    ( gfx2_romcs    ),
-    .slot2_cs    ( pcm_cs        ), 
+    .slot2_cs    ( pcm_cs        ),
     .slot3_cs    ( 1'b0          ), // unused
     .slot4_cs    ( 1'b0          ), // unused
     .slot5_cs    ( 1'b0          ), // unused
