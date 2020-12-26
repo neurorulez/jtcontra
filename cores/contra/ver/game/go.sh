@@ -11,7 +11,7 @@
 
 if [ ! -e sdram.hex ]; then
     ln -sf $ROM/contra.rom rom.bin
-    bin2hex <rom.bin >sdram.hex
+    bin2hex <rom.bin >sdram_bank0.hex
 fi
 
 export GAME_ROM_PATH=rom.bin

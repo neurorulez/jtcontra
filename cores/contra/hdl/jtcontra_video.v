@@ -164,6 +164,7 @@ jtcontra_gfx u_gfx1(
     .cpu_dout   ( cpu_dout      ),
     .dout       ( gfx1_dout     ),
     .cpu_irqn   ( cpu_irqn      ),
+    .cpu_nmin   (               ),
     // SDRAM interface
     .rom_obj_sel( gfx1_sel      ),
     .rom_addr   ( gfx1_pre      ),
@@ -203,6 +204,7 @@ jtcontra_gfx u_gfx2(
     .cpu_dout   ( cpu_dout      ),
     .dout       ( gfx2_dout     ),
     .cpu_irqn   (               ),
+    .cpu_nmin   (               ),
     // SDRAM interface
     .rom_obj_sel( gfx2_sel      ),
     .rom_addr   ( gfx2_pre      ),
