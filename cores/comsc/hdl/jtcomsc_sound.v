@@ -42,7 +42,8 @@ module jtcontra_sound(
     // Sound output
     output signed [15:0] snd_left,
     output signed [15:0] snd_right,
-    output               sample    
+    output               sample,
+    output               game_led
 );
 
 wire        [ 7:0]  cpu_dout, ram_dout, fm_dout;
@@ -116,6 +117,7 @@ jt49_dcrm2 #(.sw(10)) u_dcrm (
 );
 
 jtframe_mixer #(.W0(16),.W1(9),.W2(10)) u_mixer(
+    .rst    ( rst        ),
     .clk    ( clk        ),
     .cen    ( cen_fm     ),
     .ch0    ( fm_snd     ),
@@ -126,7 +128,8 @@ jtframe_mixer #(.W0(16),.W1(9),.W2(10)) u_mixer(
     .gain1  ( 8'h18      ),
     .gain2  ( 8'h10      ),
     .gain3  ( 8'd0       ),
-    .mixed  ( snd_left   )
+    .mixed  ( snd_left   ),
+    .peak   ( peak       )
 );
 
 jtframe_ff u_ff(
@@ -142,7 +145,7 @@ jtframe_ff u_ff(
 );
 
 jtframe_sysz80 #(.RAM_AW(11)) u_cpu(
-    .rst_n      ( ~rst      ), 
+    .rst_n      ( ~rst      ),
     .clk        ( clk       ),
     .cen        ( cen_fm2   ), // 1.5MHz, there is a clock divider in schematics
 //    .cen        ( cen_fm    ), // 3MHz, see if melody pace gets faster

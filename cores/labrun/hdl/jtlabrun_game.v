@@ -63,6 +63,7 @@ module jtlabrun_game(
     // Sound output
     output  signed [15:0] snd,
     output          sample,
+    output          game_led,
     input           enable_psg,
     input           enable_fm,
     // Debug
@@ -178,7 +179,8 @@ jtlabrun_main u_main(
     .dipsw_c        ( dipsw_c       ),
     // Sound
     .snd            ( snd           ),
-    .sample         ( sample        )
+    .sample         ( sample        ),
+    .peak           ( game_led      )
 );
 `else
 assign main_cs = 0;

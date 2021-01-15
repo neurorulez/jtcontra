@@ -243,6 +243,7 @@ jt49_dcrm2 #(.sw(11)) u_dcrm (
 );
 
 jtframe_mixer #(.W0(16),.W1(16),.W2(11)) u_mixer(
+    .rst    ( rst       ),
     .clk    ( clk       ),
     .cen    ( cen3      ),
     // input signals
@@ -255,7 +256,8 @@ jtframe_mixer #(.W0(16),.W1(16),.W2(11)) u_mixer(
     .gain1  ( 8'hF0     ),
     .gain2  ( 8'hC0     ),
     .gain3  ( 8'h00     ),
-    .mixed  ( snd       )
+    .mixed  ( snd       ),
+    .peak   ( peak      )
 );
 
 endmodule

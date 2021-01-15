@@ -64,6 +64,7 @@ module jtcontra_game(
     output  signed [15:0] snd_left,
     output  signed [15:0] snd_right,
     output          sample,
+    output          game_led,
     input           enable_psg,
     input           enable_fm,
     // Debug
@@ -114,7 +115,6 @@ wire        prio_latch;
 assign prog_rd    = 0;
 assign dwnld_busy = downloading;
 assign { dipsw_c, dipsw_b, dipsw_a } = dipsw[19:0];
-
 
 jtframe_cen24 u_cen(
     .clk        ( clk24         ),    // 24 MHz
@@ -292,7 +292,8 @@ jtcontra_sound u_sound(
     // Sound output
     .snd_left   ( snd_left      ),
     .snd_right  ( snd_right     ),
-    .sample     ( sample        )
+    .sample     ( sample        ),
+    .peak       ( game_led      )
 );
 `else
 assign snd_cs   = 0;

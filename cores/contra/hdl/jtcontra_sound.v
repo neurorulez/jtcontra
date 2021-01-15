@@ -44,7 +44,8 @@ module jtcontra_sound(
     // Sound output
     output signed [15:0] snd_left,
     output signed [15:0] snd_right,
-    output               sample
+    output               sample,
+    output               peak
 );
 
 wire [ 7:0] cpu_dout, ram_dout, fm_dout;
@@ -59,6 +60,7 @@ assign rom_addr  = A[14:0];
 
 assign pcm_addr = 17'd0;
 assign pcm_cs   = 0;
+assign peak     = 0;
 
 wire cen_fm, cen_fm2;
 wire cpu_cen;
