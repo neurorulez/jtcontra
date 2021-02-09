@@ -56,6 +56,7 @@ module jtcontra_game(
     // DIP switches
     input   [31:0]  status,     // only bits 31:16 are looked at
     input   [31:0]  dipsw,
+    input           service,
     input           dip_pause,
     inout           dip_flip,
     input           dip_test,
@@ -183,7 +184,7 @@ jtcontra_main #(.GAME(GAME)) u_main(
     .coin_input     ( coin_input    ),
     .joystick1      ( joystick1     ),
     .joystick2      ( joystick2     ),
-    .service        ( 1'b1          ),
+    .service        ( service       ),
     // GFX
     .cpu_addr       ( cpu_addr      ),
     .cpu_dout       ( cpu_dout      ),

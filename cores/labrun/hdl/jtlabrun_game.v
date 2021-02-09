@@ -57,6 +57,7 @@ module jtlabrun_game(
     input   [31:0]  status,     // only bits 31:16 are looked at
     input   [31:0]  dipsw,
     input           dip_pause,
+    input           service,
     inout           dip_flip,
     input           dip_test,
     input   [ 1:0]  dip_fxlevel, // Not a DIP on the original PCB
@@ -159,7 +160,7 @@ jtlabrun_main u_main(
     .coin_input     ( coin_input    ),
     .joystick1      ( joystick1     ),
     .joystick2      ( joystick2     ),
-    .service        ( 1'b1          ),
+    .service        ( service       ),
     // GFX
     .gfx_addr       ( cpu_addr      ),
     .cpu_dout       ( cpu_dout      ),
