@@ -380,3 +380,12 @@ contra        	mist	20210209	1	PASS	ef28dc9	061566f
 contra        	sidi	20210209	22790	PASS	8aa1aa6	061566f
 contra        	mist	20210209	16279	PASS	8aa1aa6	061566f
 contra        	mister	20210209	29546	PASS	8aa1aa6	061566f
+labrun        	mister	20210210	16609	FAIL	2cb1d91	91a1ef8
+labrun        	mister	20210210	2260	FAIL	2cb1d91	91a1ef8
+labrun        	mister	20210210	14458	FAIL	2cb1d91	91a1ef8
+labrun        	mister	20210210	24989	FAIL	2cb1d91	91a1ef8
+comsc         	mister	20210210	23207	FAIL	2cb1d91	91a1ef8
+comsc         	mister	20210210	12634	FAIL	2cb1d91	91a1ef8
+comsc         	mister	20210210	17616	FAIL	2cb1d91	91a1ef8
+comsc         	mister	20210210	13291	FAIL	2cb1d91	91a1ef8
+contra        	mister	20210210	23010	PASS	2cb1d91	91a1ef8

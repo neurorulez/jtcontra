@@ -43,7 +43,7 @@ module jtcontra_sound(
     output signed [15:0] snd_left,
     output signed [15:0] snd_right,
     output               sample,
-    output               game_led
+    output               peak
 );
 
 wire        [ 7:0]  cpu_dout, ram_dout, fm_dout;
