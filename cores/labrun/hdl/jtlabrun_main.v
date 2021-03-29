@@ -57,7 +57,8 @@ module jtlabrun_main(
     input      [3:0]    dipsw_c,
     // Sound
     output signed [15:0] snd,
-    output               sample
+    output               sample,
+    output               peak
 );
 
 localparam RAM_AW = 11;
