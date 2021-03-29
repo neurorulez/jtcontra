@@ -106,9 +106,9 @@ wire [ 3:0] dipsw_c;
 wire        LHBL, LVBL;
 
 wire [15:0] cpu_addr;
-wire        gfx_irqn, gfx1_romcs, gfx2_romcs, gfx1_cfg_cs, gfx2_cfg_cs, pal_cs;
+wire        gfx1_romcs, gfx2_romcs, gfx1_cfg_cs, gfx2_cfg_cs, pal_cs;
 wire        gfx1_vram_cs, gfx2_vram_cs;
-wire        cpu_cen, cpu_rnw, cpu_irqn;
+wire        cpu_cen, cpu_rnw, cpu_irqn, cpu_nmin;
 wire [ 7:0] gfx1_dout, gfx2_dout, pal_dout, cpu_dout;
 wire [ 7:0] video_bank;
 wire        prio_latch;
@@ -190,6 +190,7 @@ jtcontra_main #(.GAME(GAME)) u_main(
     .cpu_dout       ( cpu_dout      ),
     .cpu_rnw        ( cpu_rnw       ),
     .gfx_irqn       ( cpu_irqn      ),
+    .gfx_nmin       ( cpu_nmin      ),
     .gfx1_cs        ( gfx1_cs       ),
     .gfx2_cs        ( gfx2_cs       ),
     .pal_cs         ( pal_cs        ),
@@ -240,6 +241,7 @@ jtcontra_video #(.GAME(GAME)) u_video (
     .prog_data      ( prog_data[3:0]),
     // GFX - CPU interface
     .cpu_irqn       ( cpu_irqn      ),
+    .cpu_nmin       ( cpu_nmin      ),
     .gfx1_cs        ( gfx1_cs       ),
     .gfx2_cs        ( gfx2_cs       ),
     .pal_cs         ( pal_cs        ),

@@ -46,6 +46,7 @@ module jtcontra_main(
     output              cpu_rnw,
     output      [ 7:0]  cpu_dout,
     input               gfx_irqn,
+    input               gfx_nmin,
     inout               gfx1_cs,
     inout               gfx2_cs,
     output              pal_cs,
@@ -68,11 +69,12 @@ localparam RAM_AW = GAME==0 ? 12 : 13;
 
 wire [ 7:0] ram_dout, cpu_din;
 wire [15:0] A;
-wire        RnW, irq_n, irq_ack;
-wire        irq_trigger;
+wire        RnW, irq_n, nmi_n, irq_ack;
+wire        irq_trigger, nmi_trigger;
 wire        ram_cs;
 
 assign irq_trigger = ~gfx_irqn & dip_pause;
+assign nmi_trigger = ~gfx_nmin & dip_pause;
 assign cpu_addr    = A;
 assign cpu_rnw     = RnW;
 
@@ -162,10 +164,10 @@ generate
                 .dipsw_c        ( dipsw_c       )
             );
         end
-    endcase    
+    endcase
 endgenerate
 
-jtframe_ff u_ff(
+jtframe_ff u_ff_irq(
     .clk      ( clk         ),
     .rst      ( rst         ),
     .cen      ( 1'b1        ),
@@ -177,8 +179,20 @@ jtframe_ff u_ff(
     .sigedge  ( irq_trigger )     // signal whose edge will trigger the FF
 );
 
+jtframe_ff u_ff_nmi(
+    .clk      ( clk         ),
+    .rst      ( rst         ),
+    .cen      ( 1'b1        ),
+    .din      ( 1'b1        ),
+    .q        (             ),
+    .qn       ( nmi_n       ),
+    .set      (             ),    // active high
+    .clr      ( irq_ack     ),    // active high
+    .sigedge  ( nmi_trigger )     // signal whose edge will trigger the FF
+);
+
 jtframe_sys6809 #(.RAM_AW(RAM_AW)) u_cpu(
-    .rstn       ( ~rst      ), 
+    .rstn       ( ~rst      ),
     .clk        ( clk       ),
     .cen        ( cen12     ),   // This is normally the input clock to the CPU
     .cpu_cen    ( cpu_cen   ),   // 1/4th of cen -> 3MHz
@@ -186,7 +200,7 @@ jtframe_sys6809 #(.RAM_AW(RAM_AW)) u_cpu(
     // Interrupts
     .nIRQ       ( irq_n     ),
     .nFIRQ      ( 1'b1      ),
-    .nNMI       ( 1'b1      ),
+    .nNMI       ( nmi_n     ),
     .irq_ack    ( irq_ack   ),
     // Bus sharing
     .bus_busy   ( 1'b0      ),

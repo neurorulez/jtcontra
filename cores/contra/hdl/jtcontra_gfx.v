@@ -67,7 +67,7 @@ parameter   H0 = 9'h75; // initial value of hdump after H blanking
 parameter   BYPASS_VPROM=0;
 localparam  RCNT=96;
 
-reg         last_LVBL;
+reg         last_LVBL, last_LHBL;
 wire        gfx_we;
 wire        lyr, done, chr_we, scr_we;
 wire        vram_cs, cfg_cs;
@@ -94,6 +94,7 @@ wire        nmi_en     = mmr[7][0];
 wire        irq_en     = mmr[7][1];
 wire        firq_en    = mmr[7][2];
 assign      flip       = mmr[7][3];
+wire        nmi_pace   = mmr[7][4];
 wire        pal_msb    = mmr[6][0];
 wire        hflip_en   = mmr[6][1];
 wire        vflip_en   = mmr[6][2];
@@ -257,20 +258,24 @@ end
 
 always @(posedge clk, posedge rst) begin
     if( rst ) begin
-        cpu_irqn <= 1;
-        cpu_nmin <= 1;
+        cpu_irqn  <= 1;
+        cpu_nmin  <= 1;
+        last_LVBL <= 0;
+        last_LHBL <= 0;
     end else if(pxl_cen) begin
         last_LVBL <= LVBL;
+        last_LHBL <= LHBL;
         if( !LVBL && last_LVBL ) begin
             if( irq_en ) cpu_irqn <= 0;
         end
         else if( LHBL || !irq_en ) cpu_irqn <= 1;
-        if( !nmi_en || vdump[5:4]!=2'b11 )
-            cpu_nmin <= 1;
-        else begin
-            if( vdump[5:0]==6'b11_0000 && nmi_en )
+
+        // NMI
+        if( nmi_en && !LHBL && last_LHBL &&
+            ( &vdump[3:0] & (vdump[4]|~nmi_pace)) )
                 cpu_nmin <= 0;
-        end
+        else
+                cpu_nmin <= 1;
     end
 end
 

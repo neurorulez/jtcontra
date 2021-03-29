@@ -47,6 +47,7 @@ module jtcontra_video(
     output     [ 7:0]   gfx2_dout,
     output     [ 7:0]   pal_dout,
     output              cpu_irqn,
+    output              cpu_nmin,
     // Combat School:
     input      [ 7:0]   video_bank,
     input               prio_latch,
@@ -164,7 +165,7 @@ jtcontra_gfx u_gfx1(
     .cpu_dout   ( cpu_dout      ),
     .dout       ( gfx1_dout     ),
     .cpu_irqn   ( cpu_irqn      ),
-    .cpu_nmin   (               ),
+    .cpu_nmin   ( cpu_nmin      ),
     // SDRAM interface
     .rom_obj_sel( gfx1_sel      ),
     .rom_addr   ( gfx1_pre      ),
