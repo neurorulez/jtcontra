@@ -1,0 +1,3 @@
+#!/bin/bash
+iverilog test.v ../../hdl/jtcontra_007452.v -o xsim && xsim -lxt
+rm -f xsim
