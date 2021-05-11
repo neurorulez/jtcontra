@@ -16,9 +16,12 @@
     Version: 1.0
     Date: 27-6-2020 */
 
-// This is the custom address decoder 
+// This is the custom address decoder
 // It originally split the bus depending on the E/Q phases
 // That is not needed here
+
+// I don't understand how the 007452 (divider chip) is selected
+// without selecting the GFX chip
 
 module jtcontra_007766(
     input      [15:0]  cpu_addr, // only bits 15-10 and 6-5 were used

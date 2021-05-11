@@ -59,15 +59,17 @@ module jtcontra_main_decoder(
     input      [3:0]    dipsw_c
 );
 
-reg       bank_cs, in_cs, out_cs;
-reg [3:0] bank;
-reg [7:0] port_in;
+reg        bank_cs, in_cs, out_cs, div_cs;
+reg  [3:0] bank;
+reg  [7:0] port_in;
+wire [7:0] div_dout;
 
 always @(*) begin
     rom_cs      = (A[15] || A[15:13]==3'b011) && RnW;
     bank_cs     = A[15:12] == 4'b0111 && !RnW;
     ram_cs      = A[15:12] == 4'b0001;
     pal_cs      = A[15:10] == 6'b0000_11;
+    div_cs      = A[15:10] == 6'b0000_00 && A[4:3]==2'b01;  // 08-0F
     in_cs       = A[15:10] == 6'b0000_00 && A[4] && RnW;  // 10 -1F
     out_cs      = A[15:10] == 6'b0000_00 && A[4:3]==2'b11 && !RnW; // 18-1F
 end
@@ -78,6 +80,7 @@ always @(*) begin   // doesn't boot up if latched
         ram_cs:  cpu_din = ram_dout;
         pal_cs:  cpu_din = pal_dout;
         in_cs:   cpu_din = port_in;
+        div_cs:  cpu_din = div_dout;    // must be above gfx?_cs as it gets selected at the same time
         gfx1_cs: cpu_din = gfx1_dout;
         gfx2_cs: cpu_din = gfx2_dout;
         default: cpu_din = 8'hff;
@@ -118,5 +121,15 @@ always @(posedge clk) begin
         end
     end
 end
+
+jtcontra_007452 u_div(
+    .rst    ( rst       ),
+    .clk    ( clk       ),
+    .cs     ( div_cs & cpu_cen ),
+    .wrn    ( RnW       ),
+    .addr   ( A[2:0]    ),
+    .din    ( cpu_dout  ),
+    .dout   ( div_dout  )
+);
 
 endmodule
