@@ -65,6 +65,13 @@ module jtcontra_gfx(
 
 parameter   H0 = 9'h75; // initial value of hdump after H blanking
 parameter   BYPASS_VPROM=0;
+
+// Simulation files
+parameter   CFGFILE="gfx_cfg.hex",
+            SIMATTR="gfx_attr.bin",
+            SIMCODE="gfx_code.bin",
+            SIMOBJ ="gfx_obj.bin";
+
 localparam  RCNT=96;
 
 reg         last_LVBL, last_LHBL;
@@ -149,9 +156,7 @@ assign strip_pos = mmr[ { 2'b1, strip_addr} ];
 
 // Data bus mux. It'd be nice to latch this:
 always @(*) begin
-    dout = !addr[13] ?
-        mmr[ addr[6:0] ]     // registers, row_scr cannot be read (?)
-        : (addr[12] ? obj_dout :            // objects
+    dout = (addr[12] ? obj_dout :            // objects
           (addr[10] ? code_dout : attr_dout)); // tiles
 end
 
@@ -208,12 +213,15 @@ always @(posedge clk, posedge rst) begin
 end
 
 `ifdef SIMULATION
+initial $readmemh( CFGFILE, mmr );
+/*
 always @(posedge cfg_cs) begin
     if( cpu_rnw )
         $display("K007121 CFG read  %2X (%4X)",addr[6:0], mmr[addr[6:0]]);
     else
         $display("K007121 CFG write %2X (%4X)",addr[6:0], cpu_dout);
 end
+*/
 `endif
 
 always @(posedge clk24) begin
@@ -451,7 +459,7 @@ jtframe_dual_ram #(.dw(9),.aw(10)) u_line_scr(
     .q1     ( scr_pxl   )
 );
 
-jtframe_dual_ram #(.aw(11)) u_attr_ram(
+jtframe_dual_ram #(.aw(11),.simfile(SIMATTR)) u_attr_ram(
     .clk0   ( clk24     ),
     .clk1   ( clk       ),
     // Port 0
@@ -466,7 +474,7 @@ jtframe_dual_ram #(.aw(11)) u_attr_ram(
     .q1     ( attr_scan )
 );
 
-jtframe_dual_ram #(.aw(11)) u_code_ram(
+jtframe_dual_ram #(.aw(11),.simfile(SIMCODE)) u_code_ram(
     .clk0   ( clk24     ),
     .clk1   ( clk       ),
     // Port 0
@@ -481,7 +489,7 @@ jtframe_dual_ram #(.aw(11)) u_code_ram(
     .q1     ( code_scan )
 );
 
-jtframe_dual_ram #(.aw(12)) u_obj_ram(
+jtframe_dual_ram #(.aw(12),.simfile(SIMOBJ)) u_obj_ram(
     .clk0   ( clk24         ),
     .clk1   ( clk           ),
     // Port 0

@@ -39,7 +39,7 @@ module jtcontra_game(
     output          dwnld_busy,
     output          sdram_req,
     output  [21:0]  sdram_addr,
-    input   [31:0]  data_read,
+    input   [15:0]  data_read,
     input           data_dst,
     input           data_rdy,
     input           sdram_ack,
@@ -145,7 +145,8 @@ u_dwnld(
     .prog_mask      ( prog_mask     ), // active low
     .prog_we        ( prog_we       ),
     .prom_we        ( prom_we       ),
-    .sdram_ack      ( sdram_ack     )
+    .sdram_ack      ( sdram_ack     ),
+    .header         (               )
 );
 
 `ifdef GFX_ONLY

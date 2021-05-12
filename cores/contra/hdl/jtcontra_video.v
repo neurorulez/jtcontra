@@ -137,7 +137,12 @@ jtframe_vtimer u_timer(
 wire gfx1_prom_we = ~prog_addr[9] & prom_we;
 wire gfx2_prom_we =  prog_addr[9] & prom_we;
 
-jtcontra_gfx u_gfx1(
+jtcontra_gfx #(
+    .CFGFILE("gfx1_cfg.hex"),
+    .SIMATTR("gfx1_attr.bin"),
+    .SIMCODE("gfx1_code.bin"),
+    .SIMOBJ ("gfx1_obj.bin")
+) u_gfx1(
     .rst        ( rst           ),
     .clk        ( clk           ),
     .clk24      ( clk24         ),
@@ -177,7 +182,12 @@ jtcontra_gfx u_gfx1(
     .gfx_en     ( gfx_en[1:0]   )
 );
 
-jtcontra_gfx u_gfx2(
+jtcontra_gfx #(
+    .CFGFILE("gfx2_cfg.hex"),
+    .SIMATTR("gfx2_attr.bin"),
+    .SIMCODE("gfx2_code.bin"),
+    .SIMOBJ ("gfx2_obj.bin")
+) u_gfx2(
     .rst        ( rst           ),
     .clk        ( clk           ),
     .clk24      ( clk24         ),

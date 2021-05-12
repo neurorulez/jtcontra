@@ -10,6 +10,7 @@ jtcontra_simloader.v
 ../../hdl/jtcontra_gfx_obj.v
 ../../hdl/jtcontra_colmix.v
 ../../hdl/jtcontra_007766.v
+../../hdl/jtcontra_007452.v
 
 $JTFRAME/hdl/video/jtframe_vtimer.v
 $JTFRAME/hdl/video/jtframe_blank.v
@@ -27,4 +28,4 @@ $JTFRAME/hdl/sdram/jtframe_dwnld.v
 $JTFRAME/hdl/jtframe_z80wait.v
 $JTFRAME/hdl/jtframe_ff.v
 
--F $JTFRAME/hdl/sdram/jtframe_sdram_bank.f
+-F $JTFRAME/hdl/sdram/jtframe_sdram64.f
