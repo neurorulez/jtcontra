@@ -64,14 +64,14 @@ reg  [3:0] bank;
 reg  [7:0] port_in;
 wire [7:0] div_dout;
 
-always @(*) begin
+always @(*) begin // Decoder 007766 takes as inputs A[15:10] and A[6:5]
     rom_cs      = (A[15] || A[15:13]==3'b011) && RnW;
     bank_cs     = A[15:12] == 4'b0111 && !RnW;
     ram_cs      = A[15:12] == 4'b0001;
     pal_cs      = A[15:10] == 6'b0000_11;
-    div_cs      = A[15:10] == 6'b0000_00 && A[4:3]==2'b01;  // 08-0F
-    in_cs       = A[15:10] == 6'b0000_00 && A[4] && RnW;  // 10 -1F
-    out_cs      = A[15:10] == 6'b0000_00 && A[4:3]==2'b11 && !RnW; // 18-1F
+    div_cs      = A[15:10] == 6'b0000_00 && A[6:4]==0 && A[3];  // 08-0F
+    in_cs       = A[15:10] == 6'b0000_00 && A[6:4]==1 &&  RnW;  // 10 -1F
+    out_cs      = A[15:10] == 6'b0000_00 && A[6:4]==1 && !RnW;  // 18-1F
 end
 
 always @(*) begin   // doesn't boot up if latched
@@ -112,10 +112,10 @@ always @(posedge clk) begin
         snd_irq   <= 0;
         if( bank_cs ) bank <= cpu_dout[3:0];
         if( out_cs  ) begin
-            case( A[2:1] )
+            case( A[3:1] ) // 14D in schematics
                 // 2'b00: coin counters
-                2'b01: snd_irq   <= 1;
-                2'b10: snd_latch <= cpu_dout;
+                5: snd_irq   <= 1;
+                6: snd_latch <= cpu_dout;
                 // 2'b11 watchdog
             endcase
         end
