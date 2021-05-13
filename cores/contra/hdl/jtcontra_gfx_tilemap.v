@@ -29,14 +29,16 @@ module jtcontra_gfx_tilemap(
     input       [ 8:0]   vrender,
     input                flip,
     input                scrwin_en,
-    output reg           lyr,
-    output reg           line,
     output reg           done,
-    output               chr_we,
+    // Text mode
+    input                txt_en,        // enables the text mode
+    input                layout,
+    output      [10:0]   scan_addr,
+    // Line buffer
+    output reg           line,
     output               scr_we,
     output reg  [ 8:0]   line_din,
     output      [ 9:0]   line_addr,
-    output      [10:0]   scan_addr,
     // SDRAM
     output reg           rom_cs,
     output      [17:0]   rom_addr,
@@ -75,16 +77,18 @@ reg  [ 4:0] bank;
 reg  [ 7:0] dump_cnt;
 reg  [15:0] pxl_data;
 reg  [8:0]  hrender;
+wire        txt_row;
+wire [ 9:0] lyr_hn0;
 
-wire [ 9:0] lyr_hn0 = lyr ? 9'd0 : hpos + ((strip_en && !strip_col)? {1'b0,strip_pos} : 9'd0);
+assign txt_row    = txt_en || (layout && hrender<9'o60);
+assign lyr_hn0    = txt_row ? 9'd0 : hpos + ((strip_en && !strip_col)? {1'b0,strip_pos} : 9'd0);
 assign line_addr  = { line, flip ? 9'h117-hrender  : hrender };
-assign chr_we     = line_we &  lyr;
-assign scr_we     = line_we & ~lyr;
+assign scr_we     = line_we;
 assign rom_addr   = { tile_msb, code, vn[2:0], hn[2] }; // 13+3+1 = 17!
-assign scan_addr  = { lyr, vn[7:3], hn[7:3] }; // 1 + 5 + 5 = 11
+assign scan_addr  = { txt_row, vn[7:3], hn[7:3] }; // 1 + 5 + 5 = 11
 assign strip_addr = strip_col ? hn_aux[7:3] : vrender[7:3];
 assign vpos_sum   = {1'd0,vpos} + ((strip_en && strip_col) ? {1'd0,strip_pos} : 9'd0);
-assign lyr_vn     = (vrender^{1'b0,{9{flip}}}) + (lyr ? 9'd0 : vpos_sum);
+assign lyr_vn     = (vrender^{1'b0,{9{flip}}}) + (txt_row ? 9'd0 : vpos_sum);
 
 always @(*) begin
     bank[0] = attr_scan[7];
@@ -98,7 +102,6 @@ end
 always @(posedge clk) begin
     if( rst ) begin
         done    <= 1;
-        lyr     <= 0;
         pal     <= 4'd0;
         code    <= 13'd0;
         line_we <= 0;
@@ -109,7 +112,6 @@ always @(posedge clk) begin
         last_LHBL <= LHBL;
         if( LHBL && !last_LHBL && LVBL) begin
             line   <= ~line;
-            lyr    <= 0;
             done   <= 0;
             rom_cs <= 0;
             st     <= 3'd0;
@@ -119,8 +121,9 @@ always @(posedge clk) begin
                 0: begin
                     hn <= lyr_hn0[8:0];
                     hn_aux <= lyr_hn0[8:0];
-                    hrender <= ( lyr ? chr_dump_start : scr_dump_start )
-                               - { 7'd0, lyr_hn0[1:0] } - 9'd1;
+                    //hrender <= ( txt_en ? chr_dump_start : scr_dump_start )
+                    //           - { 7'd0, lyr_hn0[1:0] } - 9'd1;
+                    hrender <= chr_dump_start;
                 end
                 1: begin
                     vn <= lyr_vn;
@@ -160,11 +163,7 @@ always @(posedge clk) begin
                         end
                     end else begin
                         st  <= 0;
-                        if( !lyr ) begin
-                            lyr <= 1;
-                        end else begin
-                            done <= 1;
-                        end
+                        done <= 1;
                     end
                 end
             endcase // st

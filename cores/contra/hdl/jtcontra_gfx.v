@@ -72,11 +72,11 @@ parameter   CFGFILE="gfx_cfg.hex",
             SIMCODE="gfx_code.bin",
             SIMOBJ ="gfx_obj.bin";
 
-localparam  RCNT=96;
+localparam  RCNT=8, ZURECNT=32;
 
 reg         last_LVBL, last_LHBL;
 wire        gfx_we;
-wire        lyr, done, chr_we, scr_we;
+wire        done, scr_we;
 wire        vram_cs, cfg_cs;
 
 wire        line;
@@ -85,14 +85,16 @@ wire [8:0]  chr_pxl, scr_pxl, line_din;
 
 ////////// Memory Mapped Registers
 reg  [7:0]  mmr[0:RCNT-1];
+reg  [7:0]  zure[0:ZURECNT-1];  // zure RAM, row/col scroll
+reg  [31:0] strip_map;          // Sets the row as a text (1) or scroll (0)
 wire [8:0]  hpos;
 wire [7:0]  vpos = mmr[2];
 wire        strip_en   = mmr[1][1]; // strip scroll enable
 wire        strip_col  = mmr[1][2]; // strip scroll applies to columns (1) or rows (0)
-wire        ch_tx_enb  = mmr[1][3]; // char layer transparency (enable low)
+wire        strip_txt  = mmr[1][3]; // enables the text tilemap per strip
 wire        tile_msb   = mmr[3][0];
 wire        obj_page   = mmr[3][3]; // select from which page to draw sprites
-wire        layout     = mmr[3][4]; // 1 for wide layout
+wire        layout     = mmr[3][4]; // 5 columns on the left are text (wide layout)
 wire        narrow_en  = mmr[3][6] | strip_en; // 1 for not displaying first and last columns
 wire [3:0]  extra_mask = mmr[4][7:4];
 wire [3:0]  extra_bits = mmr[4][3:0];
@@ -109,8 +111,6 @@ wire        scrwin_en  = mmr[6][3];
 wire [1:0]  pal_bank   = mmr[6][5:4];
 wire        extra_en   = 1; // there must be a bit in the MMR that turns off all the extra_bits above
                             // because Contra doesn't need them but seems to write to them
-wire        char_en    = 1;
-// wire        char_en    =~mmr[7][4];     // undocumented by MAME
 
 assign      { code12_sel, code11_sel, code10_sel, code9_sel } = mmr[5];
 assign      gfx_we   = cpu_cen & ~cpu_rnw & vram_cs;
@@ -134,6 +134,7 @@ wire [ 3:0] vprom_data, oprom_data;
 
 wire [ 7:0] strip_pos;
 wire [ 4:0] strip_addr;
+reg         txt_en;
 
 wire [9:0]  line_dump;
 
@@ -150,13 +151,17 @@ reg         ok_wait;
 reg  [ 1:0] last_cs;
 
 assign cfg_cs    = (addr < RCNT) && cs;
+assign zure_cs   = (addr>='h20 && addr<'h5f && cs) ||
+                   (addr<'h2000 && cpu_rnw && cs); // read has a looser selection
 assign vram_cs   = addr[13] && cs;
 assign hpos      = { mmr[1][0], mmr[0] };
 assign strip_pos = mmr[ { 2'b1, strip_addr} ];
 
 // Data bus mux. It'd be nice to latch this:
 always @(*) begin
-    dout = (addr[12] ? obj_dout :            // objects
+    dout = !addr[13] ?
+          (addr[6] ? {7'd0,strip_map[addr[4:0]]} : zure[addr[4:0]]) :
+          (addr[12] ? obj_dout :            // objects
           (addr[10] ? code_dout : attr_dout)); // tiles
 end
 
@@ -224,18 +229,26 @@ end
 */
 `endif
 
+integer rst_cnt;
+
 always @(posedge clk24) begin
     if( rst ) begin
-        { mmr[7], mmr[6], mmr[5], mmr[4] } <= 32'd0;
-        { mmr[3], mmr[2], mmr[1], mmr[0] } <= 32'd0;
-        // Unknown extra registers:
-        { mmr[23], mmr[22], mmr[21], mmr[20] } <= ~32'd0;
-        { mmr[19], mmr[18], mmr[17], mmr[16] } <= ~32'd0;
-        { mmr[15], mmr[14], mmr[13], mmr[12] } <= ~32'd0;
-        { mmr[11], mmr[10], mmr[ 9], mmr[ 8] } <= ~32'd0;
+        for( rst_cnt=0; rst_cnt<8; rst_cnt=rst_cnt+1 ) begin
+            mmr[rst_cnt] <= 0;
+        end
+        for( rst_cnt=0; rst_cnt<32; rst_cnt=rst_cnt+1 ) begin
+            zure[rst_cnt] <= 0;
+            strip_map[rst_cnt] <= 0;
+        end
     end else if(cpu_cen) begin
         if(!cpu_rnw && cfg_cs)
             mmr[ addr[6:0] ] <= cpu_dout;
+        if(!cpu_rnw && zure_cs) begin
+            if( addr[6] )
+                strip_map[ addr[4:0] ] <= cpu_dout[0];
+            else
+                zure[ addr[4:0] ] <= cpu_dout;
+        end
         // Apply layout
         if( layout ) begin
             // total 35*8 = 280 visible pixels: OCTAL!!
@@ -264,6 +277,15 @@ always @(posedge clk24) begin
     end
 end
 
+always @(*) begin
+    txt_en = 0;
+    if( layout ) begin
+        txt_en = 0;
+    end else if( strip_txt ) begin
+        txt_en = strip_map[ vrender[7:3] ];
+    end
+end
+
 always @(posedge clk, posedge rst) begin
     if( rst ) begin
         cpu_irqn  <= 1;
@@ -289,38 +311,27 @@ end
 
 // Local colour mixer
 wire [ 7:0] scr_pxl_gated = scr_pxl[7:0];
-wire [ 7:0] chr_pxl_gated = chr_pxl[7:0];
-wire        chr_blank     = chr_pxl_gated[3:0] == 4'h0;
 wire        obj_blank     = oprom_data[3:0] == 4'h0;
 wire        tile_blank    = vprom_data[3:0] == 4'h0;
-wire        chr_area      = hdump>=chr_dump_start && hdump<chr_dump_end;
-wire        scr_area      = hdump>=scr_dump_start && hdump<scr_dump_end;
 wire        border_narrow = (hdump<9'o30 || hdump>=9'o410) && narrow_en;
 wire        border_wide   = hdump<9'o20 || hdump>=9'o420;
 wire        blank_area    = vdump<9'o20 || (!layout && (border_narrow||border_wide));
-reg         draw_scr;
 wire [11:0] obj_scan_addr;
 wire        scrwin        = scr_pxl[8];
 wire        tile_prio     = scrwin_en && scrwin;
-
-always @(*) begin
-    draw_scr <= ( chr_area && !scr_area) ? 1'b0 : (
-                (!chr_area &&  scr_area) ? 1'b1 : (
-                 chr_blank ? 1'b1 : 1'b0 ));
-end
 
 always @(posedge clk, posedge rst) begin
     if( rst ) begin
         pxl_out    <= ~7'd0;
         vprom_addr <= 8'd0;
     end else begin
-        vprom_addr <= draw_scr ? scr_pxl_gated : chr_pxl_gated;
+        vprom_addr <= scr_pxl_gated;
         if(pxl_cen) begin
             if( blank_area )
                 pxl_out <= 7'd0;
             else begin
                 pxl_out[6:5] <= pal_bank;
-                if( obj_blank || (layout && chr_area) || (tile_prio && !tile_blank))
+                if( obj_blank || (layout && txt_en) || (tile_prio && !tile_blank))
                     pxl_out[4:0] <= { 1'b1, vprom_data }; // Tilemap
                 else
                     pxl_out[4:0] <= { 1'b0, oprom_data }; // Object
@@ -340,14 +351,14 @@ jtcontra_gfx_tilemap u_tilemap(
     .vrender            ( vrender           ),
     .flip               ( flip              ),
     .scrwin_en          ( scrwin_en         ),
-    .lyr                ( lyr               ),
     .line               ( line              ),
     .line_addr          ( line_addr         ),
     .done               ( done              ),
-    .chr_we             ( chr_we            ),
     .scr_we             ( scr_we            ),
     .line_din           ( line_din          ),
     .scan_addr          ( scan_addr         ),
+    .txt_en             ( txt_en            ),
+    .layout             ( layout            ),
     // SDRAM
     .rom_cs             ( rom_scr_cs        ),
     .rom_addr           ( rom_scr_addr      ),
@@ -424,24 +435,6 @@ jtframe_prom #(.dw(4),.aw(8) ) u_oprom(
     .wr_addr    ( prog_addr[7:0]            ),
     .we         ( prom_we & ~prog_addr[8]   ),
     .q          ( oprom_data                )
-);
-
-// Line buffers could work with only AW=9 but it would
-// make logic a bit more complex without any benefit in
-// the FPGA, as the minimum size BRAM available is normally AW=10
-jtframe_dual_ram #(.dw(9),.aw(10)) u_line_char(
-    .clk0   ( clk       ),
-    .clk1   ( clk       ),
-    // Port 0
-    .data0  ( line_din  ),
-    .addr0  ( line_addr ),
-    .we0    ( chr_we    ),
-    .q0     (           ),
-    // Port 1
-    .data1  (           ),
-    .addr1  ( line_dump ),
-    .we1    ( 1'b0      ),
-    .q1     ( chr_pxl   )
 );
 
 jtframe_dual_ram #(.dw(9),.aw(10)) u_line_scr(
