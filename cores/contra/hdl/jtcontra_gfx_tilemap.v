@@ -124,7 +124,7 @@ always @(posedge clk) begin
                     hn_aux <= lyr_hn0[8:0];
                     //hrender <= ( txt_en ? chr_dump_start : scr_dump_start )
                     //           - { 7'd0, lyr_hn0[1:0] } - 9'd1;
-                    hrender <= chr_dump_start;
+                    hrender <= chr_dump_start - (txt_row ? 0 : ({ 7'd0, lyr_hn0[1:0] } - 9'd1));
                 end
                 1: begin
                     vn <= lyr_vn;

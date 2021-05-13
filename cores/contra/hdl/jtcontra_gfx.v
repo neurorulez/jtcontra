@@ -21,7 +21,7 @@
 
 //  IRQ triggers once per frame
 // FIRQ triggers once per ?
-//  NMI triggers once per ?
+//  NMI triggers once per 16/32 scanlines
 
 module jtcontra_gfx(
     input                rst,
@@ -51,6 +51,7 @@ module jtcontra_gfx(
     output reg [ 7:0]    dout,
     output reg           cpu_irqn,
     output reg           cpu_nmin,
+    output reg           cpu_firqn,
     // SDRAM interface
     output reg           rom_obj_sel,   // pin H2 of actual chip
     output reg [17:0]    rom_addr,
@@ -74,7 +75,7 @@ parameter   CFGFILE="gfx_cfg.hex",
 
 localparam  RCNT=8, ZURECNT=32;
 
-reg         last_LVBL, last_LHBL;
+reg         last_LVBL, last_LHBL, last_irqn;
 wire        gfx_we;
 wire        done, scr_we;
 wire        vram_cs, cfg_cs;
@@ -285,26 +286,48 @@ always @(*) begin
     end
 end
 
+reg last_trig, trig_nfir;
+reg last_line16, last_line32;
+
 always @(posedge clk, posedge rst) begin
     if( rst ) begin
         cpu_irqn  <= 1;
+        cpu_firqn <= 1;
         cpu_nmin  <= 1;
         last_LVBL <= 0;
         last_LHBL <= 0;
-    end else if(pxl_cen && hdump[1:0]==3 ) begin
+        last_irqn <= 1;
+        trig_nfir <= 1;
+        last_trig <= 1;
+    end else if(pxl_cen ) begin
         last_LVBL <= LVBL;
         last_LHBL <= LHBL;
-        if( !LVBL && last_LVBL ) begin
-            if( irq_en ) cpu_irqn <= 0;
-        end
-        else if( LHBL || !irq_en ) cpu_irqn <= 1;
+        last_irqn <= cpu_irqn;
+        last_trig <= trig_nfir;
 
-        // NMI
-        if( nmi_en && !LHBL && last_LHBL &&
-            ( &vdump[3:0] & (vdump[4]|~nmi_pace)) )
-                cpu_nmin <= 0;
-        else
-                cpu_nmin <= 1;
+        last_line16 <= vdump[3];
+        last_line32 <= vdump[4];
+
+        // IRQ, once per frame
+        if( !irq_en )
+            cpu_irqn <= 1;
+        else if( !LVBL && last_LVBL )
+            cpu_irqn <= 0;
+
+        // NMI, once very 16 or 32 lines
+        if( !nmi_en )
+            cpu_nmin <= 1;
+        else if( nmi_pace ? (vdump[4] && !last_line32) : (vdump[3] && !last_line16) )
+            cpu_nmin <= 0;
+
+        // FIRQ, once every two frames
+        if( !last_irqn && cpu_irqn )
+            trig_nfir <= ~trig_nfir;
+
+        if( !firq_en )
+            cpu_firqn <= 1;
+        else if( !last_trig && trig_nfir )
+            cpu_firqn <= 0;
     end
 end
 
