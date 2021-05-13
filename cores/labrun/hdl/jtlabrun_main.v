@@ -72,6 +72,7 @@ reg  [ 2:0] bank;
 reg  [ 7:0] port_in, cpu_din, ym_dout, cabinet;
 wire [ 9:0] psg0_snd, psg1_snd;
 wire        fm0_irq_n, fm1_irq_n;
+wire        VMA;
 
 wire signed [15:0] fm0_snd, fm1_snd;
 
@@ -79,7 +80,7 @@ assign irq_trigger = ~gfx_irqn & dip_pause;
 assign cpu_rnw     = RnW;
 
 always @(*) begin
-    rom_cs  = (A[15] || A[15:14]==2'b01) && RnW;
+    rom_cs  = (A[15] || A[15:14]==2'b01) && RnW && VMA;
     ram_cs  = A[15:11] == 5'b00011; // 18xx-1fxx
     pre_gfx = A[15:13] == 3'b001; // 2xxx 3xxx
     pre_cfg = A[15:8] == 8'd0;
@@ -166,6 +167,7 @@ jtframe_sys6809 #(.RAM_AW(RAM_AW)) u_cpu(
     // memory interface
     .A          ( A         ),
     .RnW        ( RnW       ),
+    .VMA        ( VMA       ),
     .ram_cs     ( ram_cs    ),
     .rom_cs     ( rom_cs    ),
     .rom_ok     ( rom_ok    ),

@@ -291,7 +291,7 @@ always @(posedge clk, posedge rst) begin
         cpu_nmin  <= 1;
         last_LVBL <= 0;
         last_LHBL <= 0;
-    end else if(pxl_cen) begin
+    end else if(pxl_cen && hdump[2:0]==~0 ) begin
         last_LVBL <= LVBL;
         last_LHBL <= LHBL;
         if( !LVBL && last_LVBL ) begin

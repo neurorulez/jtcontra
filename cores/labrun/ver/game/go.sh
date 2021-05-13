@@ -15,9 +15,12 @@ export CONVERT_OPTIONS="-resize 300%x300%"
 export YM2203=1
 export M6809=1
 
+# JTFRAME_SIM_DIPS="~'h8000" --> Enables demo sounds
+
 # Generic simulation script from JTFRAME
 jtsim -mist -sysname labrun  \
     -d JTFRAME_DWNLD_PROM_ONLY \
     -def ../../hdl/jtlabrun.def \
     -videow 280 -videoh 240 \
+    -d JTFRAME_SIM_DIPS="~'h8000" \
     $*

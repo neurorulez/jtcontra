@@ -51,6 +51,7 @@ module mist_dump(
             //$shm_probe(UUT.u_game.u_dwnld,"A");
             //$shm_probe(UUT.u_game,"A");
             $shm_probe(UUT.u_game.u_main,"A");
+            $shm_probe(UUT.u_game.u_main.u_cpu.u_wait,"A");
 
             //$shm_probe(UUT.u_game.u_main.u_fm0.u_jt12,"AS");
             //$shm_probe(UUT.u_game.u_main.u_fm0.u_jt12.u_mmr,"A");
