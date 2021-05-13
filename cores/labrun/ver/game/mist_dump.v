@@ -61,7 +61,7 @@ module mist_dump(
             //$shm_probe(UUT.u_game.u_main.u_fm1.u_jt12.gen_ssg.u_psg,"AS");
             //$shm_probe(UUT.u_game.u_main.u_prot,"A");
             //$shm_probe(UUT.u_game.u_video,"A");
-            //$shm_probe(UUT.u_game.u_video.u_gfx,"A");
+            $shm_probe(UUT.u_game.u_video.u_gfx,"A");
         `endif
     end
 `endif
