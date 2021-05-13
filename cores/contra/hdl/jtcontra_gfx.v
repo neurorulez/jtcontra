@@ -151,7 +151,7 @@ reg         ok_wait;
 reg  [ 1:0] last_cs;
 
 assign cfg_cs    = (addr < RCNT) && cs;
-assign zure_cs   = (addr>='h20 && addr<'h5f && cs);
+assign zure_cs   = (addr>='h20 && addr<'h60 && cs);
 assign vram_cs   = addr[13] && cs;
 assign hpos      = { mmr[1][0], mmr[0] };
 assign strip_pos = mmr[ { 2'b1, strip_addr} ];
