@@ -151,8 +151,7 @@ reg         ok_wait;
 reg  [ 1:0] last_cs;
 
 assign cfg_cs    = (addr < RCNT) && cs;
-assign zure_cs   = (addr>='h20 && addr<'h5f && cs) ||
-                   (addr<'h2000 && cpu_rnw && cs); // read has a looser selection
+assign zure_cs   = (addr>='h20 && addr<'h5f && cs);
 assign vram_cs   = addr[13] && cs;
 assign hpos      = { mmr[1][0], mmr[0] };
 assign strip_pos = mmr[ { 2'b1, strip_addr} ];
@@ -160,7 +159,7 @@ assign strip_pos = mmr[ { 2'b1, strip_addr} ];
 // Data bus mux. It'd be nice to latch this:
 always @(*) begin
     dout = !addr[13] ?
-          (addr[6] ? {7'd0,strip_map[addr[4:0]]} : zure[addr[4:0]]) :
+          (addr[6] ? {~7'd0,strip_map[addr[4:0]]} : zure[addr[4:0]]) :
           (addr[12] ? obj_dout :            // objects
           (addr[10] ? code_dout : attr_dout)); // tiles
 end
