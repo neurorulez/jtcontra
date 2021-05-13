@@ -393,6 +393,7 @@ jtcontra_gfx_obj u_obj(
     .LVBL               ( LVBL              ),
     .vrender            ( vrender           ),
     .flip               ( flip              ),
+    .layout             ( layout            ),
     .done               (                   ),
     .scan_addr          ( obj_scan_addr[9:0]),
     .hdump              ( hdump             ),

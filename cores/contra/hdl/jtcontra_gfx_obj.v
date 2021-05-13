@@ -27,6 +27,7 @@ module jtcontra_gfx_obj(
     input                LVBL,
     input       [ 8:0]   vrender,
     input                flip,
+    input                layout,
     output reg           done,
     output      [ 9:0]   scan_addr, // max 64 sprites in total
     // Line buffer
@@ -66,7 +67,9 @@ reg  [ 2:0] size_attr;
 reg         hflip, vflip;
 reg  [ 8:0] pxl_cnt; // OBJ limit should be less than 64us*6MHz=384 pixels
 wire [ 8:0] vf;
+wire        scores;  // high if line_addr falls in the score area
 
+assign      scores    = layout && xpos<9'o50;
 assign      line_addr = { flip ? 9'h0EF-xpos : xpos };
 assign      scan_addr = scan_base + byte_sel;
 assign      vf        = vrender ^ {1'b0, {8{flip}}};
@@ -174,7 +177,7 @@ always @(posedge clk) begin
                     line_din <= { pal,
                         hflip ? pxl_data[3:0] : pxl_data[15:12]
                         };
-                    line_we  <= 1;
+                    line_we  <= !scores;
                 end
                 8: begin
                     line_we <= 0;
