@@ -245,6 +245,7 @@ jt49_dcrm2 #(.sw(11)) u_dcrm (
     .dout   (  psg2x    )
 );
 
+`ifndef NOSOUND
 jtframe_mixer #(.W0(16),.W1(16),.W2(11)) u_mixer(
     .rst    ( rst       ),
     .clk    ( clk       ),
@@ -262,5 +263,9 @@ jtframe_mixer #(.W0(16),.W1(16),.W2(11)) u_mixer(
     .mixed  ( snd       ),
     .peak   ( peak      )
 );
+`else
+assign snd  = 0;
+assign peak = 0;
+`endif
 
 endmodule
