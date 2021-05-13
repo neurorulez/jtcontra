@@ -81,7 +81,7 @@ wire        txt_row;
 wire [ 9:0] lyr_hn0;
 
 assign txt_row    = txt_en || (layout && hrender<9'o50);
-assign lyr_hn0    = txt_row ? 9'd0 : hpos + ((strip_en && !strip_col)? {1'b0,strip_pos} : 9'd0);
+assign lyr_hn0    = txt_row ? 9'd0 : (hpos + ((strip_en && !strip_col)? {1'b0,strip_pos} : 9'd0));
 assign line_addr  = { line, flip ? 9'h117-hrender  : hrender };
 assign scr_we     = line_we;
 assign hnscan     = (layout & ~txt_row) ? (hn-9'o44) : hn;
@@ -109,6 +109,7 @@ always @(posedge clk) begin
         st      <= 3'd0;
         line    <= 0;
         scrwin  <= 0;
+        hrender <= 0;
     end else begin
         last_LHBL <= LHBL;
         if( LHBL && !last_LHBL && LVBL) begin
@@ -116,6 +117,7 @@ always @(posedge clk) begin
             done   <= 0;
             rom_cs <= 0;
             st     <= 3'd0;
+            hrender<= chr_dump_start;
         end else begin
             if(!done) st <= st + 3'd1;
             case( st )
@@ -124,7 +126,7 @@ always @(posedge clk) begin
                     hn_aux <= lyr_hn0[8:0];
                     //hrender <= ( txt_en ? chr_dump_start : scr_dump_start )
                     //           - { 7'd0, lyr_hn0[1:0] } - 9'd1;
-                    hrender <= chr_dump_start - (txt_row ? 0 : ({ 7'd0, lyr_hn0[1:0] } - 9'd1));
+                    hrender <= chr_dump_start - 9'd1; // - { 7'd0, lyr_hn0[1:0] };
                 end
                 1: begin
                     vn <= lyr_vn;

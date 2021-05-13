@@ -287,7 +287,9 @@ always @(*) begin
 end
 
 reg last_trig, trig_nfir;
-reg last_line16, last_line32;
+reg last_fast, last_slow;
+wire slow_nmi = vdump[5];
+wire fast_nmi = vdump[4];
 
 always @(posedge clk, posedge rst) begin
     if( rst ) begin
@@ -305,8 +307,8 @@ always @(posedge clk, posedge rst) begin
         last_irqn <= cpu_irqn;
         last_trig <= trig_nfir;
 
-        last_line16 <= vdump[3];
-        last_line32 <= vdump[4];
+        last_fast <= fast_nmi;
+        last_slow <= slow_nmi;
 
         // IRQ, once per frame
         if( !irq_en )
@@ -317,7 +319,7 @@ always @(posedge clk, posedge rst) begin
         // NMI, once very 16 or 32 lines
         if( !nmi_en )
             cpu_nmin <= 1;
-        else if( nmi_pace ? (vdump[4] && !last_line32) : (vdump[3] && !last_line16) )
+        else if( nmi_pace ? (slow_nmi && !last_slow) : (fast_nmi && !last_fast) )
             cpu_nmin <= 0;
 
         // FIRQ, once every two frames
