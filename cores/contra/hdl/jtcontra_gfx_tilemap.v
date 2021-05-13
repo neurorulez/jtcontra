@@ -80,11 +80,11 @@ reg  [8:0]  hrender;
 wire        txt_row;
 wire [ 9:0] lyr_hn0;
 
-assign txt_row    = txt_en || (layout && hrender<9'o60);
+assign txt_row    = txt_en || (layout && hrender<9'o50);
 assign lyr_hn0    = txt_row ? 9'd0 : hpos + ((strip_en && !strip_col)? {1'b0,strip_pos} : 9'd0);
 assign line_addr  = { line, flip ? 9'h117-hrender  : hrender };
 assign scr_we     = line_we;
-assign hnscan     = (layout & ~txt_row) ? (hn-9'o50) : hn;
+assign hnscan     = (layout & ~txt_row) ? (hn-9'o44) : hn;
 assign rom_addr   = { tile_msb, code, vn[2:0], hn[2] }; // 13+3+1 = 17!
 assign scan_addr  = { txt_row, vn[7:3], hnscan[7:3] }; // 1 + 5 + 5 = 11
 assign strip_addr = strip_col ? hn_aux[7:3] : vrender[7:3];
