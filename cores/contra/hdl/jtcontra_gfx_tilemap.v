@@ -65,7 +65,8 @@ module jtcontra_gfx_tilemap(
     input       [ 1:0]   code12_sel
 );
 
-localparam [8:0] RENDER_END = 9'd320;
+localparam [8:0] RENDER_END = 9'o500;
+localparam [8:0] BLANK      = 9'o460;
 
 reg  [12:0] code;
 reg  [ 3:0] pal;
@@ -144,7 +145,7 @@ always @(posedge clk) begin
                 end
                 5: begin
                     if( rom_ok ) begin
-                        pxl_data <= rom_data;
+                        pxl_data <= /*(hrender>=BLANK && layout) ? 16'd0 : */rom_data;
                         rom_cs   <= 0;
                         dump_cnt <= 4'h7;
                     end else st <= st;
@@ -175,9 +176,9 @@ always @(posedge clk) begin
                     end else begin
                         if( layout && !scores ) begin
                             scores  <= 1;
-                            hend    <= 9'o50;
+                            hend    <= 9'o44;
                             hrender <= chr_dump_start-1'd1;
-                            st      <= 2;
+                            st      <= 1; // assign vn again
                         end else begin
                             done <= 1;
                             st   <= 0;

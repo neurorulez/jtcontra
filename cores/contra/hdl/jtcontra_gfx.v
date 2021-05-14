@@ -257,17 +257,18 @@ always @(posedge clk24) begin
             // total 35*8 = 280 visible pixels: OCTAL!!
             chr_render_start <= 9'o000;
             scr_render_start <= 9'o050;
+            /*
             if( flip ) begin
                 chr_dump_start <= 9'o360;
                 chr_dump_end   <= 9'o450;
                 scr_dump_start <= 9'o000;
                 scr_dump_end   <= 9'o360; // o400 = d256
-            end else begin
+            end else begin*/
                 chr_dump_start <= 9'o000;
                 chr_dump_end   <= 9'o050;
                 scr_dump_start <= 9'o050;
-                scr_dump_end   <= 9'o450; // o400 = d256
-            end
+                scr_dump_end   <= 9'o430; // o400 = d256
+            // end
         end else begin
             // total 31*8 = 248 visible pixels: OCTAL!!
             chr_render_start <= 9'o020;
