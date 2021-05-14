@@ -85,13 +85,13 @@ wire [ 9:0] scr_hn0, hn;
 reg         scores;
 
 assign txt_row    = txt_en || scores;
-assign scr_hn0    = hpos + ((strip_en && !strip_col)? {1'b0,strip_pos} : 9'd0);
+assign scr_hn0    = (strip_en && !strip_col)? {1'b0,strip_pos} : hpos;
 assign line_addr  = { line, flip ? 9'h117-hrender  : hrender };
 assign scr_we     = line_we;
 assign rom_addr   = { tile_msb, code, vn[2:0], hn[2] }; // 13+3+1 = 17!
 assign scan_addr  = { txt_row, vn[7:3], hn[7:3] }; // 1 + 5 + 5 = 11
 assign strip_addr = strip_col ? hn_aux[7:3] : vrender[7:3];
-assign vpos_sum   = {1'd0,vpos} + ((strip_en && strip_col) ? {1'd0,strip_pos} : 9'd0);
+assign vpos_sum   = (strip_en && strip_col) ? {1'd0,strip_pos} : {1'd0,vpos};
 assign lyr_vn     = (vrender^{1'b0,{9{flip}}}) + (txt_row ? 9'd0 : vpos_sum);
 assign hn         = txt_row ? hn_txt : hn_scr;
 
