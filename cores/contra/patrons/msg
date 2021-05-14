@@ -1,7 +1,7 @@
   \BContra\W  FPGA core by \RJotego\W
   http://patreon.com/topapate
 
-BETA VERSION-DO NOT DISTRIBUTE
+   With the help of Furrtek
 
 
          DIRECTORS
@@ -19,12 +19,12 @@ BETA VERSION-DO NOT DISTRIBUTE
 
 
 
-Frederic Mahe    Chris. Gelatt
+  Frederic Mahe Chris. Gelatt
 
 
-Ben01623        - Manuel Antoni
+  Ben01623      Manuel Antoni
 
-Charles D'Aoust - John Williams
+  C. D'Aoust    John Williams
 _______________________________
     \RSpecial Thanks to\W
 
@@ -34,7 +34,7 @@ _______________________________
 
 
 
-Andrew Boudreau \Barcadexpress.com\W
+   A. Boudreau  \BArcadexpress\W
 
 
 
@@ -42,7 +42,7 @@ Andrew Boudreau \Barcadexpress.com\W
 
 
 
-Brian Sallee     Fabrice Ketels
+  Brian Sallee  Fabrice Ketels
 
 
 
@@ -50,7 +50,7 @@ Brian Sallee     Fabrice Ketels
 
 
 
-Christian Bailey Daniel Bauza
+  C. Bailey      Daniel Bauza
 
 
 
@@ -58,35 +58,35 @@ Christian Bailey Daniel Bauza
 
 
 
-Phillip McMahon  Jo Tomiyori
+  Phillip McMahon Jo Tomiyori
 
 _______________________________
 
        \Rand thanks to\W
 
 
-Adam Davis       Leslie Law
-Andreas Wester   Mahendra
-Andrew Francomb  Marcus Hogue
-Andyways         Matthew Young
-Amoore2600       Michele Zilli
-Chris Jardine    nullobject
-Christian Auby   Oliver Jaksch
-Chris. Harvey    Blackstar
-Cohge            Oscar Laguna
-David Ashby      Per Sweden
-Don Gafford      PsyFX
-Ed Balan         RetroDriven
-Frank Wolf       Richard M-S
-Gus Douboulidis  Robert MacLean
-Jason Madigan    Roman Buser
-Joeri v. Dooren  Ryan Fig
-John Casey       Steven Wilson
-Jorge Slowfret   Toby Boreham
-JPS (RetroFPGA)  Ulf Skutnabba
-Kitsuake         Ultrarobotninja
-Kyle Good        Victor Gomariz
-Basket Snake     Xzarian
+  Adam Davis     Leslie Law
+  Andreas Wester Mahendra
+  A. Francomb    Marcus Hogue
+  Andyways       Matthew Young
+  Amoore2600     Michele Zilli
+  Chris Jardine  nullobject
+  Christian Auby Oliver Jaksch
+  Chris. Harvey  Blackstar
+  Cohge          Oscar Laguna
+  David Ashby    Per Sweden
+  Don Gafford    PsyFX
+  Ed Balan       RetroDriven
+  Frank Wolf     Richard M-S
+  G. Douboulidis R. MacLean
+  Jason Madigan  Roman Buser
+  Joeri Dooren   Ryan Fig
+  John Casey     Steven Wilson
+  Jorge Slowfret Toby Boreham
+  RetroFPGA      Ulf Skutnabba
+  Kitsuake     Ultrarobotninja
+  Kyle Good     Victor Gomariz
+  Basket Snake   Xzarian
 
 _______________________________
   \GHardware support from\W
