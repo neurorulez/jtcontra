@@ -123,6 +123,7 @@ always @(posedge clk) begin
             st     <= 3'd0;
             hrender<= chr_dump_start;
             scores <= 0;
+            hn_aux <= 0;
         end else begin
             if(!done) st <= st + 3'd1;
             case( st )
@@ -131,7 +132,7 @@ always @(posedge clk) begin
                     hn_scr <= scr_hn0[8:0];
                     //hrender <= ( txt_en ? chr_dump_start : scr_dump_start )
                     //           - { 7'd0, scr_hn0[1:0] } - 9'd1;
-                    hrender <= scr_dump_start - 9'd1 - { 7'd0, scr_hn0[1:0] };
+                    hrender <= scr_dump_start - 9'd1 - (txt_en ? 0 : { 7'd0, scr_hn0[1:0] });
                     hend    <= RENDER_END;
                 end
                 1: begin
