@@ -83,6 +83,7 @@ wire        vram_cs, cfg_cs;
 wire        line;
 wire [9:0]  line_addr;
 wire [8:0]  chr_pxl, scr_pxl, line_din;
+wire [1:0]  prio_en;
 
 ////////// Memory Mapped Registers
 reg  [7:0]  mmr[0:RCNT-1];
@@ -94,8 +95,10 @@ wire        strip_en   = mmr[1][1]; // strip scroll enable
 wire        strip_col  = mmr[1][2]; // strip scroll applies to columns (1) or rows (0)
 wire        strip_txt  = mmr[1][3]; // enables the text tilemap per strip
 wire        tile_msb   = mmr[3][0];
+assign      prio_en[0] = mmr[3][2]; // enables other priority bits
 wire        obj_page   = mmr[3][3]; // select from which page to draw sprites
 wire        layout     = mmr[3][4]; // 5 columns on the left are text (wide layout)
+assign      prio_en[1] = mmr[3][5];
 wire        narrow_en  = mmr[3][6] | strip_en; // 1 for not displaying first and last columns
 wire [3:0]  extra_mask = mmr[4][7:4];
 wire [3:0]  extra_bits = mmr[4][3:0];
@@ -342,7 +345,7 @@ wire        border_wide   = hdump<9'o20 || hdump>=9'o420;
 wire        blank_area    = vdump<9'o20 || (!layout && (border_narrow||border_wide));
 wire [11:0] obj_scan_addr;
 wire        scrwin        = scr_pxl[8];
-wire        tile_prio     = scrwin_en && scrwin;
+wire        tile_prio     = &prio_en & scrwin & ~tile_blank;
 
 always @(posedge clk, posedge rst) begin
     if( rst ) begin
@@ -355,7 +358,7 @@ always @(posedge clk, posedge rst) begin
                 pxl_out <= 7'd0;
             else begin
                 pxl_out[6:5] <= pal_bank;
-                if( obj_blank || (layout && txt_en) || (tile_prio && !tile_blank))
+                if( obj_blank || (layout && txt_en) || tile_prio )
                     pxl_out[4:0] <= { 1'b1, vprom_data }; // Tilemap
                 else
                     pxl_out[4:0] <= { 1'b0, oprom_data }; // Object
