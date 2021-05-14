@@ -158,7 +158,7 @@ assign cfg_cs    = (addr < RCNT) && cs;
 assign zure_cs   = (addr>='h20 && addr<'h60 && cs);
 assign vram_cs   = addr[13] && cs;
 assign hpos      = { mmr[1][0], mmr[0] };
-assign strip_pos = mmr[ { 2'b1, strip_addr} ];
+assign strip_pos = zure[ strip_addr ];
 
 wire [7:0] zure_cpu = zure[addr[4:0]];
 

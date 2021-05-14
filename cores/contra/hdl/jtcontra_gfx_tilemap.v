@@ -170,7 +170,7 @@ always @(posedge clk) begin
                             st      <= 4; // wait for new ROM data
                         end else begin
                             vn      <= lyr_vn; // in case there is column scroll
-                            hn_aux  <= hn;
+                            hn_aux  <= hn_scr;
                             st      <= 2; // collect tile info
                         end
                     end else begin
