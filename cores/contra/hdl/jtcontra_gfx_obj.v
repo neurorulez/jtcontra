@@ -184,7 +184,7 @@ always @(posedge clk) begin
                     {code[2],code[0],h4} <= {code[2],code[0],h4} +
                         ( hflip ? -3'd1 : 3'd1 );
                     if( h4 ) size_cnt <= size_cnt>>1;
-                    if( !size_cnt[1] && (h4) ) begin
+                    if( hflip ? (!size_cnt[0] && !h4) : (!size_cnt[1] && h4) ) begin
                         st      <= 9; // next tile
                     end else begin
                         rom_cs  <= 1;
