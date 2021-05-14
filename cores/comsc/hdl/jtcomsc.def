@@ -11,6 +11,7 @@ COLORW=5
 VIDEO_WIDTH=280
 VIDEO_HEIGHT=240
 BUTTONS=2
+JTFRAME_CREDITS_HSTART=8
 
 [mist|sidi]
 # OSD credits cannot be used when

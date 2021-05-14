@@ -160,10 +160,12 @@ assign vram_cs   = addr[13] && cs;
 assign hpos      = { mmr[1][0], mmr[0] };
 assign strip_pos = mmr[ { 2'b1, strip_addr} ];
 
+wire [7:0] zure_cpu = zure[addr[4:0]];
+
 // Data bus mux. It'd be nice to latch this:
 always @(*) begin
     dout = !addr[13] ?
-          (addr[6] ? {~7'd0,strip_map[addr[4:0]]} : zure[addr[4:0]]) :
+          { zure_cpu[7:1], addr[6] ? strip_map[addr[4:0]] : zure_cpu[0] } :
           (addr[12] ? obj_dout :            // objects
           (addr[10] ? code_dout : attr_dout)); // tiles
 end
