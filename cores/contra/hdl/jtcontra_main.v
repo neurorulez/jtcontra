@@ -71,7 +71,7 @@ wire [ 7:0] ram_dout, cpu_din;
 wire [15:0] A;
 wire        RnW, irq_n, nmi_n, irq_ack;
 wire        irq_trigger, nmi_trigger;
-wire        ram_cs;
+wire        ram_cs, VMA;
 
 assign irq_trigger = ~gfx_irqn & dip_pause;
 assign nmi_trigger = ~gfx_nmin & dip_pause;
@@ -87,6 +87,7 @@ generate
                 //.cen12          ( cen12         ),
                 .cpu_cen        ( cpu_cen       ),
                 .A              ( A             ),
+                .VMA            ( VMA           ),
                 .RnW            ( RnW           ),
                 .gfx1_cs        ( gfx1_cs       ),
                 .gfx2_cs        ( gfx2_cs       ),
@@ -130,6 +131,7 @@ generate
                 //.cen12          ( cen12         ),
                 .cpu_cen        ( cpu_cen       ),
                 .A              ( A             ),
+                .VMA            ( VMA           ),
                 .RnW            ( RnW           ),
                 .gfx1_cs        ( gfx1_cs       ),
                 .gfx2_cs        ( gfx2_cs       ),
@@ -208,6 +210,7 @@ jtframe_sys6809 #(.RAM_AW(RAM_AW)) u_cpu(
     // memory interface
     .A          ( A         ),
     .RnW        ( RnW       ),
+    .VMA        ( VMA       ),
     .ram_cs     ( ram_cs    ),
     .rom_cs     ( rom_cs    ),
     .rom_ok     ( rom_ok    ),

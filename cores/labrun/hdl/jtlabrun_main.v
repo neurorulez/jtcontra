@@ -69,7 +69,7 @@ wire        RnW, irq_n, irq_ack;
 wire        irq_trigger;
 reg         bank_cs, in_cs, pre_gfx, pre_cfg, ym0_cs, ym1_cs, ram_cs, prot_cs, sys_cs;
 reg  [ 2:0] bank;
-reg  [ 7:0] port_in, cpu_din, ym_dout, cabinet;
+reg  [ 7:0] port_in, cpu_din, cabinet;
 wire [ 9:0] psg0_snd, psg1_snd;
 wire        fm0_irq_n, fm1_irq_n;
 wire        VMA;
@@ -93,8 +93,8 @@ always @(*) begin
     sys_cs  = 0;
     if( A[15:12]==4'd0 && A[11] ) begin
         case(A[10:8])
-            3'd0: ym0_cs  = 1;
-            3'd1: ym1_cs  = 1;
+            3'd0: ym0_cs  = VMA;
+            3'd1: ym1_cs  = VMA;
             3'd2: in_cs   = RnW;
             3'd3: sys_cs  = RnW;
             3'd4: bank_cs = !RnW;
@@ -117,17 +117,17 @@ end
 wire [7:0] sys_dout ={ ~5'd0, service, coin_input };
 
 always @(posedge clk) begin
-    ym_dout <= ym0_cs ? ym0_dout : ym1_dout;
     cabinet <= A[0] ? {start_button[0],1'b1, joystick1[5:4], joystick1[2], joystick1[3], joystick1[0], joystick1[1]} :
                       {start_button[1],1'b1, joystick2[5:4], joystick2[2], joystick2[3], joystick2[0], joystick2[1]};
     cpu_din <= rom_cs ? rom_data : (
                ram_cs ? ram_dout : (
                gfx_cs ? gfx_dout : (
                in_cs  ? cabinet  : (
-               (ym0_cs | ym1_cs) ? ym_dout  : (
-               sys_cs            ? sys_dout :
-               pal_cs            ? pal_dout : (
-               prot_cs           ? prot_dout : 8'hff ))))));
+               ym0_cs ? ym0_dout : (
+               ym1_cs ? ym1_dout : (
+               sys_cs ? sys_dout :
+               pal_cs ? pal_dout : (
+               prot_cs? prot_dout : 8'hff )))))));
 end
 
 always @(posedge clk) begin

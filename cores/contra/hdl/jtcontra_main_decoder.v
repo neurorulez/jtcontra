@@ -27,6 +27,7 @@ module jtcontra_main_decoder(
     input               rst,
     input               cpu_cen,
     input       [15:0]  A,
+    input               VMA,
     input               RnW,
     input               gfx1_cs,
     input               gfx2_cs,
@@ -65,7 +66,7 @@ reg  [7:0] port_in;
 wire [7:0] div_dout;
 
 always @(*) begin // Decoder 007766 takes as inputs A[15:10] and A[6:5]
-    rom_cs      = (A[15] || A[15:13]==3'b011) && RnW;
+    rom_cs      = (A[15] || A[15:13]==3'b011) && RnW && VMA;
     bank_cs     = A[15:12] == 4'b0111 && !RnW;
     ram_cs      = A[15:12] == 4'b0001;
     pal_cs      = A[15:10] == 6'b0000_11;

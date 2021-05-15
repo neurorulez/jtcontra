@@ -22,6 +22,7 @@ module jtcomsc_main_decoder(
     input               cpu_cen,
     input       [15:0]  A,
     input               RnW,
+    input               VMA,
     output reg          gfx1_cs,
     output reg          gfx2_cs,
     output reg          pal_cs,
@@ -71,7 +72,7 @@ reg  [15:0] mul;
 // but input /G2B could be A[5] as schematics scan don't show
 // a horizontal band around that position
 always @(*) begin
-    rom_cs      = A[15] || A[15:14]==2'b01; // 4000-FFFF
+    rom_cs      = (A[15] || A[15:14]==2'b01) && VMA; // 4000-FFFF
     ram_cs      = A[15:12] == 4'b0001 || A[15:11]==5'b0000_1; // 800-1FFF - also RAM below it?
     // Line order important:
     io_cs       = A[15:9]==7'h2 && !A[5];  // 0400 - 041F
