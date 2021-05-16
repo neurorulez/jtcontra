@@ -99,7 +99,7 @@ assign      prio_en[0] = mmr[3][2]; // enables other priority bits
 wire        obj_page   = mmr[3][3]; // select from which page to draw sprites
 wire        layout     = mmr[3][4]; // 5 columns on the left are text (wide layout)
 assign      prio_en[1] = mmr[3][5];
-wire        narrow_en  = mmr[3][6] | strip_en; // 1 for not displaying first and last columns
+wire        narrow_en  = mmr[3][6]; // 1 for not displaying first and last columns
 wire [3:0]  extra_mask = mmr[4][7:4];
 wire [3:0]  extra_bits = mmr[4][3:0];
 wire [1:0]  code9_sel, code10_sel, code11_sel, code12_sel;
@@ -119,10 +119,7 @@ wire        extra_en   = 1; // there must be a bit in the MMR that turns off all
 assign      { code12_sel, code11_sel, code10_sel, code9_sel } = mmr[5];
 assign      gfx_we   = cpu_cen & ~cpu_rnw & vram_cs;
 // Other configuration
-reg  [8:0]  chr_dump_start, chr_render_start;
-reg  [8:0]  chr_dump_end;
-reg  [8:0]  scr_dump_start, scr_render_start;
-reg  [8:0]  scr_dump_end;
+reg  [8:0]  chr_render_start, scr_render_start;
 
 // Scan
 wire [10:0] scan_addr;
@@ -246,40 +243,26 @@ always @(posedge clk24) begin
             zure[rst_cnt] <= 0;
             strip_map[rst_cnt] <= 0;
         end
-    end else if(cpu_cen) begin
-        if(!cpu_rnw && cfg_cs)
-            mmr[ addr[6:0] ] <= cpu_dout;
-        if(!cpu_rnw && zure_cs) begin
-            if( addr[6] )
-                strip_map[ addr[4:0] ] <= cpu_dout[0];
-            else
-                zure[ addr[4:0] ] <= cpu_dout;
+    end else begin
+        if(cpu_cen && !cpu_rnw) begin
+            if( cfg_cs )
+                mmr[ addr[6:0] ] <= cpu_dout;
+            if( zure_cs ) begin
+                if( addr[6] )
+                    strip_map[ addr[4:0] ] <= cpu_dout[0];
+                else
+                    zure[ addr[4:0] ] <= cpu_dout;
+            end
         end
         // Apply layout
         if( layout ) begin
             // total 35*8 = 280 visible pixels: OCTAL!!
             chr_render_start <= 9'o000;
             scr_render_start <= 9'o050;
-            /*
-            if( flip ) begin
-                chr_dump_start <= 9'o360;
-                chr_dump_end   <= 9'o450;
-                scr_dump_start <= 9'o000;
-                scr_dump_end   <= 9'o360; // o400 = d256
-            end else begin*/
-                chr_dump_start <= 9'o000;
-                chr_dump_end   <= 9'o050;
-                scr_dump_start <= 9'o050;
-                scr_dump_end   <= 9'o430; // o400 = d256
-            // end
         end else begin
             // total 31*8 = 248 visible pixels: OCTAL!!
             chr_render_start <= 9'o020;
             scr_render_start <= 9'o020;
-            chr_dump_start <= 9'o020;
-            chr_dump_end   <= 9'o410;
-            scr_dump_start <= 9'o020;
-            scr_dump_end   <= 9'o410;
         end
     end
 end
@@ -430,7 +413,7 @@ jtcontra_gfx_obj u_obj(
     .scan_addr          ( obj_scan_addr[9:0]),
     .hdump              ( hdump             ),
     .pxl                ( obj_pxl           ),
-    .dump_start         ( scr_dump_start    ),
+    .dump_start         ( scr_render_start  ),
     // Colour PROM
     .oprom_addr         ( oprom_addr        ),
     .oprom_data         ( oprom_data        ),
