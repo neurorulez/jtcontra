@@ -134,6 +134,7 @@ wire [ 7:0] code_dout, attr_dout, obj_dout, obj_pxl;
 wire [ 7:0] code_scan, attr_scan, obj_scan;
 
 reg  [ 7:0] vprom_addr;
+wire [ 7:0] oprom_addr;
 wire [ 3:0] vprom_data, oprom_data;
 
 wire [ 7:0] strip_pos;
@@ -341,7 +342,7 @@ end
 
 // Local colour mixer
 wire [ 7:0] scr_pxl_gated = scr_pxl[7:0];
-wire        obj_blank     = oprom_data[3:0] == 4'h0;
+wire        obj_blank     = obj_pxl == 4'h0;
 wire        tile_blank    = vprom_data[3:0] == 4'h0;
 wire        border_narrow = (hdump<9'o30 || hdump>=9'o410) && narrow_en;
 wire        border_wide   = hdump<9'o20 || hdump>=9'o420;
@@ -364,7 +365,7 @@ always @(posedge clk, posedge rst) begin
                 if( obj_blank || (layout && txt_en) || tile_prio )
                     pxl_out[4:0] <= { 1'b1, vprom_data }; // Tilemap
                 else
-                    pxl_out[4:0] <= { 1'b0, oprom_data }; // Object
+                    pxl_out[4:0] <= { 1'b0, obj_pxl }; // Object
             end
         end
     end
@@ -429,6 +430,9 @@ jtcontra_gfx_obj u_obj(
     .hdump              ( hdump             ),
     .pxl                ( obj_pxl           ),
     .dump_start         ( scr_dump_start    ),
+    // Colour PROM
+    .oprom_addr         ( oprom_addr        ),
+    .oprom_data         ( oprom_data        ),
     // SDRAM
     .rom_cs             ( rom_obj_cs        ),
     .rom_addr           ( rom_obj_addr      ),
@@ -458,11 +462,11 @@ generate
     end
 endgenerate
 
-jtframe_prom #(.dw(4),.aw(8) ) u_oprom(
+jtframe_prom #(.dw(4),.aw(8),.ASYNC(1) ) u_oprom(
     .clk        ( clk                       ),
     .cen        ( 1'b1                      ),
     .data       ( prog_data                 ),
-    .rd_addr    ( obj_pxl                   ),
+    .rd_addr    ( oprom_addr                ),
     .wr_addr    ( prog_addr[7:0]            ),
     .we         ( prom_we & ~prog_addr[8]   ),
     .q          ( oprom_data                )

@@ -1,37 +1,16 @@
   \BTrick Trap\W FPGA by \RJotego\W
   http://patreon.com/topapate
 
-      October 2020
-
+      October 2020 (beta)
+      May     2021 (public)
 
         DIRECTORS
 
-
-
-
-
-
-
   Purple Tinker    Atrac17
 
+  F. Mahe          C. Gelatt
 
-
-
-
-
-  F. Mahe         C. Gelatt
-
-
-
-
-
-
-   DJ Qbert           SID
-
-
-
-
-
+  DJ Qbert         SID
 
          DJ Hard Rich
 
@@ -41,35 +20,11 @@
 _______________________________
       \RSpecial Thanks to\W
 
+  Cohge     \BArcadexpress.com\W
 
-
-
-
-
-
-    Cohge      \BArcadexpress.com\W
-
-
-
-
-
-
-
-          Brian Sallee
-
-
-
-
-
-
+        Brian Sallee
 
   Lionel Lenoble  Daniel Bauza
-
-
-
-
-
-
 
   Phillip McMahon  Jo Tomiyori
 _______________________________
@@ -99,10 +54,9 @@ _______________________________
       Ultrarobotninja
 _______________________________
 
-  Furrtek is working on RE of
-  the Konami chip K007121 for
-  this game and other
-  awesome arcade titles.
+  This core has been possible
+  thanks to the work of Furrtek
+  on the Konami chip K007121
 
   Please follow him in:
 

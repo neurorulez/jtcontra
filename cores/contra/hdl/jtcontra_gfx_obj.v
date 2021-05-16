@@ -30,10 +30,13 @@ module jtcontra_gfx_obj(
     input                layout,
     output reg           done,
     output      [ 9:0]   scan_addr, // max 64 sprites in total
+    // Object Colour Prom
+    output reg  [ 7:0]   oprom_addr,
+    input       [ 3:0]   oprom_data,
     // Line buffer
     input       [ 8:0]   hdump,
     input       [ 8:0]   dump_start,
-    output      [ 7:0]   pxl,
+    output      [ 3:0]   pxl,
     // SDRAM
     output reg           rom_cs,
     output      [17:0]   rom_addr,
@@ -57,7 +60,6 @@ reg  [15:0] pxl_data;
 reg  [ 8:0] xpos;
 reg  [ 9:0] scan_base;
 reg         obj_we;
-reg  [ 7:0] line_din;
 wire [ 8:0] line_addr;
 
 reg  [ 2:0] height_comb;
@@ -174,7 +176,7 @@ always @(posedge clk) begin
                     pxl_data <= hflip ? pxl_data>>4 : pxl_data << 4;
                     pxl_cnt  <= pxl_cnt + 9'd1;
                     xpos     <= xpos + 9'd1;
-                    line_din <= { pal,
+                    oprom_addr <= { pal,
                         hflip ? pxl_data[3:0] : pxl_data[15:12]
                         };
                     line_we  <= !scores;
@@ -208,13 +210,14 @@ always @(posedge clk) begin
 end
 
 jtframe_obj_buffer #(
+    .DW   (4),
     .ALPHA(0),
     .BLANK(0)
 ) u_line(
     .clk    ( clk           ),
     .LHBL   ( LHBL          ),
     // New data writes
-    .wr_data( line_din      ),
+    .wr_data( oprom_data    ),
     .wr_addr( line_addr     ),
     .we     ( line_we       ),
     // Old data reads (and erases)
