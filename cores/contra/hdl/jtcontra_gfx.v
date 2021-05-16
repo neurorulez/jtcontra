@@ -350,6 +350,7 @@ wire        blank_area    = vdump<9'o20 || (!layout && (border_narrow||border_wi
 wire [11:0] obj_scan_addr;
 wire        scrwin        = scr_pxl[8];
 wire        tile_prio     = &prio_en & scrwin & ~tile_blank;
+wire        no_obj        = layout && ( flip ? hdump>9'o360 : hdump<8'o50);
 
 always @(posedge clk, posedge rst) begin
     if( rst ) begin
@@ -362,7 +363,7 @@ always @(posedge clk, posedge rst) begin
                 pxl_out <= 7'd0;
             else begin
                 pxl_out[6:5] <= pal_bank;
-                if( obj_blank || (layout && hdump<8'o50) || tile_prio )
+                if( obj_blank || no_obj || tile_prio )
                     pxl_out[4:0] <= { 1'b1, vprom_data }; // Tilemap
                 else
                     pxl_out[4:0] <= { 1'b0, obj_pxl }; // Object
@@ -424,6 +425,7 @@ jtcontra_gfx_obj u_obj(
     .LVBL               ( LVBL              ),
     .vrender            ( vrender           ),
     .flip               ( flip              ),
+    .layout             ( layout            ),
     .done               (                   ),
     .scan_addr          ( obj_scan_addr[9:0]),
     .hdump              ( hdump             ),

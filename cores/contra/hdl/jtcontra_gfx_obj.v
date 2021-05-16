@@ -27,6 +27,7 @@ module jtcontra_gfx_obj(
     input                LVBL,
     input       [ 8:0]   vrender,
     input                flip,
+    input                layout,
     output reg           done,
     output      [ 9:0]   scan_addr, // max 64 sprites in total
     // Object Colour Prom
@@ -69,7 +70,8 @@ reg         hflip, vflip;
 reg  [ 8:0] pxl_cnt; // OBJ limit should be less than 64us*6MHz=384 pixels
 wire [ 8:0] vf;
 
-assign      line_addr = { flip ? 9'h0EF-xpos : xpos };
+//assign      line_addr = { flip ? 9'h0EF-xpos + (layout ? 9'o50 : 0) : xpos };
+assign      line_addr = { flip ? 9'h117-xpos : xpos };
 assign      scan_addr = scan_base + byte_sel;
 assign      vf        = vrender ^ {1'b0, {8{flip}}};
 
