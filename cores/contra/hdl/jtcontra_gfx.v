@@ -344,7 +344,7 @@ end
 wire [ 7:0] scr_pxl_gated = scr_pxl[7:0];
 wire        obj_blank     = obj_pxl == 4'h0;
 wire        tile_blank    = vprom_data[3:0] == 4'h0;
-wire        border_narrow = (hdump<9'o30 || hdump>=9'o410) && narrow_en;
+wire        border_narrow = (hdump<9'o30 || hdump>9'o410) && narrow_en;
 wire        border_wide   = hdump<9'o20 || hdump>9'o420;
 wire        blank_area    = vdump<9'o20 || (!layout && (border_narrow||border_wide));
 wire [11:0] obj_scan_addr;
