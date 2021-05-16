@@ -130,12 +130,12 @@ wire [10:0] ram_addr = { addr[11], addr[9:0] };
 wire        attr_we  = gfx_we & ~addr[10] & ~addr[12];
 wire        code_we  = gfx_we &  addr[10] & ~addr[12];
 wire        obj_we   = gfx_we &  addr[12];
-wire [ 7:0] code_dout, attr_dout, obj_dout, obj_pxl;
+wire [ 7:0] code_dout, attr_dout, obj_dout;
 wire [ 7:0] code_scan, attr_scan, obj_scan;
 
 reg  [ 7:0] vprom_addr;
 wire [ 7:0] oprom_addr;
-wire [ 3:0] vprom_data, oprom_data;
+wire [ 3:0] vprom_data, oprom_data, obj_pxl;
 
 wire [ 7:0] strip_pos;
 wire [ 4:0] strip_addr;

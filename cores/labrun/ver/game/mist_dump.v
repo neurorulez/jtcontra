@@ -51,18 +51,20 @@ module mist_dump(
             //$shm_probe(UUT.u_game.u_dwnld,"A");
             //$shm_probe(UUT.u_game,"A");
             $shm_probe(UUT.u_game.u_main,"A");
-            $shm_probe(UUT.u_game.u_main.u_cpu.u_wait,"A");
+            `ifdef NOSOUND
+                $shm_probe(UUT.u_game.u_main.u_cpu.u_wait,"A");
+                $shm_probe(UUT.u_game.u_video.u_gfx,"AS");
+            `else
+                $shm_probe(UUT.u_game.u_main.u_fm0.u_jt12,"A");
+                $shm_probe(UUT.u_game.u_main.u_fm0.u_jt12.u_mmr,"A");
+                $shm_probe(UUT.u_game.u_main.u_fm0.u_jt12.u_timers,"AS");
 
-            //$shm_probe(UUT.u_game.u_main.u_fm0.u_jt12,"AS");
-            //$shm_probe(UUT.u_game.u_main.u_fm0.u_jt12.u_mmr,"A");
-            //$shm_probe(UUT.u_game.u_main.u_fm0.u_jt12.gen_ssg.u_psg,"AS");
-
-            //$shm_probe(UUT.u_game.u_main.u_fm1.u_jt12,"AS");
-            //$shm_probe(UUT.u_game.u_main.u_fm1.u_jt12.u_mmr,"A");
-            //$shm_probe(UUT.u_game.u_main.u_fm1.u_jt12.gen_ssg.u_psg,"AS");
+                $shm_probe(UUT.u_game.u_main.u_fm1.u_jt12,"A");
+                $shm_probe(UUT.u_game.u_main.u_fm1.u_jt12.u_mmr,"AS");
+                $shm_probe(UUT.u_game.u_main.u_fm1.u_jt12.u_timers,"AS");
+            `endif
             //$shm_probe(UUT.u_game.u_main.u_prot,"A");
             //$shm_probe(UUT.u_game.u_video,"A");
-            $shm_probe(UUT.u_game.u_video.u_gfx,"A");
         `endif
     end
 `endif
