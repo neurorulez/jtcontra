@@ -230,9 +230,6 @@ jtcontra_gfx #(
     .gfx_en     ( gfx_en[3:2]   )
 );
 
-wire [4:0] cm_red, cm_green, cm_blue;
-wire       cm_LHBL, cm_LVBL;
-
 jtcontra_colmix #(.GAME(GAME)) u_colmix(
     .rst        ( rst           ),
     .clk        ( clk           ),
@@ -242,8 +239,8 @@ jtcontra_colmix #(.GAME(GAME)) u_colmix(
     .pxl_cen    ( pxl_cen       ),
     .LHBL       ( LHBL          ),
     .LVBL       ( LVBL          ),
-    .LHBL_dly   ( cm_LHBL       ),
-    .LVBL_dly   ( cm_LVBL       ),
+    .LHBL_dly   ( LHBL_dly      ),
+    .LVBL_dly   ( LVBL_dly      ),
     // CPU      interface
     .pal_cs     ( pal_cs        ),
     .cpu_rnw    ( cpu_rnw       ),
@@ -254,46 +251,9 @@ jtcontra_colmix #(.GAME(GAME)) u_colmix(
     .prio_latch ( prio_latch    ), // unused
     .gfx1_pxl   ( gfx1_pxl      ),
     .gfx2_pxl   ( gfx2_pxl      ),
-    .red        ( cm_red        ),
-    .green      ( cm_green      ),
-    .blue       ( cm_blue       )
+    .red        ( red           ),
+    .green      ( green         ),
+    .blue       ( blue          )
 );
-
-`ifdef SIMULATION
-`define NOCREDITS
-`endif
-
-//`ifdef MISTER_NOHDMI
-//`define NOCREDITS
-//`endif
-
-`ifndef NOCREDITS
-wire [23:0] colmix_rgb = { cm_red, cm_green, cm_blue }; // shouldn't it be 15:0?
-
-jtframe_credits #(
-    .PAGES  (      3 ),
-    .COLW   (      5 ),
-    .BLKPOL (      0 )
-) u_credits(
-    .rst        ( rst           ),
-    .clk        ( clk           ),
-    .pxl_cen    ( pxl_cen       ),
-
-    // input image
-    .HB         ( cm_LHBL       ),
-    .VB         ( cm_LVBL       ),
-    .rgb_in     ( colmix_rgb    ),
-    .enable     ( ~dip_pause    ),
-    .toggle     ( start_button  ),
-
-    // output image
-    .HB_out     ( LHBL_dly      ),
-    .VB_out     ( LVBL_dly      ),
-    .rgb_out    ( {red, green, blue } )
-);
-`else
-assign {red, green, blue }    = { cm_red, cm_green, cm_blue };
-assign { LHBL_dly, LVBL_dly } = { cm_LHBL, cm_LVBL };
-`endif
 
 endmodule
