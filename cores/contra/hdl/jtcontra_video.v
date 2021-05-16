@@ -120,8 +120,8 @@ jtframe_cen48 u_cen(
 );
 
 jtframe_vtimer #(
-    .HB_START( 279 ),
-    .HB_END  ( 384 )    // makes H length = 64us
+    .HB_START( 281 ),
+    .HB_END  ( 383 )    // makes H length = 64us
 ) u_timer(
     .clk        ( clk           ),
     .pxl_cen    ( pxl_cen       ),
