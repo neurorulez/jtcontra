@@ -22,6 +22,7 @@
 module jtcontra_gfx_tilemap(
     input                rst,
     input                clk,
+    input                HS,
     input                LHBL,
     input                LVBL,
     input       [ 8:0]   hpos,
@@ -74,7 +75,7 @@ reg  [ 3:0] pal;
 reg  [ 1:0] txt_his;
 reg         line_we;
 reg  [ 2:0] st;
-reg         last_LHBL;
+reg         last_HS;
 reg         scrwin;
 reg  [ 8:0] hend, hn_txt,hn_scr, vn, hn_aux;
 wire [ 8:0] lyr_vn, vpos_sum;
@@ -118,8 +119,8 @@ always @(posedge clk) begin
         scrwin  <= 0;
         hrender <= 0;
     end else begin
-        last_LHBL <= LHBL;
-        if( LHBL && !last_LHBL && LVBL) begin
+        last_HS <= HS;
+        if( HS && !last_HS && LVBL) begin
             line   <= ~line;
             done   <= 0;
             rom_cs <= 0;
@@ -135,7 +136,7 @@ always @(posedge clk) begin
                     hn_scr <= scr_hn0[8:0];
                     //hrender <= ( txt_en ? chr_dump_start : scr_dump_start )
                     //           - { 7'd0, scr_hn0[1:0] } - 9'd1;
-                    hrender <= scr_dump_start - 9'd1 - (txt_en ? 0 : { 7'd0, scr_hn0[1:0] });
+                    hrender <= scr_dump_start - (txt_en ? 0 : { 7'd0, scr_hn0[1:0] });
                     hend    <= RENDER_END;
                     if(!done) txt_his <= { txt_his[0], txt_row };
                 end

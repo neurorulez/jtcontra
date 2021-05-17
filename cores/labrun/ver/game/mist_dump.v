@@ -55,6 +55,8 @@ module mist_dump(
             $shm_probe(UUT.u_game.u_video.u_colmix,"A");
             $shm_probe(UUT.u_game.u_video.u_gfx.u_obj,"A");
             $shm_probe(UUT.u_game.u_video.u_gfx.u_tilemap,"A");
+            $shm_probe(UUT.u_frame.u_board.u_scan2x,"AS");
+            $shm_probe(UUT.u_frame.u_board.u_wirebw,"AS");
             `ifdef NOSOUND
                 $shm_probe(UUT.u_game.u_main.u_cpu.u_wait,"A");
             `else

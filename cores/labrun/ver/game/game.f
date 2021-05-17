@@ -11,6 +11,8 @@ $MODULESdivfunc.v
 
 $JTFRAME/hdl/video/jtframe_vtimer.v
 $JTFRAME/hdl/video/jtframe_blank.v
+$JTFRAME/hdl/video/jtframe_wirebw.v
+$JTFRAME/hdl/video/jtframe_scan2x.v
 $JTFRAME/hdl/jtframe_sh.v
 $JTFRAME/hdl/clocking/jtframe_cen24.v
 $JTFRAME/hdl/clocking/jtframe_cen48.v

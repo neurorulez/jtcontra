@@ -29,6 +29,7 @@ module jtcontra_gfx(
     input                clk24,
     input                pxl2_cen,
     input                pxl_cen,
+    input                HS,
     input                LHBL,
     input                LVBL,
     input                HS,
@@ -361,6 +362,7 @@ jtcontra_gfx_tilemap u_tilemap(
     .rst                ( rst               ),
     .clk                ( clk               ),
     // screen
+    .HS                 ( HS                ),
     .LHBL               ( LHBL              ),
     .LVBL               ( LVBL              ),
     .hpos               ( hpos              ),
