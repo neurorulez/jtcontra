@@ -106,7 +106,6 @@ jtcontra_gfx #(.BYPASS_VPROM(1)) u_gfx(
     .cpu_cen    ( cpu_cen       ),
     .pxl2_cen   ( pxl2_cen      ),
     .pxl_cen    ( pxl_cen       ),
-    .HS         ( HS            ),
     .LHBL       ( LHBL          ),
     .LVBL       ( LVBL          ),
     .HS         ( HS            ),

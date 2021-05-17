@@ -29,7 +29,6 @@ module jtcontra_gfx(
     input                clk24,
     input                pxl2_cen,
     input                pxl_cen,
-    input                HS,
     input                LHBL,
     input                LVBL,
     input                HS,
@@ -76,7 +75,7 @@ parameter   CFGFILE="gfx_cfg.hex",
 
 localparam  RCNT=8, ZURECNT=32;
 
-reg         last_LVBL, last_LHBL, last_irqn;
+reg         last_LVBL, last_irqn;
 wire        gfx_we;
 wire        done, scr_we;
 wire        vram_cs, cfg_cs;
@@ -288,13 +287,11 @@ always @(posedge clk, posedge rst) begin
         cpu_firqn <= 1;
         cpu_nmin  <= 1;
         last_LVBL <= 0;
-        last_LHBL <= 0;
         last_irqn <= 1;
         trig_nfir <= 1;
         last_trig <= 1;
     end else if(pxl_cen ) begin
         last_LVBL <= LVBL;
-        last_LHBL <= LHBL;
         last_irqn <= cpu_irqn;
         last_trig <= trig_nfir;
 
@@ -363,7 +360,6 @@ jtcontra_gfx_tilemap u_tilemap(
     .clk                ( clk               ),
     // screen
     .HS                 ( HS                ),
-    .LHBL               ( LHBL              ),
     .LVBL               ( LVBL              ),
     .hpos               ( hpos              ),
     .vpos               ( vpos              ),
@@ -409,7 +405,7 @@ jtcontra_gfx_obj u_obj(
     .rst                ( rst               ),
     .clk                ( clk               ),
     .pxl_cen            ( pxl_cen           ),
-    .LHBL               ( LHBL              ),
+    .HS                 ( HS                ),
     .LVBL               ( LVBL              ),
     .vrender            ( vrender           ),
     .flip               ( flip              ),

@@ -23,7 +23,7 @@ module jtcontra_gfx_obj(
     input                rst,
     input                clk,
     input                pxl_cen,
-    input                LHBL,
+    input                HS,
     input                LVBL,
     input       [ 8:0]   vrender,
     input                flip,
@@ -51,7 +51,7 @@ reg         line_we;
 reg         h4;
 reg  [ 2:0] byte_sel;
 reg  [ 3:0] st;
-reg         last_LHBL;
+reg         last_HS;
 reg  [ 8:0] hn, vn;
 reg  [ 4:0] bank;
 reg  [ 7:0] dump_cnt;
@@ -93,8 +93,8 @@ always @(posedge clk) begin
         dump_cnt<= 8'd0;
         h4      <= 0;
     end else begin
-        last_LHBL <= LHBL;
-        if( LHBL && !last_LHBL && LVBL) begin
+        last_HS <= HS;
+        if( HS && !last_HS && LVBL) begin
             done      <= 0;
             rom_cs    <= 0;
             st        <= 3'd0;
@@ -214,7 +214,7 @@ jtframe_obj_buffer #(
     .BLANK(0)
 ) u_line(
     .clk    ( clk           ),
-    .LHBL   ( LHBL          ),
+    .LHBL   ( ~HS           ),
     // New data writes
     .wr_data( oprom_data    ),
     .wr_addr( line_addr     ),

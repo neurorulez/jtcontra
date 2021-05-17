@@ -23,7 +23,6 @@ module jtcontra_gfx_tilemap(
     input                rst,
     input                clk,
     input                HS,
-    input                LHBL,
     input                LVBL,
     input       [ 8:0]   hpos,
     input       [ 7:0]   vpos,
