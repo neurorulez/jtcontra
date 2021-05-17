@@ -52,11 +52,11 @@ module mist_dump(
             //$shm_probe(UUT.u_game.u_main,"A");
             //$shm_probe(UUT.u_game.u_main.genblk2.u_decoder,"A");
             `ifndef NOSOUND
-            $shm_probe(UUT.u_game.u_sound,"A");
-            $shm_probe(UUT.u_game.u_sound.u_pcm,"AS");
-            //$shm_probe(UUT.u_game.u_sound.u_fm,"AS");
+                $shm_probe(UUT.u_game.u_sound,"A");
+                $shm_probe(UUT.u_game.u_sound.u_pcm,"AS");
+                //$shm_probe(UUT.u_game.u_sound.u_fm,"AS");
             `endif
-            //$shm_probe(UUT.u_game.u_video,"A");
+            $shm_probe(UUT.u_game.u_video,"AS");
             //$shm_probe(UUT.u_game.u_video.u_gfx1,"A");
             //$shm_probe(UUT.u_game.u_video.u_gfx2,"A");
             //$shm_probe(UUT.u_game.u_video.u_gfx1.u_tilemap,"A");

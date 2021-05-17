@@ -39,6 +39,7 @@ module jtcontra_gfx_tilemap(
     output               scr_we,
     output reg  [ 8:0]   line_din,
     output      [ 9:0]   line_addr,
+    output               txt_line,
     // SDRAM
     output reg           rom_cs,
     output      [17:0]   rom_addr,
@@ -70,6 +71,7 @@ localparam [8:0] BLANK      = 9'o460;
 
 reg  [12:0] code;
 reg  [ 3:0] pal;
+reg  [ 1:0] txt_his;
 reg         line_we;
 reg  [ 2:0] st;
 reg         last_LHBL;
@@ -84,6 +86,7 @@ wire        txt_row;
 wire [ 9:0] scr_hn0, hn;
 reg         scores;
 
+assign txt_line   = txt_his[1];
 assign txt_row    = txt_en || scores;
 assign scr_hn0    = (strip_en && !strip_col)? {1'b0,strip_pos} : hpos;
 assign line_addr  = { line, flip ? 9'h117-hrender  : hrender };
@@ -134,6 +137,7 @@ always @(posedge clk) begin
                     //           - { 7'd0, scr_hn0[1:0] } - 9'd1;
                     hrender <= scr_dump_start - 9'd1 - (txt_en ? 0 : { 7'd0, scr_hn0[1:0] });
                     hend    <= RENDER_END;
+                    if(!done) txt_his <= { txt_his[0], txt_en };
                 end
                 1: begin
                     vn <= lyr_vn;
@@ -141,7 +145,7 @@ always @(posedge clk) begin
                 3: begin
                     code   <= { bank, code_scan };
                     pal    <= { pal_msb & attr_scan[3], attr_scan[2:0] };
-                    scrwin <= attr_scan[6] && scrwin_en;
+                    scrwin <= (attr_scan[6] && scrwin_en);
                     rom_cs <= 1;
                 end
                 5: begin

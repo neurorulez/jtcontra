@@ -324,6 +324,7 @@ always @(posedge clk, posedge rst) begin
 end
 
 // Local colour mixer
+wire        txt_line;
 wire [ 7:0] scr_pxl_gated = scr_pxl[7:0];
 wire        obj_blank     = obj_pxl == 4'h0;
 wire        tile_blank    = vprom_data[3:0] == 4'h0;
@@ -334,6 +335,7 @@ wire [11:0] obj_scan_addr;
 wire        scrwin        = scr_pxl[8];
 wire        tile_prio     = &prio_en & scrwin & ~tile_blank;
 wire        no_obj        = layout && ( flip ? hdump>9'o360 : hdump<8'o50);
+wire        scr_sel       = obj_blank || no_obj || tile_prio || txt_line;
 
 always @(posedge clk, posedge rst) begin
     if( rst ) begin
@@ -346,7 +348,7 @@ always @(posedge clk, posedge rst) begin
                 pxl_out <= 7'd0;
             else begin
                 pxl_out[6:5] <= pal_bank;
-                if( obj_blank || no_obj || tile_prio )
+                if( scr_sel )
                     pxl_out[4:0] <= { 1'b1, vprom_data }; // Tilemap
                 else
                     pxl_out[4:0] <= { 1'b0, obj_pxl }; // Object
@@ -374,6 +376,7 @@ jtcontra_gfx_tilemap u_tilemap(
     .scan_addr          ( scan_addr         ),
     .txt_en             ( txt_en            ),
     .layout             ( layout            ),
+    .txt_line           ( txt_line          ),
     // SDRAM
     .rom_cs             ( rom_scr_cs        ),
     .rom_addr           ( rom_scr_addr      ),

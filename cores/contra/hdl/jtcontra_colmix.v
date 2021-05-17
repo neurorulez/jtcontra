@@ -17,7 +17,7 @@
     Date: 03-05-2020 */
 
 // Equivalent to KONAMI 007593
-// Plus priority decoding selected for each game 
+// Plus priority decoding selected for each game
 // with parameter GAME
 
 module jtcontra_colmix(
@@ -110,12 +110,12 @@ always @(posedge clk) begin
             // { blue, green, red } <= (!LVBL || !LHBL) ? 15'd0 : pxl_aux;
             col_in <= pxl_aux;
             pal_half <= 1;
-        end else 
+        end else
             pal_half <= ~pal_half;
     end
 end
 
-jtframe_blank #(.DLY(3),.DW(15)) u_blank(
+jtframe_blank #(.DLY(2),.DW(15)) u_blank(
     .clk        ( clk       ),
     .pxl_cen    ( pxl_cen   ),
     .LHBL       ( LHBL      ),
