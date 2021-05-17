@@ -79,7 +79,7 @@ reg         scrwin;
 reg  [ 8:0] hend, hn_txt,hn_scr, vn, hn_aux;
 wire [ 8:0] lyr_vn, vpos_sum;
 reg  [ 4:0] bank;
-reg  [ 7:0] dump_cnt;
+reg  [ 2:0] dump_cnt;
 reg  [15:0] pxl_data;
 reg  [8:0]  hrender;
 wire        txt_row;
@@ -135,7 +135,7 @@ always @(posedge clk) begin
                     hn_scr <= scr_hn0[8:0];
                     //hrender <= ( txt_en ? chr_dump_start : scr_dump_start )
                     //           - { 7'd0, scr_hn0[1:0] } - 9'd1;
-                    hrender <= scr_dump_start - (txt_en ? 0 : { 7'd0, scr_hn0[1:0] });
+                    hrender <= scr_dump_start - 1'd1 - (txt_en ? 0 : { 7'd0, scr_hn0[1:0] });
                     hend    <= RENDER_END;
                     if(!done) txt_his <= { txt_his[0], txt_row };
                 end
@@ -152,7 +152,7 @@ always @(posedge clk) begin
                     if( rom_ok ) begin
                         pxl_data <= /*(hrender>=BLANK && layout) ? 16'd0 : */rom_data;
                         rom_cs   <= 0;
-                        dump_cnt <= 4'h7;
+                        dump_cnt <= 7;
                     end else st <= st;
                 end
                 6: begin // dumps 4 pixels
