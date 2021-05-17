@@ -119,32 +119,14 @@ jtframe_cen48 u_cen(
     .cen1p5b    (           )
 );
 
-jtframe_vtimer #(
-    .HB_START( 279 ),
-    .HB_END  ( 383 )    // 384 pixels per line, H length = 64us
-) u_timer(
-    .clk        ( clk           ),
-    .pxl_cen    ( pxl_cen       ),
-    .vdump      ( vdump         ),
-    .vrender    ( vrender       ),
-    .vrender1   ( vrender1      ),
-    .H          ( hdump         ),
-    .Hinit      (               ),
-    .Vinit      (               ),
-    .LHBL       ( LHBL          ),
-    .LVBL       ( LVBL          ),
-    .HS         ( HS            ),
-    .VS         ( VS            )
-);
-
 wire gfx1_prom_we = ~prog_addr[9] & prom_we;
 wire gfx2_prom_we =  prog_addr[9] & prom_we;
 
 jtcontra_gfx #(
-    .CFGFILE("gfx1_cfg.hex"),
+    .CFGFILE("gfx1_cfg.hex" ),
     .SIMATTR("gfx1_attr.bin"),
     .SIMCODE("gfx1_code.bin"),
-    .SIMOBJ ("gfx1_obj.bin")
+    .SIMOBJ ("gfx1_obj.bin" )
 ) u_gfx1(
     .rst        ( rst           ),
     .clk        ( clk           ),
@@ -173,6 +155,7 @@ jtcontra_gfx #(
     .cpu_dout   ( cpu_dout      ),
     .dout       ( gfx1_dout     ),
     .cpu_irqn   ( cpu_irqn      ),
+    .cpu_firqn  (               ),
     .cpu_nmin   ( cpu_nmin      ),
     // SDRAM interface
     .rom_obj_sel( gfx1_sel      ),
@@ -186,10 +169,11 @@ jtcontra_gfx #(
 );
 
 jtcontra_gfx #(
-    .CFGFILE("gfx2_cfg.hex"),
+    .CFGFILE("gfx2_cfg.hex" ),
     .SIMATTR("gfx2_attr.bin"),
     .SIMCODE("gfx2_code.bin"),
-    .SIMOBJ ("gfx2_obj.bin")
+    .SIMOBJ ("gfx2_obj.bin" ),
+    .VTIMER ( 0             )
 ) u_gfx2(
     .rst        ( rst           ),
     .clk        ( clk           ),
@@ -218,6 +202,7 @@ jtcontra_gfx #(
     .cpu_dout   ( cpu_dout      ),
     .dout       ( gfx2_dout     ),
     .cpu_irqn   (               ),
+    .cpu_firqn  (               ),
     .cpu_nmin   (               ),
     // SDRAM interface
     .rom_obj_sel( gfx2_sel      ),

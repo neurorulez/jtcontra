@@ -81,24 +81,6 @@ jtframe_cen48 u_cen(
     .cen1p5b    (           )
 );
 
-jtframe_vtimer #(
-    .HB_START( 279 ),
-    .HB_END  ( 383 )    // 384 pixels per line, H length = 64us
-) u_timer(
-    .clk        ( clk           ),
-    .pxl_cen    ( pxl_cen       ),
-    .vdump      ( vdump         ),
-    .vrender    ( vrender       ),
-    .vrender1   ( vrender1      ),
-    .H          ( hdump         ),
-    .Hinit      (               ),
-    .Vinit      (               ),
-    .LHBL       ( LHBL          ),
-    .LVBL       ( LVBL          ),
-    .HS         ( HS            ),
-    .VS         ( VS            )
-);
-
 jtcontra_gfx #(.BYPASS_VPROM(1)) u_gfx(
     .rst        ( rst           ),
     .clk        ( clk           ),

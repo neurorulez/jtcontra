@@ -29,14 +29,17 @@ module jtcontra_gfx(
     input                clk24,
     input                pxl2_cen,
     input                pxl_cen,
-    input                LHBL,
-    input                LVBL,
-    input                HS,
-    input                VS,
-    input   [8:0]        hdump,
-    input   [8:0]        vdump,
-    input   [8:0]        vrender,
-    input   [8:0]        vrender1,
+
+    // output if VTIMER = 1, input otherwise
+    inout                LHBL,
+    inout                LVBL,
+    inout                HS,
+    inout                VS,
+    inout   [8:0]        hdump,
+    inout   [8:0]        vdump,
+    inout   [8:0]        vrender,
+    inout   [8:0]        vrender1,
+
     output               flip,
     // PROMs
     input      [ 8:0]    prog_addr,
@@ -65,7 +68,7 @@ module jtcontra_gfx(
 );
 
 parameter   H0 = 9'h75; // initial value of hdump after H blanking
-parameter   BYPASS_VPROM=0;
+parameter   BYPASS_VPROM=0, VTIMER=1;
 
 // Simulation files
 parameter   CFGFILE="gfx_cfg.hex",
@@ -428,6 +431,31 @@ jtcontra_gfx_obj u_obj(
 
 assign obj_scan_addr[11] = obj_page;
 assign obj_scan_addr[10] = 1'b0;
+
+// Timing
+
+generate
+    if( VTIMER==1 ) begin
+        jtframe_vtimer #(
+            .HB_START( 279 ),
+            .HB_END  ( 383 )    // 384 pixels per line, H length = 64us
+        ) u_timer(
+            .clk        ( clk           ),
+            .pxl_cen    ( pxl_cen       ),
+            .vdump      ( vdump         ),
+            .vrender    ( vrender       ),
+            .vrender1   ( vrender1      ),
+            .H          ( hdump         ),
+            .Hinit      (               ),
+            .Vinit      (               ),
+            .LHBL       ( LHBL          ),
+            .LVBL       ( LVBL          ),
+            .HS         ( HS            ),
+            .VS         ( VS            )
+        );
+    end
+endgenerate
+
 
 // Colour PROMs
 
