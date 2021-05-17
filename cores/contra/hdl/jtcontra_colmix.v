@@ -115,7 +115,7 @@ always @(posedge clk) begin
     end
 end
 
-jtframe_blank #(.DLY(2),.DW(15)) u_blank(
+jtframe_blank #(.DLY(3),.DW(15)) u_blank(
     .clk        ( clk       ),
     .pxl_cen    ( pxl_cen   ),
     .LHBL       ( LHBL      ),
