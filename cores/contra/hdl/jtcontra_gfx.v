@@ -329,13 +329,13 @@ wire        txt_line;
 wire [ 7:0] scr_pxl_gated = scr_pxl[7:0];
 wire        obj_blank     = obj_pxl == 4'h0;
 wire        tile_blank    = vprom_data[3:0] == 4'h0;
-wire        border_narrow = (hdump<9'o30 || hdump>9'o410) && narrow_en;
-wire        border_wide   = hdump<9'o20 || hdump>9'o420;
+wire        border_narrow = (hdump<9'o30 || hdump>=9'o410) && narrow_en;
+wire        border_wide   = hdump<9'o20 || hdump>=9'o420;
 wire        blank_area    = vdump<9'o20 || (!layout && (border_narrow||border_wide));
 wire [11:0] obj_scan_addr;
 wire        scrwin        = scr_pxl[8];
 wire        tile_prio     = &prio_en & scrwin & ~tile_blank;
-wire        no_obj        = layout && ( flip ? hdump>9'o360 : hdump<8'o50);
+wire        no_obj        = layout && ( flip ? hdump>=9'o360 : hdump<8'o50);
 wire        scr_sel       = obj_blank || no_obj || tile_prio || txt_line;
 
 always @(posedge clk, posedge rst) begin
