@@ -51,9 +51,12 @@ module mist_dump(
             //$shm_probe(UUT.u_game.u_dwnld,"A");
             //$shm_probe(UUT.u_game,"A");
             $shm_probe(UUT.u_game.u_main,"A");
+            $shm_probe(UUT.u_game.u_video.u_gfx,"A");
+            $shm_probe(UUT.u_game.u_video.u_colmix,"A");
+            $shm_probe(UUT.u_game.u_video.u_gfx.u_obj,"A");
+            $shm_probe(UUT.u_game.u_video.u_gfx.u_tilemap,"A");
             `ifdef NOSOUND
                 $shm_probe(UUT.u_game.u_main.u_cpu.u_wait,"A");
-                $shm_probe(UUT.u_game.u_video.u_gfx,"AS");
             `else
                 $shm_probe(UUT.u_game.u_main.u_fm0.u_jt12,"A");
                 $shm_probe(UUT.u_game.u_main.u_fm0.u_jt12.u_mmr,"A");

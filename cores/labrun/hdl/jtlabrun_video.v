@@ -81,7 +81,10 @@ jtframe_cen48 u_cen(
     .cen1p5b    (           )
 );
 
-jtframe_vtimer u_timer(
+jtframe_vtimer #(
+    .HB_START( 281 ),
+    .HB_END  ( 383 )    // 384 pixels per line, H length = 64us
+) u_timer(
     .clk        ( clk           ),
     .pxl_cen    ( pxl_cen       ),
     .vdump      ( vdump         ),
