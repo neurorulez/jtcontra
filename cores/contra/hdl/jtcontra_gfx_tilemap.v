@@ -137,7 +137,7 @@ always @(posedge clk) begin
                     //           - { 7'd0, scr_hn0[1:0] } - 9'd1;
                     hrender <= scr_dump_start - 9'd1 - (txt_en ? 0 : { 7'd0, scr_hn0[1:0] });
                     hend    <= RENDER_END;
-                    if(!done) txt_his <= { txt_his[0], txt_en };
+                    if(!done) txt_his <= { txt_his[0], txt_row };
                 end
                 1: begin
                     vn <= lyr_vn;
