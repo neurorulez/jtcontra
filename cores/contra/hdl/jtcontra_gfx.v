@@ -438,7 +438,9 @@ generate
     if( VTIMER==1 ) begin
         jtframe_vtimer #(
             .HB_START( 279 ),
-            .HB_END  ( 383 )    // 384 pixels per line, H length = 64us
+            .HB_END  ( 383 ),   // 384 pixels per line, H length = 64us
+            .VS_START( 252 ),
+            .VS_END  ( 255 )
         ) u_timer(
             .clk        ( clk           ),
             .pxl_cen    ( pxl_cen       ),
