@@ -146,6 +146,8 @@ wire [9:0]  line_dump;
 wire        rom_obj_cs, rom_scr_cs;
 wire [17:0] rom_scr_addr, rom_obj_addr;
 
+wire        LVBshort;
+
 assign      line_dump = { ~line, hdump };
 
 // local SDRAM mux
@@ -160,6 +162,7 @@ assign zure_cs   = (addr>='h20 && addr<'h60 && cs);
 assign vram_cs   = addr[13] && cs;
 assign hpos      = { mmr[1][0], mmr[0] };
 assign strip_pos = zure[ strip_addr ];
+assign LVBshort  = LVBL || vdump==15;
 
 wire [7:0] zure_cpu = zure[addr[4:0]];
 
@@ -363,7 +366,7 @@ jtcontra_gfx_tilemap u_tilemap(
     .clk                ( clk               ),
     // screen
     .HS                 ( HS                ),
-    .LVBL               ( LVBL              ),
+    .LVBL               ( LVBshort          ),
     .hpos               ( hpos              ),
     .vpos               ( vpos              ),
     .vrender            ( vrender           ),
@@ -409,7 +412,7 @@ jtcontra_gfx_obj u_obj(
     .clk                ( clk               ),
     .pxl_cen            ( pxl_cen           ),
     .HS                 ( HS                ),
-    .LVBL               ( LVBL              ),
+    .LVBL               ( LVBshort          ),
     .vrender            ( vrender           ),
     .flip               ( flip              ),
     .layout             ( layout            ),
@@ -439,8 +442,11 @@ generate
         jtframe_vtimer #(
             .HB_START( 279 ),
             .HB_END  ( 383 ),   // 384 pixels per line, H length = 64us
-            .VS_START( 247 ),
-            .VS_END  ( 250 )
+            .VB_END  ( 15  ),
+            .VCNT_END( 263 ),
+            .HS_START( 312 ),
+            .VS_START( 253 ),
+            .VS_END  ( 256 )
         ) u_timer(
             .clk        ( clk           ),
             .pxl_cen    ( pxl_cen       ),

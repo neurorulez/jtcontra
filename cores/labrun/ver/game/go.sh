@@ -17,5 +17,5 @@ export CONVERT_OPTIONS="-resize 300%x300%"
 jtsim -mist -sysname labrun  \
     -d JTFRAME_DWNLD_PROM_ONLY \
     -def ../../hdl/jtlabrun.def \
-    -videow 280 -videoh 240 \
+    -videow 280 -videoh 224 \
     $*

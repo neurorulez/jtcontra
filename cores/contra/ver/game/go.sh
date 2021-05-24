@@ -16,5 +16,5 @@ echo "Game ROM length: " $GAME_ROM_LEN
 jtsim -mist -sysname contra  \
     -d JTFRAME_DWNLD_PROM_ONLY \
     -d JT51_NODEBUG  \
-    -videow 280 -videoh 240 \
+    -videow 280 -videoh 224 \
     $*

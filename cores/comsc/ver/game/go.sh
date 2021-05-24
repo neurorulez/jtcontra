@@ -18,5 +18,5 @@ export UDP7759=1
 jtsim -mist -sysname contra  \
     -d JTFRAME_DWNLD_PROM_ONLY \
     -def ../../hdl/jtcomsc.def \
-    -videow 280 -videoh 240 \
+    -videow 280 -videoh 224 \
     $*
