@@ -123,6 +123,7 @@ assign      { code12_sel, code11_sel, code10_sel, code9_sel } = mmr[5];
 assign      gfx_we   = cpu_cen & ~cpu_rnw & vram_cs;
 // Other configuration
 reg  [8:0]  chr_render_start, scr_render_start;
+reg         obj_page_l;
 
 // Scan
 wire [10:0] scan_addr;
@@ -174,6 +175,17 @@ always @(*) begin
           (addr[10] ? code_dout : attr_dout)); // tiles
 end
 
+reg last_vdump8;
+
+always @(posedge clk, posedge rst) begin
+    if( rst ) begin
+        obj_page_l  <= 0;
+        last_vdump8 <= 0;
+    end else begin
+        last_vdump8 <= vdump[8];
+        if( vdump[8] & ~last_vdump8 ) obj_page_l <= obj_page;
+    end
+end
 
 always @(posedge clk, posedge rst) begin
     if( rst ) begin
@@ -432,7 +444,7 @@ jtcontra_gfx_obj u_obj(
     .obj_scan           ( obj_scan          )
 );
 
-assign obj_scan_addr[11] = obj_page;
+assign obj_scan_addr[11] = obj_page_l;
 assign obj_scan_addr[10] = 1'b0;
 
 // Timing
