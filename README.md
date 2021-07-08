@@ -38,6 +38,8 @@ file using the mra tool.
 
 Name          | Purpose           | Author  | URL
 --------------|-------------------|---------|---------------------------------
+JT7759        | ADPCM  sound      | jotego  | https://github.com/jotego/jt7759
+JT12          | YM2203 sound      | jotego  | https://github.com/jotego/jt12
 JT51          | YM2151 sound      | jotego  | https://github.com/jotego/jt51
 JTFRAME       | FPGA framework    | jotego  | https://github.com/jotego/jtframe
 
