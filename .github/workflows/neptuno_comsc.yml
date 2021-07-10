@@ -3,34 +3,35 @@ name: comsc for neptuno
 
 on:
   push:
-    branches:
-      - build
+	branches:
+	  - build
+  workflow_dispatch
 
 jobs:
 
   neptuno_compilation:
 
-    env:
-      FTPUSER: ${{ secrets.FTPUSER }}
-      FTPPASS: ${{ secrets.FTPPASS }}
+	env:
+	  FTPUSER: ${{ secrets.FTPUSER }}
+	  FTPPASS: ${{ secrets.FTPPASS }}
 
-    runs-on: ubuntu-latest
+	runs-on: ubuntu-latest
 
-    container:
-      image: jotego/jtcore13
-      credentials:
-        username: jotego
-        password: ${{ secrets.DOCKER_LOGIN }}
+	container:
+	  image: jotego/jtcore13
+	  credentials:
+		username: jotego
+		password: ${{ secrets.DOCKER_LOGIN }}
 
-    steps:
-      - name: Cancel Previous Runs
-        uses: styfle/cancel-workflow-action@0.9.0
-        with:
-          access_token: ${{ github.token }}
-      - name: check out
-        uses: actions/checkout@v2
-        with:
-          submodules: true
-          repository: ${{ github.repository }}
-      - name: compile for neptuno
-        run: /docked_build.sh comsc -neptuno 
+	steps:
+	  - name: Cancel Previous Runs
+		uses: styfle/cancel-workflow-action@0.9.0
+		with:
+		  access_token: ${{ github.token }}
+	  - name: check out
+		uses: actions/checkout@v2
+		with:
+		  submodules: true
+		  repository: ${{ github.repository }}
+	  - name: compile for neptuno
+		run: /docked_build.sh comsc -neptuno 

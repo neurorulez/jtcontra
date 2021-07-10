@@ -1,5 +1,5 @@
 
-name: comsc for sidi
+name: labrun for mc2
 
 on:
   push:
@@ -9,7 +9,7 @@ on:
 
 jobs:
 
-  sidi_compilation:
+  mc2_compilation:
 
 	env:
 	  FTPUSER: ${{ secrets.FTPUSER }}
@@ -33,5 +33,5 @@ jobs:
 		with:
 		  submodules: true
 		  repository: ${{ github.repository }}
-	  - name: compile for sidi
-		run: /docked_build.sh comsc -sidi 
+	  - name: compile for mc2
+		run: /docked_build.sh labrun -mc2 
