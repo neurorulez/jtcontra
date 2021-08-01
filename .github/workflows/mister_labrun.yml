@@ -1,5 +1,5 @@
 
-name: labrun for sidi
+name: labrun for mister
 
 on:
   push:
@@ -9,7 +9,7 @@ on:
 
 jobs:
 
-  sidi_compilation:
+  mister_compilation:
 
     env:
       FTPUSER: ${{ secrets.FTPUSER }}
@@ -18,7 +18,7 @@ jobs:
     runs-on: ubuntu-latest
 
     container:
-      image: jotego/jtcore13
+      image: jotego/jtcore:20
       credentials:
         username: jotego
         password: ${{ secrets.DOCKER_LOGIN }}
@@ -33,5 +33,5 @@ jobs:
         with:
           submodules: true
           repository: ${{ github.repository }}
-      - name: compile for sidi
-        run: /docked_build.sh labrun -sidi  
+      - name: compile for mister
+        run: /docked_build.sh labrun -mister  
