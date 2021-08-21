@@ -11,7 +11,7 @@ debug= true
 sourcefile="flkatck.cpp"
 
 [buttons]
-core=2 # max number of buttons supported by the core
+core=3 # max number of buttons supported by the core
 names = [
     { names="Shot,Bomb" }
 ]
