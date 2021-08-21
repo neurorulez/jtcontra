@@ -1,0 +1,37 @@
+[global]
+# info = [ {tag="mameversion", value="0229"} ]
+mraauthor=["jotego"]
+
+[features]
+beta = true
+debug= true
+# nvram = 75777
+
+[parse]
+sourcefile="flkatck.cpp"
+
+[buttons]
+core=2 # max number of buttons supported by the core
+names = [
+    { names="Shot,Bomb" }
+]
+
+[rbf]
+name="jtmx5k"
+
+[dipsw]
+delete = [ "Unused", "Unknown" ]
+
+[ROM]
+# values starting with $ refer to macro definitions in the .def file
+# or arguments passed to mame2mra
+regions = [
+    { name="maincpu",       no_offset=true  },
+    { name="audiocpu",      start=$SND_START },
+    { name="gfx1",          start=$GFX_START, width=16 },
+    { name="k007232",       start=$PCM_START, width=16, reverse=true }
+]
+# { name="myregion", reorder=[3,2,1,0] } # reorder files inside a region
+order = [
+    "maincpu", "audiocpu", "gfx1", "k007232"
+]
