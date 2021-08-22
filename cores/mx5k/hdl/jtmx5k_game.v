@@ -16,7 +16,7 @@
     Version: 1.0
     Date: 21-8-2021 */
 
-module jtcontra_game(
+module jtmx5k_game(
     input           rst,
     input           clk,
     input           clk24,
@@ -86,7 +86,7 @@ wire [17:0] gfx1_addr, gfx2_addr;
 wire [ 7:0] main_data, snd_data, snd_latch;
 wire [14:0] snd_addr;
 wire [17:0] main_addr;
-wire        cen12, cen3, cen1p5, prom_we;
+wire        cen12, cen3, cen1p5;
 wire        gfx1_cs, gfx2_cs;
 
 wire [ 7:0] dipsw_a, dipsw_b;
@@ -122,8 +122,7 @@ jtframe_cen24 u_cen(
     .cen1p5b    (               )
 );
 
-jtframe_dwnld #(.PROM_START(PROM_START))
-u_dwnld(
+jtframe_dwnld u_dwnld(
     .clk            ( clk           ),
     .downloading    ( downloading   ),
     .ioctl_addr     ( ioctl_addr    ),
@@ -133,7 +132,7 @@ u_dwnld(
     .prog_data      ( prog_data     ),
     .prog_mask      ( prog_mask     ), // active low
     .prog_we        ( prog_we       ),
-    .prom_we        ( prom_we       ),
+    .prom_we        (               ),
     .sdram_ack      ( sdram_ack     ),
     .header         (               )
 );
@@ -155,7 +154,7 @@ jtcontra_simloader u_simloader(
 );
 `else
 `ifndef NOMAIN
-jtcontra_main #(.GAME(GAME)) u_main(
+jtcontra_main #(.GAME(2)) u_main(
     .clk            ( clk24         ),        // 24 MHz
     .rst            ( rst           ),
     .cen12          ( cen12         ),
@@ -209,7 +208,7 @@ assign snd_irq = pre_irq;
 `endif
 
 `ifndef NOVIDEO
-jtmx5k_video #(.GAME(GAME)) u_video (
+jtmx5k_video u_video (
     .rst            ( rst           ),
     .clk            ( clk           ),
     .clk24          ( clk24         ),
@@ -222,12 +221,6 @@ jtmx5k_video #(.GAME(GAME)) u_video (
     .HS             ( HS            ),
     .VS             ( VS            ),
     .flip           ( dip_flip      ),
-    .dip_pause      ( dip_pause     ),
-    .start_button   ( &start_button ),
-    // PROMs
-    .prom_we        ( prom_we       ),
-    .prog_addr      ( prog_addr[9:0]),
-    .prog_data      ( prog_data[3:0]),
     // GFX - CPU interface
     .cpu_irqn       ( cpu_irqn      ),
     .cpu_nmin       ( cpu_nmin      ),
@@ -241,8 +234,6 @@ jtmx5k_video #(.GAME(GAME)) u_video (
     .gfx1_dout      ( gfx1_dout     ),
     .gfx2_dout      ( gfx2_dout     ),
     .pal_dout       ( pal_dout      ),
-    .video_bank     ( video_bank    ),
-    .prio_latch     ( prio_latch    ),
     // SDRAM
     .gfx1_addr      ( gfx1_addr     ),
     .gfx1_data      ( gfx1_data     ),
@@ -297,10 +288,6 @@ jtframe_rom #(
     .SLOT0_DW    ( 16              ),
     .SLOT0_OFFSET( GFX1_OFFSET     ),
 
-    .SLOT1_AW    ( 18              ), // GFX2
-    .SLOT1_DW    ( 16              ),
-    .SLOT1_OFFSET( GFX2_OFFSET     ),
-
     .SLOT2_AW    ( 17              ), // ADPCM
     .SLOT2_DW    (  8              ),
     .SLOT2_OFFSET( PCM_OFFSET      ),
@@ -317,7 +304,7 @@ jtframe_rom #(
     .clk         ( clk           ),
 
     .slot0_cs    ( gfx1_romcs    ),
-    .slot1_cs    ( gfx2_romcs    ),
+    .slot1_cs    ( 1'b0          ),
     .slot2_cs    ( pcm_cs        ),
     .slot3_cs    ( 1'b0          ), // unused
     .slot4_cs    ( 1'b0          ), // unused
@@ -327,7 +314,7 @@ jtframe_rom #(
     .slot8_cs    ( 1'b0          ),
 
     .slot0_ok    ( gfx1_ok       ),
-    .slot1_ok    ( gfx2_ok       ),
+    .slot1_ok    (               ),
     .slot2_ok    ( pcm_ok        ),
     .slot3_ok    (               ),
     .slot4_ok    (               ),
@@ -337,7 +324,7 @@ jtframe_rom #(
     .slot8_ok    (               ),
 
     .slot0_addr  ( gfx1_addr     ),
-    .slot1_addr  ( gfx2_addr     ),
+    .slot1_addr  (               ),
     .slot2_addr  ( pcm_addr      ),
     .slot3_addr  (               ),
     .slot4_addr  (               ),
@@ -347,7 +334,7 @@ jtframe_rom #(
     .slot8_addr  (               ),
 
     .slot0_dout  ( gfx1_data     ),
-    .slot1_dout  ( gfx2_data     ),
+    .slot1_dout  (               ),
     .slot2_dout  ( pcm_data      ),
     .slot3_dout  (               ),
     .slot4_dout  (               ),

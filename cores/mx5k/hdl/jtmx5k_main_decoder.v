@@ -23,9 +23,9 @@ module jtmx5k_main_decoder(
     input       [15:0]  A,
     input               VMA,
     input               RnW,
-    output              gfx1_cs,
+    output reg          gfx1_cs,
     output              gfx2_cs,
-    output reg          pal_cs,
+    input               pal_cs, // from 007121
     // communication with sound CPU
     output reg          snd_irq,
     output reg  [ 7:0]  snd_latch,
@@ -54,18 +54,21 @@ module jtmx5k_main_decoder(
     input      [3:0]    dipsw_c
 );
 
-reg        io_cs, in_cs, out_cs;
+reg        dip_cs, io_cs, in_cs, out_cs;
 reg  [1:0] bank;
 reg  [7:0] port_in;
 wire [7:0] div_dout;
 
+assign gfx2_cs = 0;
+
 always @(*) begin // Decoder 051502 takes as inputs A[15:10]
-    rom_cs  = A[15:12]>6 && RnW && VMA;
-    io_cs   = A[15:10];
-    in_cs   = io_cs && A[4:2]==0;
-    dip_cs  = io_cs && A[4:2]==1;
-    ram_cs  = A[15:12] == 4'b0001;
-    pal_cs  = A[15:10] == 6'b0000_11;
+    rom_cs   = A[15:12]>4 && RnW && VMA;
+    io_cs    = A[15:10];
+    in_cs    = io_cs && A[4:2]==0;
+    dip_cs   = io_cs && A[4:2]==1;
+    ram_cs   = A[15:12] == 3;
+    gfx1_cs  = A[15:12] < 3;
+    rom_addr = A[15:12]>=6 ? A[15:0] : { A[15], bank, A[12:0] };
 end
 
 always @(*) begin   // doesn't boot up if latched
@@ -78,10 +81,6 @@ always @(*) begin   // doesn't boot up if latched
         gfx2_cs: cpu_din = gfx2_dout;
         default: cpu_din = 8'hff;
     endcase
-end
-
-always @(*) begin
-    rom_addr = A[15] ? { 2'b00, A[14:0] } : { bank+4'b0100, A[12:0] }; // 13+4=17
 end
 
 always @(posedge clk) begin

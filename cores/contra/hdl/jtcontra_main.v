@@ -49,7 +49,7 @@ module jtcontra_main(
     input               gfx_nmin,
     inout               gfx1_cs,
     inout               gfx2_cs,
-    output              pal_cs,
+    inout               pal_cs,
 
     output     [7:0]    video_bank,
     output              prio_latch,
@@ -178,8 +178,6 @@ generate
                 .gfx1_cs        ( gfx1_cs       ),
                 .gfx2_cs        ( gfx2_cs       ),
                 .pal_cs         ( pal_cs        ),
-                .prio_latch     ( prio_latch    ),
-                .video_bank     ( video_bank    ),
                 // communication with sound CPU
                 .snd_irq        ( snd_irq       ),
                 .snd_latch      ( snd_latch     ),

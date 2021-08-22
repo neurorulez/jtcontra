@@ -55,6 +55,8 @@ module jtcontra_gfx(
     output reg           cpu_irqn,
     output reg           cpu_nmin,
     output reg           cpu_firqn,
+    // External palette 007327
+    output               col_cs,
     // SDRAM interface
     output reg           rom_obj_sel,   // pin H2 of actual chip
     output reg [17:0]    rom_addr,
@@ -161,6 +163,7 @@ reg  [ 1:0] last_cs;
 assign cfg_cs    = (addr < RCNT) && cs;
 assign zure_cs   = (addr>='h20 && addr<'h60 && cs);
 assign vram_cs   = addr[13] && cs;
+assign col_cs    = addr[13:12]=='b01 && cs;
 assign hpos      = { mmr[1][0], mmr[0] };
 assign strip_pos = zure[ strip_addr ];
 assign LVBshort  = LVBL || vdump==15;

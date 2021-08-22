@@ -29,16 +29,10 @@ module jtmx5k_video(
     output              HS,
     output              VS,
     output              flip,
-    input               dip_pause,
-    input               start_button,
-    // PROMs
-    input      [ 9:0]   prog_addr,
-    input      [ 3:0]   prog_data,
-    input               prom_we,
     // CPU      interface
-    inout               gfx1_cs,
-    inout               gfx2_cs,
-    input               pal_cs,
+    input               gfx1_cs,
+    input               gfx2_cs,
+    output              pal_cs,
     input               cpu_rnw,
     input               cpu_cen,
     input      [15:0]   cpu_addr,
@@ -48,9 +42,6 @@ module jtmx5k_video(
     output     [ 7:0]   pal_dout,
     output              cpu_irqn,
     output              cpu_nmin,
-    // Combat School:
-    input      [ 7:0]   video_bank,
-    input               prio_latch,
     // SDRAM interface
     output     [17:0]   gfx1_addr,
     input      [15:0]   gfx1_data,
@@ -68,34 +59,10 @@ parameter GAME=0;
 
 wire [ 8:0] vrender, vrender1, vdump, hdump;
 wire [ 6:0] gfx1_pxl, gfx2_pxl;
-wire [17:0] gfx1_pre, gfx2_pre;
 wire [13:0] gfx_addr_in;
 wire        gfx1_sel, gfx2_sel;
 
-
-generate
-case( GAME )
-    ///////////////////////// CONTRA
-    0: begin
-    assign gfx1_addr = gfx1_pre;
-    assign gfx2_addr = gfx2_pre;
-    jtcontra_007766 u_decod(
-        .cpu_addr   ( cpu_addr             ),
-        .gfx_cs     ( { gfx2_cs, gfx1_cs } ),
-        .gfx_addr   ( gfx_addr_in          )
-    );
-    end
-    ////////////////////////// Combat School
-    1: begin
-    assign gfx1_addr[13:0] = gfx1_pre[13:0];
-    assign gfx2_addr[13:0] = gfx2_pre[13:0];
-    assign gfx_addr_in     = cpu_addr[13:0];
-
-    assign gfx1_addr[17:14] = gfx1_sel ? gfx1_pre[17:14] : (video_bank[3:0] & {4{gfx1_pre[14]}});
-    assign gfx2_addr[17:14] = gfx2_sel ? gfx2_pre[17:14] : (video_bank[7:4] & {4{gfx2_pre[14]}});
-    end
-endcase
-endgenerate
+assign gfx_addr_in     = cpu_addr[13:0];
 
 jtframe_cen48 u_cen(
     .clk        ( clk       ),    // 48 MHz
@@ -115,14 +82,12 @@ jtframe_cen48 u_cen(
     .cen1p5b    (           )
 );
 
-wire gfx1_prom_we = ~prog_addr[9] & prom_we;
-wire gfx2_prom_we =  prog_addr[9] & prom_we;
-
 jtcontra_gfx #(
     .CFGFILE("gfx1_cfg.hex" ),
     .SIMATTR("gfx1_attr.bin"),
     .SIMCODE("gfx1_code.bin"),
-    .SIMOBJ ("gfx1_obj.bin" )
+    .SIMOBJ ("gfx1_obj.bin" ),
+    .BYPASS_VPROM( 1        )
 ) u_gfx1(
     .rst        ( rst           ),
     .clk        ( clk           ),
@@ -135,9 +100,9 @@ jtcontra_gfx #(
     .HS         ( HS            ),
     .VS         ( VS            ),
     // PROMs
-    .prom_we    ( gfx1_prom_we  ),
-    .prog_addr  ( prog_addr[8:0]),
-    .prog_data  ( prog_data[3:0]),
+    .prom_we    (               ),
+    .prog_addr  (               ),
+    .prog_data  (               ),
     // Screen position
     .hdump      ( hdump         ),
     .vdump      ( vdump         ),
@@ -146,6 +111,7 @@ jtcontra_gfx #(
     .flip       ( flip          ),
     // CPU      interface
     .cs         ( gfx1_cs       ),
+    .col_cs     ( pal_cs        ),
     .cpu_rnw    ( cpu_rnw       ),
     .addr       ( gfx_addr_in   ),
     .cpu_dout   ( cpu_dout      ),
@@ -155,7 +121,7 @@ jtcontra_gfx #(
     .cpu_nmin   ( cpu_nmin      ),
     // SDRAM interface
     .rom_obj_sel( gfx1_sel      ),
-    .rom_addr   ( gfx1_pre      ),
+    .rom_addr   ( gfx1_addr     ),
     .rom_data   ( gfx1_data     ),
     .rom_cs     ( gfx1_romcs    ),
     .rom_ok     ( gfx1_ok       ),
@@ -169,7 +135,8 @@ jtcontra_gfx #(
     .SIMATTR("gfx2_attr.bin"),
     .SIMCODE("gfx2_code.bin"),
     .SIMOBJ ("gfx2_obj.bin" ),
-    .VTIMER ( 0             )
+    .VTIMER ( 0             ),
+    .BYPASS_VPROM( 1        )
 ) u_gfx2(
     .rst        ( rst           ),
     .clk        ( clk           ),
@@ -182,9 +149,9 @@ jtcontra_gfx #(
     .HS         ( HS            ),
     .VS         ( VS            ),
     // PROMs
-    .prom_we    ( gfx2_prom_we  ),
-    .prog_addr  ( prog_addr[8:0]),
-    .prog_data  ( prog_data[3:0]),
+    .prom_we    (               ),
+    .prog_addr  (               ),
+    .prog_data  (               ),
     // Screen position
     .hdump      ( hdump         ),
     .vdump      ( vdump         ),
@@ -193,6 +160,7 @@ jtcontra_gfx #(
     .flip       (               ),
     // CPU      interface
     .cs         ( gfx2_cs       ),
+    .col_cs     (               ),
     .cpu_rnw    ( cpu_rnw       ),
     .addr       ( gfx_addr_in   ),
     .cpu_dout   ( cpu_dout      ),
@@ -211,7 +179,7 @@ jtcontra_gfx #(
     .gfx_en     ( gfx_en[3:2]   )
 );
 
-jtcontra_colmix #(.GAME(GAME)) u_colmix(
+jtmx5k_colmix #(.GAME(GAME)) u_colmix(
     .rst        ( rst           ),
     .clk        ( clk           ),
     .clk24      ( clk24         ),
@@ -225,13 +193,13 @@ jtcontra_colmix #(.GAME(GAME)) u_colmix(
     // CPU      interface
     .pal_cs     ( pal_cs        ),
     .cpu_rnw    ( cpu_rnw       ),
-    .cpu_addr   ( cpu_addr[7:0] ),
+    .cpu_addr   ( cpu_addr[9:0] ),
     .cpu_dout   ( cpu_dout      ),
     .pal_dout   ( pal_dout      ),
     // Colours
     .prio_latch ( prio_latch    ), // unused
-    .gfx1_pxl   ( gfx1_pxl      ),
-    .gfx2_pxl   ( gfx2_pxl      ),
+    .gfx1_pxl   ( gfx1_pxl[4:0] ),
+    .gfx2_pxl   ( gfx2_pxl[3:0] ),
     .red        ( red           ),
     .green      ( green         ),
     .blue       ( blue          )
