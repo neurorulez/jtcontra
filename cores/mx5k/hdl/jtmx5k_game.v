@@ -278,8 +278,8 @@ jtmx5k_sound u_sound(
 assign snd_cs   = 0;
 assign pcm_cs   = 0;
 assign snd_addr = 15'd0;
-assign snd_left = 16'd0;
-assign snd_right= 16'd0;
+assign snd      = 0;
+assign game_led = 0;
 assign sample   = 0;
 `endif
 

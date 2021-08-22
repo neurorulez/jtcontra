@@ -143,7 +143,7 @@ reg         txt_en;
 
 wire [9:0]  line_dump;
 
-wire        rom_obj_cs, rom_scr_cs;
+wire        rom_obj_cs, rom_scr_cs, zure_cs;
 wire [17:0] rom_scr_addr, rom_obj_addr;
 
 wire        LVBshort;
