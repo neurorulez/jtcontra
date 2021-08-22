@@ -64,8 +64,12 @@ wire        gfx1_sel, gfx2_sel;
 
 always @(*) begin
     gfx_addr_in[11:0] = cpu_addr[11:0];
-
-
+    casez( cpu_addr[15:10] )
+        6'b0000_1?: gfx_addr_in[13:12]=1;
+        6'b0001_??: gfx_addr_in[13:12]=3;
+        6'b0010_??: gfx_addr_in[13:12]=2;
+        default: gfx_addr_in[13:12]=0;
+    endcase
 end
 
 jtframe_cen48 u_cen(

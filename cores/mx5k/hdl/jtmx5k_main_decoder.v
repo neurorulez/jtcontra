@@ -75,9 +75,8 @@ always @(*) begin   // doesn't boot up if latched
     case(1'b1)
         rom_cs:  cpu_din = rom_data;
         ram_cs:  cpu_din = ram_dout;
-        pal_cs:  cpu_din = pal_dout;
         in_cs:   cpu_din = port_in;
-        gfx1_cs: cpu_din = gfx1_dout;
+        gfx1_cs: cpu_din = pal_cs ? pal_dout : gfx1_dout;
         gfx2_cs: cpu_din = gfx2_dout;
         default: cpu_din = 8'hff;
     endcase
