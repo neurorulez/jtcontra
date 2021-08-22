@@ -170,7 +170,6 @@ generate
             jtmx5k_main_decoder u_decoder(
                 .clk            ( clk           ),        // 24 MHz
                 .rst            ( rst           ),
-                //.cen12          ( cen12         ),
                 .cpu_cen        ( cpu_cen       ),
                 .A              ( A             ),
                 .VMA            ( VMA           ),

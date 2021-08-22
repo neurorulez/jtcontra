@@ -62,7 +62,7 @@ wire [7:0] div_dout;
 assign gfx2_cs = 0;
 
 always @(*) begin // Decoder 051502 takes as inputs A[15:10]
-    rom_cs   = A[15:12]>4 && RnW && VMA;
+    rom_cs   = A[15:12]>=4 && RnW && VMA;
     io_cs    = A[15:10]==1 && VMA;
     in_cs    = io_cs && A[4:2]==0;
     dip_cs   = io_cs && A[4:2]==1;
@@ -96,6 +96,9 @@ always @(posedge clk) begin
     end
 end
 
+// unknown usage
+reg net_end, net_nrd, net_wowr;
+
 always @(posedge clk) begin
     if( rst ) begin
         bank      <= 0;
@@ -105,7 +108,12 @@ always @(posedge clk) begin
         snd_irq   <= 0;
         if( io_cs && !RnW ) begin
             case( A[4:2] ) // 5D in schematics
-                4: bank <= cpu_dout[1:0];
+                4: begin
+                    net_wowr <= cpu_dout[7];
+                    net_nrd  <= cpu_dout[6];
+                    net_end  <= cpu_dout[5];
+                    bank <= cpu_dout[1:0];
+                end
                 // 2'b00: coin counters
                 5: snd_latch <= cpu_dout;
                 6: snd_irq   <= 1;
