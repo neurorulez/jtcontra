@@ -84,7 +84,7 @@ reg  [ 4:0] bank;
 reg  [ 2:0] dump_cnt;
 reg  [15:0] pxl_data;
 reg  [8:0]  hrender;
-wire        txt_row;
+wire        txt_row;    // signal whether the current row being rendered is text or graphics
 wire [ 9:0] scr_hn0, hn;
 reg         scores;
 reg         hflip, vflip;
@@ -94,7 +94,7 @@ assign txt_row    = txt_en || scores;
 assign scr_hn0    = (strip_en && !strip_col)? {1'b0,strip_pos} : hpos;
 assign line_addr  = { line, flip ? 9'h117-hrender  : hrender };
 assign scr_we     = line_we;
-assign rom_addr   = { tile_msb, code, vn[2:0]^vflip, hn[2]^hflip }; // 13+3+1 = 17!
+assign rom_addr   = { tile_msb, code, vn[2:0]^{3{vflip}}, hn[2]^hflip }; // 13+3+1 = 17!
 assign scan_addr  = { txt_row, vn[7:3], hn[7:3] }; // 1 + 5 + 5 = 11
 assign strip_addr = strip_col ? hn_aux[7:3] : vrender[7:3];
 assign vpos_sum   = (strip_en && strip_col) ? {1'd0,strip_pos} : {1'd0,vpos};
