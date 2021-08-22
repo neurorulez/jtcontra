@@ -403,6 +403,8 @@ jtcontra_gfx_tilemap u_tilemap(
     .txt_en             ( txt_en            ),
     .layout             ( layout            ),
     .txt_line           ( txt_line          ),
+    .hflip_en           ( hflip_en          ),
+    .vflip_en           ( vflip_en          ),
     // SDRAM
     .rom_cs             ( rom_scr_cs        ),
     .rom_addr           ( rom_scr_addr      ),
