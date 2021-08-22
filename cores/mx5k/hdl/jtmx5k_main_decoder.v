@@ -54,7 +54,7 @@ module jtmx5k_main_decoder(
     input      [3:0]    dipsw_c
 );
 
-reg        dip_cs, io_cs, in_cs, out_cs;
+reg        dip_cs, io_cs, in_cs;
 reg  [1:0] bank;
 reg  [7:0] port_in;
 wire [7:0] div_dout;

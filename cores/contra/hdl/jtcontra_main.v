@@ -182,7 +182,7 @@ generate
                 .snd_irq        ( snd_irq       ),
                 .snd_latch      ( snd_latch     ),
                 // ROM
-                .rom_addr       ( rom_addr      ),
+                .rom_addr       ( rom_addr[15:0]),
                 .rom_cs         ( rom_cs        ),
                 .rom_data       ( rom_data      ),
                 .rom_ok         ( rom_ok        ),

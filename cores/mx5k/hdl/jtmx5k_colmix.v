@@ -38,7 +38,6 @@ module jtmx5k_colmix(
     input      [ 7:0]   cpu_dout,
     output     [ 7:0]   pal_dout,
     // GFX colour requests
-    input               prio_latch, // Used by Combat School
     input      [ 4:0]   gfx1_pxl,
     input      [ 3:0]   gfx2_pxl,
     // Colours

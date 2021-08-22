@@ -75,6 +75,7 @@ jtframe_cen48 u_cen(
     .cen3       (           ),
     .cen3q      (           ), // 1/4 advanced with respect to cen3
     .cen1p5     (           ),
+    .cen16b     (           ),
     .cen12b     (           ),
     .cen6b      (           ),
     .cen3b      (           ),
@@ -197,7 +198,6 @@ jtmx5k_colmix #(.GAME(GAME)) u_colmix(
     .cpu_dout   ( cpu_dout      ),
     .pal_dout   ( pal_dout      ),
     // Colours
-    .prio_latch ( prio_latch    ), // unused
     .gfx1_pxl   ( gfx1_pxl[4:0] ),
     .gfx2_pxl   ( gfx2_pxl[3:0] ),
     .red        ( red           ),
