@@ -122,7 +122,6 @@ wire        extra_en   = 1; // there must be a bit in the MMR that turns off all
                             // because Contra doesn't need them but seems to write to them
 
 assign      { code12_sel, code11_sel, code10_sel, code9_sel } = mmr[5];
-assign      gfx_we   = cpu_cen & ~cpu_rnw & vram_cs;
 // Other configuration
 reg  [8:0]  chr_render_start, scr_render_start;
 reg         obj_page_l;
@@ -130,9 +129,7 @@ reg         obj_page_l;
 // Scan
 wire [10:0] scan_addr;
 wire [10:0] ram_addr = { addr[11], addr[9:0] };
-wire        attr_we  = gfx_we & ~addr[10] & ~addr[12];
-wire        code_we  = gfx_we &  addr[10] & ~addr[12];
-wire        obj_we   = gfx_we &  addr[12];
+wire        attr_we, code_we, obj_we;
 wire [ 7:0] code_dout, attr_dout, obj_dout;
 wire [ 7:0] code_scan, attr_scan, obj_scan;
 
@@ -160,10 +157,20 @@ reg  [15:0] rom_scr_data, rom_obj_data;
 reg         ok_wait;
 reg  [ 1:0] last_cs;
 
+// Memory map
+// 3XXX -> OBJ
+// 2XXX -> Tiles
+// 1XXX -> Col CS
+// 0XXX -> CFG registers
+
 assign cfg_cs    = (addr < RCNT) && cs;
 assign zure_cs   = (addr>='h20 && addr<'h60 && cs);
 assign vram_cs   = addr[13] && cs;
 assign col_cs    = addr[13:12]=='b01 && cs;
+assign gfx_we    = cpu_cen & ~cpu_rnw & vram_cs;
+assign obj_we    = gfx_we &  addr[12];
+assign attr_we   = gfx_we & ~addr[12] & ~addr[10];
+assign code_we   = gfx_we & ~addr[12] &  addr[10];
 assign hpos      = { mmr[1][0], mmr[0] };
 assign strip_pos = zure[ strip_addr ];
 assign LVBshort  = LVBL || vdump==15;

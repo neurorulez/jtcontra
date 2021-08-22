@@ -59,10 +59,14 @@ parameter GAME=0;
 
 wire [ 8:0] vrender, vrender1, vdump, hdump;
 wire [ 6:0] gfx1_pxl, gfx2_pxl;
-wire [13:0] gfx_addr_in;
+reg  [13:0] gfx_addr_in;
 wire        gfx1_sel, gfx2_sel;
 
-assign gfx_addr_in     = cpu_addr[13:0];
+always @(*) begin
+    gfx_addr_in[11:0] = cpu_addr[11:0];
+
+
+end
 
 jtframe_cen48 u_cen(
     .clk        ( clk       ),    // 48 MHz

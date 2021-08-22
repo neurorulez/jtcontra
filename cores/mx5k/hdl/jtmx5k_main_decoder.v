@@ -63,11 +63,11 @@ assign gfx2_cs = 0;
 
 always @(*) begin // Decoder 051502 takes as inputs A[15:10]
     rom_cs   = A[15:12]>4 && RnW && VMA;
-    io_cs    = A[15:10];
+    io_cs    = A[15:10]==1 && VMA;
     in_cs    = io_cs && A[4:2]==0;
     dip_cs   = io_cs && A[4:2]==1;
     ram_cs   = A[15:12] == 3;
-    gfx1_cs  = A[15:12] < 3;
+    gfx1_cs  = A[15:12] < 3 && !io_cs;
     rom_addr = A[15:12]>=6 ? A[15:0] : { A[15], bank, A[12:0] };
 end
 
