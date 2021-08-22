@@ -122,7 +122,7 @@ jtframe_cen24 u_cen(
     .cen1p5b    (               )
 );
 
-jtframe_dwnld u_dwnld(
+jtframe_dwnld #(.SWAB(1)) u_dwnld(
     .clk            ( clk           ),
     .downloading    ( downloading   ),
     .ioctl_addr     ( ioctl_addr    ),
