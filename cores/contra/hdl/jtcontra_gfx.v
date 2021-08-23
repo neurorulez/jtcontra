@@ -495,7 +495,7 @@ endgenerate
 
 generate
     if( BYPASS_VPROM ) begin : bypass_vprom
-        assign vprom_data = vprom_addr[3:0];
+        assign vprom_data = BYPASS_VPROM == 2 ? vprom_addr[7:4] : vprom_addr[3:0];
     end else begin : uses_vprom
         jtframe_prom #(.dw(4),.aw(8) ) u_vprom(
             .clk        ( clk                       ),
@@ -511,7 +511,7 @@ endgenerate
 
 generate
     if( BYPASS_OPROM ) begin : bypass_oprom
-        assign oprom_data = oprom_addr[3:0];
+        assign oprom_data = BYPASS_OPROM==2 ? oprom_addr[7:4] : oprom_addr[3:0];
     end else begin : uses_oprom
         jtframe_prom #(.dw(4),.aw(8),.ASYNC(1) ) u_oprom(
             .clk        ( clk                       ),

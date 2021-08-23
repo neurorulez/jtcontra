@@ -63,6 +63,9 @@ wire [ 6:0] gfx1_pxl, gfx2_pxl;
 reg  [13:0] gfx_addr_in;
 wire [17:0] pre_gfx1_addr;
 wire        gfx1_sel, gfx2_sel;
+wire        post2_cs;
+
+assign post2_cs = gfx1_sel && !cpu_rnw; // only writes
 
 always @(*) begin
     gfx_addr_in[11:0] = cpu_addr[11:0];
@@ -151,8 +154,8 @@ jtcontra_gfx #(
     .SIMCODE("gfx2_code.bin"),
     .SIMOBJ ("gfx2_obj.bin" ),
     .VTIMER ( 0             ),
-    .BYPASS_VPROM( 1        ),
-    .BYPASS_OPROM( 1        )
+    .BYPASS_VPROM( 2        ),
+    .BYPASS_OPROM( 2        )
 ) u_gfx2(
     .rst        ( rst           ),
     .clk        ( clk           ),
@@ -175,7 +178,7 @@ jtcontra_gfx #(
     .vrender1   ( vrender1      ),
     .flip       (               ),
     // CPU      interface
-    .cs         ( gfx2_cs       ),
+    .cs         ( post2_cs      ),
     .col_cs     (               ),
     .cpu_rnw    ( cpu_rnw       ),
     .addr       ( gfx_addr_in   ),
@@ -213,8 +216,8 @@ jtmx5k_colmix #(.GAME(GAME)) u_colmix(
     .cpu_dout   ( cpu_dout      ),
     .pal_dout   ( pal_dout      ),
     // Colours
-    .gfx1_pxl   ( gfx1_pxl[4:0] ),
-    .gfx2_pxl   ( gfx2_pxl[3:0] ),
+    .gfx1_pxl   ( gfx1_pxl      ),
+    .gfx2_pxl   ( gfx2_pxl      ),
     .red        ( red           ),
     .green      ( green         ),
     .blue       ( blue          ),
