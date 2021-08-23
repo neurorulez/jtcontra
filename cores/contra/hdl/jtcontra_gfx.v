@@ -512,7 +512,7 @@ endgenerate
 generate
     if( BYPASS_OPROM ) begin : bypass_oprom
         assign oprom_data = oprom_addr[3:0];
-    end else begin : uses_vprom
+    end else begin : uses_oprom
         jtframe_prom #(.dw(4),.aw(8),.ASYNC(1) ) u_oprom(
             .clk        ( clk                       ),
             .cen        ( 1'b1                      ),
