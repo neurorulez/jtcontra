@@ -31,14 +31,12 @@ module jtmx5k_video(
     output              flip,
     // CPU      interface
     input               gfx1_cs,
-    input               gfx2_cs,
     output              pal_cs,
     input               cpu_rnw,
     input               cpu_cen,
     input      [15:0]   cpu_addr,
     input      [ 7:0]   cpu_dout,
     output     [ 7:0]   gfx1_dout,
-    output     [ 7:0]   gfx2_dout,
     output     [ 7:0]   pal_dout,
     output              cpu_irqn,
     output              cpu_nmin,
@@ -64,8 +62,10 @@ reg  [13:0] gfx_addr_in;
 wire [17:0] pre_gfx1_addr;
 wire        gfx1_sel, gfx2_sel;
 wire        post2_cs;
+wire [ 3:0] gfx1_pal;
 
-assign post2_cs = gfx1_sel && !cpu_rnw; // only writes
+//assign post2_cs = gfx1_sel && !cpu_rnw; // only writes
+assign post2_cs = 0;
 
 always @(*) begin
     gfx_addr_in[11:0] = cpu_addr[11:0];
@@ -144,59 +144,30 @@ jtcontra_gfx #(
     .rom_cs     ( gfx1_romcs    ),
     .rom_ok     ( gfx1_ok       ),
     .pxl_out    ( gfx1_pxl      ),
+    .pxl_pal    ( gfx1_pal      ),
     // Test
     .gfx_en     ( gfx_en[1:0]   )
 );
 
-jtcontra_gfx #(
-    .CFGFILE("gfx2_cfg.hex" ),
-    .SIMATTR("gfx2_attr.bin"),
-    .SIMCODE("gfx2_code.bin"),
-    .SIMOBJ ("gfx2_obj.bin" ),
-    .VTIMER ( 0             ),
-    .BYPASS_VPROM( 2        ),
-    .BYPASS_OPROM( 2        )
-) u_gfx2(
-    .rst        ( rst           ),
-    .clk        ( clk           ),
-    .clk24      ( clk24         ),
-    .cpu_cen    ( cpu_cen       ),
-    .pxl2_cen   ( pxl2_cen      ),
-    .pxl_cen    ( pxl_cen       ),
-    .LHBL       ( LHBL          ),
-    .LVBL       ( LVBL          ),
-    .HS         ( HS            ),
-    .VS         ( VS            ),
-    // PROMs
-    .prom_we    (               ),
-    .prog_addr  (               ),
-    .prog_data  (               ),
-    // Screen position
-    .hdump      ( hdump         ),
-    .vdump      ( vdump         ),
-    .vrender    ( vrender       ),
-    .vrender1   ( vrender1      ),
-    .flip       (               ),
-    // CPU      interface
-    .cs         ( post2_cs      ),
-    .col_cs     (               ),
-    .cpu_rnw    ( cpu_rnw       ),
-    .addr       ( gfx_addr_in   ),
-    .cpu_dout   ( cpu_dout      ),
-    .dout       ( gfx2_dout     ),
-    .cpu_irqn   (               ),
-    .cpu_firqn  (               ),
-    .cpu_nmin   (               ),
-    // SDRAM interface
-    .rom_obj_sel(               ),
-    .rom_addr   (               ),
-    .rom_data   ( 16'd0         ),
-    .rom_cs     (               ),
-    .rom_ok     ( 1'b1          ),
-    .pxl_out    ( gfx2_pxl      ),
-    // Test
-    .gfx_en     ( gfx_en[3:2]   )
-);
+// The second K007121 is only used to
+// extract the palette bits using a
+// funny connection:
+// The VRAM is shared with the 1st one
+// Pixel data from ROM is zero'ed but
+// when reading through the palette PROM
+// interface, the palette bits (4 MSBs of
+// address) is recorded so that is the
+// information that is dumped.
+// Note that the logic gates 13F and 14F
+// in the schematics use the object and
+// tile blank information so the second
+// K007121 selects between object and
+// sprite correctly
+// This second K007121 has been removed
+// from the FPGA core and instead the
+// palette bits are directly dumped by
+// the first one without any
+// accuracy loss
 
 jtmx5k_colmix #(.GAME(GAME)) u_colmix(
     .rst        ( rst           ),
@@ -217,7 +188,7 @@ jtmx5k_colmix #(.GAME(GAME)) u_colmix(
     .pal_dout   ( pal_dout      ),
     // Colours
     .gfx1_pxl   ( gfx1_pxl      ),
-    .gfx2_pxl   ( gfx2_pxl      ),
+    .gfx1_pal   ( gfx1_pal      ),
     .red        ( red           ),
     .green      ( green         ),
     .blue       ( blue          ),

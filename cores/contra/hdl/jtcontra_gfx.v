@@ -65,6 +65,7 @@ module jtcontra_gfx(
     output reg           rom_cs,
     // colour output
     output reg [ 6:0]    pxl_out,
+    output reg [ 3:0]    pxl_pal,
     // test
     input      [ 1:0]    gfx_en
 );
@@ -137,7 +138,8 @@ wire [ 7:0] code_scan, attr_scan, obj_scan;
 
 reg  [ 7:0] vprom_addr;
 wire [ 7:0] oprom_addr;
-wire [ 3:0] vprom_data, oprom_data, obj_pxl;
+wire [ 3:0] vprom_data, oprom_data;
+wire [ 7:0] obj_pxl;
 
 wire [ 7:0] strip_pos;
 wire [ 4:0] strip_addr;
@@ -354,7 +356,7 @@ end
 // Local colour mixer
 wire        txt_line;
 wire [ 7:0] scr_pxl_gated = scr_pxl[7:0];
-wire        obj_blank     = obj_pxl == 4'h0;
+wire        obj_blank     = obj_pxl[3:0] == 4'h0;
 wire        tile_blank    = vprom_data[3:0] == 4'h0;
 wire        border_narrow = (hdump<9'o30 || hdump>=9'o410) && narrow_en;
 wire        border_wide   = hdump<9'o20 || hdump>=9'o420;
@@ -365,21 +367,27 @@ wire        tile_prio     = &prio_en & scrwin & ~tile_blank;
 wire        no_obj        = layout && ( flip ? hdump>=9'o360 : hdump<8'o50);
 wire        scr_sel       = obj_blank || no_obj || tile_prio || txt_line;
 
+reg [7:0] vprom_addr1;
+
 always @(posedge clk, posedge rst) begin
     if( rst ) begin
         pxl_out    <= ~7'd0;
         vprom_addr <= 8'd0;
     end else begin
         vprom_addr <= scr_pxl_gated;
+        vprom_addr1<= vprom_addr;
         if(pxl_cen) begin
             if( blank_area )
                 pxl_out <= 7'd0;
             else begin
                 pxl_out[6:5] <= pal_bank;
-                if( scr_sel )
+                if( scr_sel ) begin
                     pxl_out[4:0] <= { 1'b1, vprom_data }; // Tilemap
-                else
-                    pxl_out[4:0] <= { 1'b0, obj_pxl }; // Object
+                    pxl_pal <= vprom_addr1[7:4];
+                end else begin
+                    pxl_out[4:0] <= { 1'b0, obj_pxl[3:0] }; // Object
+                    pxl_pal <= obj_pxl[7:4];
+                end
             end
         end
     end

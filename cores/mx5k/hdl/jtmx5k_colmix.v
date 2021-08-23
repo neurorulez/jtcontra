@@ -39,7 +39,7 @@ module jtmx5k_colmix(
     output     [ 7:0]   pal_dout,
     // GFX colour requests
     input      [ 6:0]   gfx1_pxl,
-    input      [ 6:0]   gfx2_pxl,
+    input      [ 3:0]   gfx1_pal,
     // Colours
     output     [ 4:0]   red,
     output     [ 4:0]   green,
@@ -61,10 +61,9 @@ reg  [ 6:0] gfx_mux;
 wire [14:0] col_out;
 reg  [14:0] col_in;
 wire        gfx1_blank = gfx1_pxl[3:0]==4'h0;
-wire        gfx2_blank = gfx2_pxl[3:0]==4'h0;
 
 
-assign col_addr = { gfx1_pxl[4],  gfx2_pxl[3:0], gfx1_pxl[3:0], pal_half };
+assign col_addr = { gfx1_pxl[4],  gfx1_pal[3:0], gfx1_pxl[3:0], pal_half };
 
 
 assign { blue, green, red } = col_out;

@@ -88,7 +88,7 @@ wire [ 7:0] main_data, snd_data, snd_latch;
 wire [14:0] snd_addr;
 wire [17:0] main_addr;
 wire        cen12, cen3, cen1p5;
-wire        gfx1_cs, gfx2_cs;
+wire        gfx1_cs;
 
 wire [ 7:0] dipsw_a, dipsw_b;
 wire [ 3:0] dipsw_c;
@@ -98,7 +98,7 @@ wire [15:0] cpu_addr;
 wire        gfx1_romcs, gfx2_romcs, gfx1_cfg_cs, gfx2_cfg_cs, pal_cs;
 wire        gfx1_vram_cs, gfx2_vram_cs;
 wire        cpu_cen, cpu_rnw, cpu_irqn, cpu_nmin;
-wire [ 7:0] gfx1_dout, gfx2_dout, pal_dout, cpu_dout;
+wire [ 7:0] gfx1_dout, pal_dout, cpu_dout;
 wire [ 7:0] video_bank;
 wire        prio_latch;
 
@@ -138,22 +138,6 @@ jtframe_dwnld #(.SWAB(1)) u_dwnld(
     .header         (               )
 );
 
-`ifdef GFX_ONLY
-jtcontra_simloader u_simloader(
-    .rst        ( rst           ),
-    .clk        ( clk24         ),
-    .cpu_cen    ( cpu_cen       ),
-    // GFX
-    .cpu_addr   ( cpu_addr      ),
-    .cpu_dout   ( cpu_dout      ),
-    .cpu_rnw    ( cpu_rnw       ),
-    .gfx1_cs    ( gfx1_cs       ),
-    .gfx2_cs    ( gfx2_cs       ),
-    .pal_cs     ( pal_cs        ),
-    .video_bank ( video_bank    ),
-    .prio_latch ( prio_latch    )
-);
-`else
 `ifndef NOMAIN
 jtcontra_main #(.GAME(2)) u_main(
     .clk            ( clk24         ),        // 24 MHz
@@ -181,11 +165,11 @@ jtcontra_main #(.GAME(2)) u_main(
     .gfx_irqn       ( cpu_irqn      ),
     .gfx_nmin       ( cpu_nmin      ),
     .gfx1_cs        ( gfx1_cs       ),
-    .gfx2_cs        ( gfx2_cs       ),
+    .gfx2_cs        (               ),
     .pal_cs         ( pal_cs        ),
 
     .gfx1_dout      ( gfx1_dout     ),
-    .gfx2_dout      ( gfx2_dout     ),
+    .gfx2_dout      (               ),
     .pal_dout       ( pal_dout      ),
 
     .video_bank     ( video_bank    ),
@@ -206,7 +190,6 @@ end
 
 assign snd_irq = pre_irq;
 `endif
-`endif
 
 `ifndef NOVIDEO
 jtmx5k_video u_video (
@@ -226,14 +209,12 @@ jtmx5k_video u_video (
     .cpu_irqn       ( cpu_irqn      ),
     .cpu_nmin       ( cpu_nmin      ),
     .gfx1_cs        ( gfx1_cs       ),
-    .gfx2_cs        ( gfx2_cs       ),
     .pal_cs         ( pal_cs        ),
     .cpu_rnw        ( cpu_rnw       ),
     .cpu_cen        ( cpu_cen       ),
     .cpu_addr       ( cpu_addr      ),
     .cpu_dout       ( cpu_dout      ),
     .gfx1_dout      ( gfx1_dout     ),
-    .gfx2_dout      ( gfx2_dout     ),
     .pal_dout       ( pal_dout      ),
     // SDRAM
     .gfx1_addr      ( gfx1_addr     ),

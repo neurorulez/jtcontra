@@ -36,7 +36,7 @@ module jtcontra_gfx_obj(
     // Line buffer
     input       [ 8:0]   hdump,
     input       [ 8:0]   dump_start,
-    output      [ 3:0]   pxl,
+    output      [ 7:0]   pxl, // upper half is the palette, used for MX5000
     // SDRAM
     output reg           rom_cs,
     output      [17:0]   rom_addr,
@@ -209,14 +209,14 @@ always @(posedge clk) begin
 end
 
 jtframe_obj_buffer #(
-    .DW   (4),
+    .DW   (8),
     .ALPHA(0),
     .BLANK(0)
 ) u_line(
     .clk    ( clk           ),
     .LHBL   ( ~HS           ),
     // New data writes
-    .wr_data( oprom_data    ),
+    .wr_data( { oprom_addr[7:4], oprom_data } ),
     .wr_addr( line_addr     ),
     .we     ( line_we       ),
     // Old data reads (and erases)

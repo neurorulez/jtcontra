@@ -175,7 +175,6 @@ generate
                 .VMA            ( VMA           ),
                 .RnW            ( RnW           ),
                 .gfx1_cs        ( gfx1_cs       ),
-                .gfx2_cs        ( gfx2_cs       ),
                 .pal_cs         ( pal_cs        ),
                 // communication with sound CPU
                 .snd_irq        ( snd_irq       ),
@@ -195,7 +194,6 @@ generate
                 .cpu_dout       ( cpu_dout      ),
                 .pal_dout       ( pal_dout      ),
                 .gfx1_dout      ( gfx1_dout     ),
-                .gfx2_dout      ( gfx2_dout     ),
                 .ram_cs         ( ram_cs        ),
                 .cpu_din        ( cpu_din       ),
                 .ram_dout       ( ram_dout      ),
@@ -207,6 +205,7 @@ generate
             // Unused signals:
             assign rom_addr[17:16] = 0;
             assign prio_latch   = 0;
+            assign gfx2_cs      = 0;
             assign video_bank   = 8'd0;
         end
     endcase

@@ -24,7 +24,6 @@ module jtmx5k_main_decoder(
     input               VMA,
     input               RnW,
     output reg          gfx1_cs,
-    output              gfx2_cs,
     input               pal_cs, // from 007121
     // communication with sound CPU
     output reg          snd_irq,
@@ -44,7 +43,6 @@ module jtmx5k_main_decoder(
     input       [ 7:0]  cpu_dout,
     input       [ 7:0]  pal_dout,
     input       [ 7:0]  gfx1_dout,
-    input       [ 7:0]  gfx2_dout,
     output reg          ram_cs,
     output reg  [ 7:0]  cpu_din,
     input       [ 7:0]  ram_dout,
@@ -58,8 +56,6 @@ reg        dip_cs, io_cs, in_cs;
 reg  [1:0] bank;
 reg  [7:0] port_in;
 wire [7:0] div_dout;
-
-assign gfx2_cs = 0;
 
 always @(*) begin // Decoder 051502 takes as inputs A[15:10]
     rom_cs   = A[15:12]>=4 && RnW && VMA;
@@ -77,7 +73,6 @@ always @(*) begin   // doesn't boot up if latched
         ram_cs:  cpu_din = ram_dout;
         in_cs:   cpu_din = port_in;
         gfx1_cs: cpu_din = pal_cs ? pal_dout : gfx1_dout;
-        gfx2_cs: cpu_din = gfx2_dout;
         default: cpu_din = 8'hff;
     endcase
 end
