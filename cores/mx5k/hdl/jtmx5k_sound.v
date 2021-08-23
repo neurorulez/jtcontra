@@ -43,7 +43,7 @@ wire        [ 7:0]  cpu_dout, ram_dout, fm_dout;
 wire        [15:0]  A;
 reg         [ 7:0]  cpu_din;
 wire                m1_n, mreq_n, rd_n, wr_n, int_n, iorq_n, rfsh_n;
-reg                 ram_cs, latch_cs, fm_cs, irq_cs, div_cs, dac_cs, iock;
+reg                 ram_cs, latch_cs, fm_cs, div_cs, dac_cs, iock;
 wire signed [15:0]  fm_left, fm_right;
 wire                cen_fm, cen_fm2;
 wire                cpu_cen, irq_ack;
@@ -85,8 +85,12 @@ always @(*) begin
     endcase
 end
 
-always @(posedge clk) begin
-    if(iock) pcm_amsb <= snd_latch[0];
+always @(posedge clk, posedge rst) begin
+    if( rst ) begin
+        pcm_amsb <= 0;
+    end else begin
+        if(iock) pcm_amsb <= snd_latch[0];
+    end
 end
 
 jtframe_mixer #(.W0(16),.W1(16),.W2(10)) u_mixer(
@@ -159,7 +163,7 @@ jt51 u_jt51(
     .cen        ( cen_fm    ),
     .cen_p1     ( cen_fm2   ),
     .cs_n       ( !fm_cs    ), // chip select
-    .wr_n       ( RnW       ), // write
+    .wr_n       ( wr_n      ), // write
     .a0         ( A[0]      ),
     .din        ( cpu_dout  ), // data in
     .dout       ( fm_dout   ), // data out
