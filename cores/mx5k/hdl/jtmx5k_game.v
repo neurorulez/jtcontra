@@ -232,11 +232,8 @@ jtmx5k_video u_video (
 
 `ifndef NOSOUND
 jtmx5k_sound u_sound(
-    .clk        ( clk24         ), // 24 MHz
     .rst        ( rst           ),
-    .cen12      ( cen12         ),
-    .cen3       ( cen3          ),
-    .cen1p5     ( cen1p5        ),
+    .clk        ( clk24         ), // 24 MHz
     // communication with main CPU
     .snd_irq    ( snd_irq       ),
     .snd_latch  ( snd_latch     ),
@@ -251,8 +248,7 @@ jtmx5k_sound u_sound(
     .pcm_data   ( pcm_data      ),
     .pcm_ok     ( pcm_ok        ),
     // Sound output
-    .snd_left   ( snd_left      ),
-    .snd_right  ( snd_right     ),
+    .snd        ( snd           ),
     .sample     ( sample        ),
     .peak       ( game_led      )
 );
