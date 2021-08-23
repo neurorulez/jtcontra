@@ -43,7 +43,7 @@ module jtmx5k_video(
     output              cpu_irqn,
     output              cpu_nmin,
     // SDRAM interface
-    output     [17:0]   gfx1_addr,
+    output reg [17:0]   gfx1_addr,
     input      [15:0]   gfx1_data,
     input               gfx1_ok,
     output              gfx1_romcs,
@@ -52,7 +52,8 @@ module jtmx5k_video(
     output     [ 4:0]   green,
     output     [ 4:0]   blue,
     // Test
-    input      [ 3:0]   gfx_en
+    input      [ 3:0]   gfx_en,
+    input      [ 7:0]   debug_bus
 );
 
 parameter GAME=0;
@@ -60,6 +61,7 @@ parameter GAME=0;
 wire [ 8:0] vrender, vrender1, vdump, hdump;
 wire [ 6:0] gfx1_pxl, gfx2_pxl;
 reg  [13:0] gfx_addr_in;
+wire [17:0] pre_gfx1_addr;
 wire        gfx1_sel, gfx2_sel;
 
 always @(*) begin
@@ -70,6 +72,9 @@ always @(*) begin
         6'b0010_??: gfx_addr_in[13:12]=2;
         default: gfx_addr_in[13:12]=0;
     endcase
+    // Logic external to the K007121, chips 15D and 16D
+    gfx1_addr = pre_gfx1_addr;
+    if( pre_gfx1_addr[13:10]==0 && !gfx1_sel ) gfx1_addr[17:14]=0;
 end
 
 jtframe_cen48 u_cen(
@@ -130,7 +135,7 @@ jtcontra_gfx #(
     .cpu_nmin   ( cpu_nmin      ),
     // SDRAM interface
     .rom_obj_sel( gfx1_sel      ),
-    .rom_addr   ( gfx1_addr     ),
+    .rom_addr   ( pre_gfx1_addr ),
     .rom_data   ( gfx1_data     ),
     .rom_cs     ( gfx1_romcs    ),
     .rom_ok     ( gfx1_ok       ),
@@ -210,7 +215,9 @@ jtmx5k_colmix #(.GAME(GAME)) u_colmix(
     .gfx2_pxl   ( gfx2_pxl[3:0] ),
     .red        ( red           ),
     .green      ( green         ),
-    .blue       ( blue          )
+    .blue       ( blue          ),
+    // Debug
+    .debug_bus  ( debug_bus     )
 );
 
 endmodule

@@ -67,7 +67,8 @@ module jtmx5k_game(
     input           enable_psg,
     input           enable_fm,
     // Debug
-    input   [ 3:0]  gfx_en
+    input   [ 3:0]  gfx_en,
+    input   [ 7:0]  debug_bus
 );
 
 // SDRAM offsets.
@@ -244,7 +245,8 @@ jtmx5k_video u_video (
     .green          ( green         ),
     .blue           ( blue          ),
     // Test
-    .gfx_en         ( gfx_en        )
+    .gfx_en         ( gfx_en        ),
+    .debug_bus      ( debug_bus     )
 );
 `endif
 

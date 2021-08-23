@@ -43,7 +43,9 @@ module jtmx5k_colmix(
     // Colours
     output     [ 4:0]   red,
     output     [ 4:0]   green,
-    output     [ 4:0]   blue
+    output     [ 4:0]   blue,
+
+    input      [ 7:0]   debug_bus
 );
 
 parameter GAME=0; // 0 = Contra, 1 = Combat School
@@ -62,8 +64,12 @@ wire        gfx1_blank = gfx1_pxl[3:0]==4'h0;
 wire        gfx2_blank = gfx2_pxl[3:0]==4'h0;
 
 
-assign col_addr = { gfx1_pxl[4],  gfx2_pxl[3], pal_half,
-                    gfx2_pxl[2:0], gfx1_pxl[3:0] };
+// assign col_addr = { gfx1_pxl[4],  gfx2_pxl[3], pal_half,
+//                     gfx2_pxl[2:0], gfx1_pxl[3:0] };
+
+assign col_addr = { gfx1_pxl[4],  debug_bus[3], pal_half^debug_bus[4],
+                    debug_bus[2:0], gfx1_pxl[3:0] };
+
 
 assign { blue, green, red } = col_out;
 
