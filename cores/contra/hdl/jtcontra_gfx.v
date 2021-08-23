@@ -70,7 +70,9 @@ module jtcontra_gfx(
 );
 
 parameter   H0 = 9'h75; // initial value of hdump after H blanking
-parameter   BYPASS_VPROM=0, VTIMER=1;
+parameter   BYPASS_VPROM=0, // bypass tile/char colour PROM (pins VCB/VCF/VCD)
+            BYPASS_OPROM=0, // bypass object colour PROM (pins OCF/OCD)
+            VTIMER=1;
 
 // Simulation files
 parameter   CFGFILE="gfx_cfg.hex",
@@ -507,15 +509,21 @@ generate
     end
 endgenerate
 
-jtframe_prom #(.dw(4),.aw(8),.ASYNC(1) ) u_oprom(
-    .clk        ( clk                       ),
-    .cen        ( 1'b1                      ),
-    .data       ( prog_data                 ),
-    .rd_addr    ( oprom_addr                ),
-    .wr_addr    ( prog_addr[7:0]            ),
-    .we         ( prom_we & ~prog_addr[8]   ),
-    .q          ( oprom_data                )
-);
+generate
+    if( BYPASS_OPROM ) begin : bypass_oprom
+        assign oprom_data = oprom_addr[3:0];
+    end else begin : uses_vprom
+        jtframe_prom #(.dw(4),.aw(8),.ASYNC(1) ) u_oprom(
+            .clk        ( clk                       ),
+            .cen        ( 1'b1                      ),
+            .data       ( prog_data                 ),
+            .rd_addr    ( oprom_addr                ),
+            .wr_addr    ( prog_addr[7:0]            ),
+            .we         ( prom_we & ~prog_addr[8]   ),
+            .q          ( oprom_data                )
+        );
+    end
+endgenerate
 
 jtframe_dual_ram #(.dw(9),.aw(10)) u_line_scr(
     .clk0   ( clk       ),

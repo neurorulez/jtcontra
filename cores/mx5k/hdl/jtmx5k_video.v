@@ -101,7 +101,8 @@ jtcontra_gfx #(
     .SIMATTR("gfx1_attr.bin"),
     .SIMCODE("gfx1_code.bin"),
     .SIMOBJ ("gfx1_obj.bin" ),
-    .BYPASS_VPROM( 1        )
+    .BYPASS_VPROM( 1        ),
+    .BYPASS_OPROM( 1        )
 ) u_gfx1(
     .rst        ( rst           ),
     .clk        ( clk           ),
@@ -150,7 +151,8 @@ jtcontra_gfx #(
     .SIMCODE("gfx2_code.bin"),
     .SIMOBJ ("gfx2_obj.bin" ),
     .VTIMER ( 0             ),
-    .BYPASS_VPROM( 1        )
+    .BYPASS_VPROM( 1        ),
+    .BYPASS_OPROM( 1        )
 ) u_gfx2(
     .rst        ( rst           ),
     .clk        ( clk           ),
