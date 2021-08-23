@@ -226,8 +226,7 @@ jtmx5k_video u_video (
     .green          ( green         ),
     .blue           ( blue          ),
     // Test
-    .gfx_en         ( gfx_en        ),
-    .debug_bus      ( debug_bus     )
+    .gfx_en         ( gfx_en        )
 );
 `endif
 

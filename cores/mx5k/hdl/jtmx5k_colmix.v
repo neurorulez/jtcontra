@@ -43,12 +43,8 @@ module jtmx5k_colmix(
     // Colours
     output     [ 4:0]   red,
     output     [ 4:0]   green,
-    output     [ 4:0]   blue,
-
-    input      [ 7:0]   debug_bus
+    output     [ 4:0]   blue
 );
-
-parameter GAME=0; // 0 = Contra, 1 = Combat School
 
 wire        pal_we = cpu_cen & ~cpu_rnw & pal_cs;
 wire [ 7:0] col_data;
@@ -86,15 +82,9 @@ jtframe_dual_ram #(.aw(10)) u_ram(
 always @(posedge clk) begin
     if( rst ) begin
         pal_half <= 0;
-        // red      <= 5'd0;
-        // green    <= 5'd0;
-        // blue     <= 5'd0;
     end else begin
         pxl_aux  <= { pxl_aux[6:0], col_data };
         if( pxl_cen ) begin
-            // LVBL_dly <= LVBL;
-            // LHBL_dly <= LHBL;
-            // { blue, green, red } <= (!LVBL || !LHBL) ? 15'd0 : pxl_aux;
             col_in <= pxl_aux;
             pal_half <= 1;
         end else

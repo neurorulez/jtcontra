@@ -50,8 +50,7 @@ module jtmx5k_video(
     output     [ 4:0]   green,
     output     [ 4:0]   blue,
     // Test
-    input      [ 3:0]   gfx_en,
-    input      [ 7:0]   debug_bus
+    input      [ 3:0]   gfx_en
 );
 
 parameter GAME=0;
@@ -169,7 +168,7 @@ jtcontra_gfx #(
 // the first one without any
 // accuracy loss
 
-jtmx5k_colmix #(.GAME(GAME)) u_colmix(
+jtmx5k_colmix u_colmix(
     .rst        ( rst           ),
     .clk        ( clk           ),
     .clk24      ( clk24         ),
@@ -191,9 +190,7 @@ jtmx5k_colmix #(.GAME(GAME)) u_colmix(
     .gfx1_pal   ( gfx1_pal      ),
     .red        ( red           ),
     .green      ( green         ),
-    .blue       ( blue          ),
-    // Debug
-    .debug_bus  ( debug_bus     )
+    .blue       ( blue          )
 );
 
 endmodule
