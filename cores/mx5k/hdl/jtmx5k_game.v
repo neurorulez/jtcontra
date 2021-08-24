@@ -81,7 +81,7 @@ wire        pcma_cs,  pcma_ok, pcmb_cs, pcmb_ok;
 wire        snd_irq;
 wire [15:0] gfx1_data, gfx2_data;
 wire [ 7:0] pcma_data, pcmb_data;
-wire [16:0] pcma_addr, pcmb_addr;
+wire [17:0] pcma_addr, pcmb_addr;
 wire [17:0] gfx1_addr, gfx2_addr;
 
 wire [ 7:0] main_data, snd_data, snd_latch;
@@ -271,11 +271,11 @@ jtframe_rom #(
     .SLOT0_DW    ( 16              ),
     .SLOT0_OFFSET( GFX1_OFFSET     ),
 
-    .SLOT2_AW    ( 17              ), // ADPCM
+    .SLOT2_AW    ( 18              ), // ADPCM
     .SLOT2_DW    (  8              ),
     .SLOT2_OFFSET( PCM_OFFSET      ),
 
-    .SLOT3_AW    ( 17              ), // ADPCM
+    .SLOT3_AW    ( 18              ), // ADPCM
     .SLOT3_DW    (  8              ),
     .SLOT3_OFFSET( PCM_OFFSET      ),
 

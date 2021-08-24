@@ -28,12 +28,12 @@ module jtmx5k_sound(
     input   [ 7:0]  rom_data,
     input           rom_ok,
     // ADPCM ROM
-    output   [16:0] pcma_addr,
+    output   [17:0] pcma_addr,
     input    [ 7:0] pcma_dout,
     output          pcma_cs,
     input           pcma_ok,
 
-    output   [16:0] pcmb_addr,
+    output   [17:0] pcmb_addr,
     input    [ 7:0] pcmb_dout,
     output          pcmb_cs,
     input           pcmb_ok,
@@ -55,11 +55,13 @@ wire                cpu_cen, irq_ack;
 reg                 mem_acc, mem_upper;
 wire        [ 7:0]  div_dout;
 wire signed [ 7:0]  pcm_snd;
-reg                 pcm_amsb; // ignored for now
+reg                 pcm_msb;
 
 assign rom_addr  = A[14:0];
 assign irq_ack   = !m1_n && !iorq_n;
 assign pcm_cs    = 0;
+assign pcma_addr[17] = pcm_msb;
+assign pcmb_addr[17] = pcm_msb;
 
 jtframe_cen3p57 #(.CLK24(1)) u_cen(
     .clk        ( clk       ),
@@ -93,9 +95,9 @@ end
 
 always @(posedge clk, posedge rst) begin
     if( rst ) begin
-        pcm_amsb <= 0;
+        pcm_msb <= 0;
     end else begin
-        if(iock) pcm_amsb <= snd_latch[0];
+        if(iock) pcm_msb <= cpu_dout[0];
     end
 end
 
@@ -200,11 +202,12 @@ jt007232 u_pcm(
 
     // External memory - the original chip
     // only had one bus
-    .roma_addr  ( pcma_addr ),
+    .roma_addr  ( pcma_addr[16:0] ),
     .roma_dout  ( pcma_dout ),
     .roma_cs    ( pcma_cs   ),
     .roma_ok    ( pcma_ok   ),
-    .romb_addr  ( pcmb_addr ),
+
+    .romb_addr  ( pcmb_addr[16:0] ),
     .romb_dout  ( pcmb_dout ),
     .romb_cs    ( pcmb_cs   ),
     .romb_ok    ( pcmb_ok   ),
