@@ -19,3 +19,4 @@ set_global_assignment -name QIP_FILE [file join $::quartus(qip_path) ../../../mo
 set_global_assignment -name VERILOG_FILE [file join $::quartus(qip_path) ../../../modules/jtframe/hdl/sound/jtframe_mixer.v ]
 
 set_global_assignment -name VERILOG_FILE [file join $::quartus(qip_path) ../../contra/hdl/jtcontra_007452.v       ]
+set_global_assignment -name VERILOG_FILE [file join $::quartus(qip_path) ../../../modules/jt007232.v              ]

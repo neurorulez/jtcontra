@@ -23,14 +23,15 @@ module jt007232(
     input             clk,
     input             cen,
     input      [ 3:0] addr,
-    input             nrcs,
+    // RAM ports not implemented
+    // input             nrcs,
+    // input             nrd,
     input             dacs, // active high
-    input             nrd,
-    output            cen_2m,// equivalent to ck2m pin -- not implemented
+    // output            cen_2m,// equivalent to ck2m pin -- not implemented
     output reg        cen_q, // equivalent to NE pin
     output reg        cen_e, // equivalent to NQ pin
     input      [ 7:0] din,
-    output     [ 7:0] dout,
+    // output     [ 7:0] dout,
 
     // External memory - the original chip
     // only had one bus
@@ -44,12 +45,13 @@ module jt007232(
     output            romb_cs,
     input             romb_ok,
     // sound output - raw
-    output reg [ 6:0] snda,
-    output reg [ 6:0] sndb,
+    output     [ 6:0] snda,
+    output     [ 6:0] sndb,
     output reg [ 7:0] snd       // snd_a + snd, scaled by register 12
 );
 
-parameter REG12A=1; // location of CHA gain
+parameter REG12A=1, // location of CHA gain
+          INVA0 =0; // invert A0? The real chip did, we don't by default
 
 reg [7:0] mmr[0:13]; // Not all bits are used
 
@@ -69,9 +71,9 @@ reg         chb_play;
 wire        chb_loop = mmr[13][1];
 wire [ 3:0] chb_gain = !REG12A ? mmr[12][7:4] : mmr[12][3:0];
 
-assign cen_2m = 0;
+// assign cen_2m = 0;
 
-wire [3:0] addrj = addr^4'b1; // addr LSB is inverted
+wire [3:0] addrj = INVA0 ? (addr^4'b1) : addr; // addr LSB may be inverted
 
 always @(posedge clk, posedge rst) begin
     if( rst ) begin

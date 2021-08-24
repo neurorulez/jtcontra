@@ -28,10 +28,15 @@ module jtmx5k_sound(
     input   [ 7:0]  rom_data,
     input           rom_ok,
     // ADPCM ROM
-    output  [16:0]  pcm_addr,
-    output          pcm_cs,
-    input   [ 7:0]  pcm_data,
-    input           pcm_ok,
+    output   [16:0] pcma_addr,
+    input    [ 7:0] pcma_dout,
+    output          pcma_cs,
+    input           pcma_ok,
+
+    output   [16:0] pcmb_addr,
+    input    [ 7:0] pcmb_dout,
+    output          pcmb_cs,
+    input           pcmb_ok,
 
     // Sound output
     output signed [15:0] snd,
@@ -49,7 +54,8 @@ wire                cen_fm, cen_fm2;
 wire                cpu_cen, irq_ack;
 reg                 mem_acc, mem_upper;
 wire        [ 7:0]  div_dout;
-reg                 pcm_amsb;
+wire        [ 7:0]  pcm_snd;
+reg                 pcm_amsb; // ignored for now
 
 assign rom_addr  = A[14:0];
 assign irq_ack   = !m1_n && !iorq_n;
@@ -93,17 +99,17 @@ always @(posedge clk, posedge rst) begin
     end
 end
 
-jtframe_mixer #(.W0(16),.W1(16),.W2(10)) u_mixer(
+jtframe_mixer #(.W0(16),.W1(16),.W2(8)) u_mixer(
     .rst    ( rst        ),
     .clk    ( clk        ),
     .cen    ( cen_fm     ),
     .ch0    ( fm_left    ),
     .ch1    ( fm_right   ),
-    .ch2    ( 10'd0      ),
+    .ch2    ( pcm_snd    ),
     .ch3    ( 16'd0      ),
     .gain0  ( 8'h08      ),
     .gain1  ( 8'h08      ),
-    .gain2  ( 8'h10      ),
+    .gain2  ( 8'h08      ),
     .gain3  ( 8'd0       ),
     .mixed  ( snd        ),
     .peak   ( peak       )
@@ -180,6 +186,32 @@ jt51 u_jt51(
     // unsigned outputs for sigma delta converters, full resolution
     .dacleft    (           ),
     .dacright   (           )
+);
+
+jt007232 u_pcm(
+    .rst        ( rst       ),
+    .clk        ( clk       ),
+    .cen        ( cen_fm    ),
+    .addr       ( A[3:0]    ),
+    .dacs       ( dac_cs    ), // active high
+    .cen_q      (           ),
+    .cen_e      (           ),
+    .din        ( cpu_din   ),
+
+    // External memory - the original chip
+    // only had one bus
+    .roma_addr  ( pcma_addr ),
+    .roma_dout  ( pcma_dout ),
+    .roma_cs    ( pcma_cs   ),
+    .roma_ok    ( pcma_ok   ),
+    .romb_addr  ( pcmb_addr ),
+    .romb_dout  ( pcmb_dout ),
+    .romb_cs    ( pcmb_cs   ),
+    .romb_ok    ( pcmb_ok   ),
+    // sound output - raw
+    .snda       (           ),
+    .sndb       (           ),
+    .snd        ( pcm_snd   )
 );
 
 endmodule
