@@ -59,9 +59,8 @@ reg                 pcm_msb;
 
 assign rom_addr  = A[14:0];
 assign irq_ack   = !m1_n && !iorq_n;
-assign pcm_cs    = 0;
-assign pcma_addr[17] = pcm_msb;
-assign pcmb_addr[17] = pcm_msb;
+assign pcma_addr[17] = 0;//pcm_msb;
+assign pcmb_addr[17] = 1;//pcm_msb;
 
 jtframe_cen3p57 #(.CLK24(1)) u_cen(
     .clk        ( clk       ),

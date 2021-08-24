@@ -10,6 +10,7 @@
 ../../../contra/hdl/jtcontra_gfx_obj.v
 ../../../contra/hdl/jtcontra_007452.v
 $MODULES/jt007232.v
+$MODULES/jt12/jt49/hdl/filter/jt49_dcrm2.v
 
 $JTFRAME/hdl/video/jtframe_vtimer.v
 $JTFRAME/hdl/video/jtframe_blank.v
