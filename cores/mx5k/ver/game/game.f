@@ -9,6 +9,7 @@
 ../../../contra/hdl/jtcontra_gfx_tilemap.v
 ../../../contra/hdl/jtcontra_gfx_obj.v
 ../../../contra/hdl/jtcontra_007452.v
+$MODULES/jt007232.v
 
 $JTFRAME/hdl/video/jtframe_vtimer.v
 $JTFRAME/hdl/video/jtframe_blank.v
