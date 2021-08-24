@@ -220,7 +220,14 @@ always @(posedge clk, posedge rst) begin
             if( over ) begin
                 cnt      <= pre0;
                 if( busy ) begin
-                    rom_addr <= rom_addr + 1'd1;
+                    if( pre_sel[1] ) begin
+                        rom_addr[ 3: 0] <= rom_addr[ 3: 0] + 1'd1;
+                        rom_addr[ 7: 4] <= rom_addr[ 7: 4] + 1'd1;
+                        rom_addr[11: 8] <= rom_addr[11: 8] + 1'd1;
+                        rom_addr[16:12] <= rom_addr[16:12] + 1'd1;
+                    end else begin
+                        rom_addr <= rom_addr + 1'd1;
+                    end
                     snd <= rom_dout[6:0]-OFFSET;
                     if( rom_dout[7] ) begin
                         if( loop )
@@ -230,7 +237,12 @@ always @(posedge clk, posedge rst) begin
                     end
                 end
             end else begin
-                cnt <= cnt + 1'd1;
+                if( pre_sel[1] ) begin
+                    cnt[ 7:0] <= cnt[ 7:0]+1'd1;
+                    cnt[11:8] <= cnt[11:8]+1'd1;
+                end else begin
+                    cnt <= cnt + 1'd1;
+                end
             end
         end
         if( play && !playl ) begin
