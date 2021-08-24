@@ -198,6 +198,7 @@ jt007232 u_pcm(
     .dacs       ( dac_cs    ), // active high
     .cen_q      (           ),
     .cen_e      (           ),
+    .wr_n       ( wr_n      ),
     .din        ( cpu_dout  ),
 
     // External memory - the original chip

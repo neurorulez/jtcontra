@@ -27,10 +27,11 @@ module jt007232(
     // input             nrcs,
     // input             nrd,
     input             dacs, // active high
+    input             wr_n, // not a pin on the original
+    input      [ 7:0] din,
     // output            cen_2m,// equivalent to ck2m pin -- not implemented
     output reg        cen_q, // equivalent to NE pin
     output reg        cen_e, // equivalent to NQ pin
-    input      [ 7:0] din,
     // output     [ 7:0] dout,
 
     // External memory - the original chip
@@ -59,7 +60,7 @@ reg [7:0] mmr[0:13]; // Not all bits are used
 wire [11:0] cha_pres = { mmr[1][3:0], mmr[0] };
 wire [16:0] cha_addr = { mmr[4][0], mmr[3], mmr[2] };
 wire [ 1:0] cha_presel = mmr[1][5:4];
-reg         cha_play;
+reg         cha_play, cha_load;
 wire        cha_loop = mmr[13][0];
 wire [ 3:0] cha_gain = REG12A ? mmr[12][7:4] : mmr[12][3:0];
 
@@ -67,7 +68,7 @@ wire [ 3:0] cha_gain = REG12A ? mmr[12][7:4] : mmr[12][3:0];
 wire [11:0] chb_pres = { mmr[7][3:0], mmr[6] };
 wire [16:0] chb_addr = { mmr[10][0], mmr[9], mmr[8] };
 wire [ 1:0] chb_presel = mmr[7][5:4];
-reg         chb_play;
+reg         chb_play, chb_load;
 wire        chb_loop = mmr[13][1];
 wire [ 3:0] chb_gain = !REG12A ? mmr[12][7:4] : mmr[12][3:0];
 
@@ -92,8 +93,12 @@ always @(posedge clk, posedge rst) begin
         cha_play <= 0;
         chb_play <= 0;
     end else begin
-        if( dacs ) begin // there is no write enable signal, just dacs
+        cha_load <= 0;
+        chb_load <= 0;
+        if( dacs && !wr_n ) begin
             mmr[ addrj ] <= din;
+            cha_load <= addrj==0 || addrj==1;
+            chb_load <= addrj==6 || addrj==7;
         end
         cha_play <= dacs && addrj==5;
         chb_play <= dacs && addrj==11;
@@ -148,6 +153,7 @@ jt007232_channel u_cha(
     .pre_sel    ( cha_presel),
     .loop       ( cha_loop  ),
     .play       ( cha_play  ),
+    .load       ( cha_load  ),
 
     .rom_addr   ( roma_addr ),
     .rom_cs     ( roma_cs   ),
@@ -166,6 +172,7 @@ jt007232_channel u_chb(
     .pre_sel    ( chb_presel),
     .loop       ( chb_loop  ),
     .play       ( chb_play  ),
+    .load       ( chb_load  ),
 
     .rom_addr   ( romb_addr ),
     .rom_cs     ( romb_cs   ),
@@ -188,6 +195,7 @@ module jt007232_channel(
     input      [ 1:0] pre_sel,
     input             loop,
     input             play,
+    input             load,
 
     output reg [16:0] rom_addr,
     output            rom_cs,
@@ -248,6 +256,9 @@ always @(posedge clk, posedge rst) begin
         if( play && !playl ) begin
             busy <= 1;
             rom_addr <= rom_start;
+        end
+        if( load ) begin
+            cnt <= pre0;
         end
         if(!busy) snd <= ZERO;
     end
