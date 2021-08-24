@@ -234,6 +234,7 @@ jtmx5k_video u_video (
 jtmx5k_sound u_sound(
     .rst        ( rst           ),
     .clk        ( clk24         ), // 24 MHz
+    .fxlevel    ( dip_fxlevel   ),
     // communication with main CPU
     .snd_irq    ( snd_irq       ),
     .snd_latch  ( snd_latch     ),

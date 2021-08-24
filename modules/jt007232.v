@@ -48,7 +48,7 @@ module jt007232(
     // sound output - raw
     output     [ 6:0] snda,
     output     [ 6:0] sndb,
-    output signed [7:0] snd       // snd_a + snd, scaled by register 12
+    output signed [10:0] snd       // snd_a + snd, scaled by register 12
 );
 
 parameter REG12A=1, // location of CHA gain
@@ -76,17 +76,20 @@ wire [ 3:0] chb_gain = !REG12A ? mmr[12][7:4] : mmr[12][3:0];
 
 wire [3:0] addrj = INVA0 ? (addr^4'b1) : addr; // addr LSB may be inverted
 
-reg [7:0] mixdc;
+reg [10:0] mixdc;
+reg [ 9:0] cha_amp, chb_amp;
 
 always @(posedge clk, posedge rst) begin
     if( rst ) begin
         mixdc <= 0;
     end else begin
-        mixdc <= {1'b0, snda } + {1'b0, sndb };
+        cha_amp <= snda * cha_gain;
+        chb_amp <= sndb * chb_gain;
+        mixdc <= {1'b0, cha_amp } + {1'b0, chb_amp };
     end
 end
 
-jt49_dcrm2 u_dcrm(
+jt49_dcrm2 #(.sw(11)) u_dcrm(
     .rst    ( rst   ),
     .clk    ( clk   ),
     .cen    ( cen_q ),

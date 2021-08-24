@@ -19,6 +19,7 @@
 module jtmx5k_sound(
     input           clk,        // 24 MHz
     input           rst,
+    input   [ 1:0]  fxlevel,
     // communication with main CPU
     input           snd_irq,
     input   [ 7:0]  snd_latch,
@@ -54,7 +55,7 @@ wire                cen_fm, cen_fm2;
 wire                cpu_cen, irq_ack;
 reg                 mem_acc, mem_upper;
 wire        [ 7:0]  div_dout;
-wire signed [ 7:0]  pcm_snd;
+wire signed [10:0]  pcm_snd;
 
 assign rom_addr  = A[14:0];
 assign irq_ack   = !m1_n && !iorq_n;
@@ -96,7 +97,18 @@ always @(*) begin
     endcase
 end
 
-jtframe_mixer #(.W0(16),.W1(16),.W2(8)) u_mixer(
+reg [7:0] fxgain;
+
+always @(*) begin
+    case( fxlevel )
+        0: fxgain = 8'h20;
+        1: fxgain = 8'h10;
+        2: fxgain = 8'h80;
+        3: fxgain = 8'h40;
+    endcase
+end
+
+jtframe_mixer #(.W0(16),.W1(16),.W2(11)) u_mixer(
     .rst    ( rst        ),
     .clk    ( clk        ),
     .cen    ( cen_fm     ),
@@ -106,7 +118,7 @@ jtframe_mixer #(.W0(16),.W1(16),.W2(8)) u_mixer(
     .ch3    ( 16'd0      ),
     .gain0  ( 8'h08      ),
     .gain1  ( 8'h08      ),
-    .gain2  ( 8'h08      ),
+    .gain2  ( fxgain     ),
     .gain3  ( 8'd0       ),
     .mixed  ( snd        ),
     .peak   ( peak       )
