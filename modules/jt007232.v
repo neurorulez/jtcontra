@@ -47,7 +47,7 @@ module jt007232(
     // sound output - raw
     output     [ 6:0] snda,
     output     [ 6:0] sndb,
-    output reg [ 7:0] snd       // snd_a + snd, scaled by register 12
+    output reg signed [ 7:0] snd       // snd_a + snd, scaled by register 12
 );
 
 parameter REG12A=1, // location of CHA gain
@@ -79,7 +79,7 @@ always @(posedge clk, posedge rst) begin
     if( rst ) begin
         snd <= 0;
     end else begin
-        snd <= {1'b0, snda } + {1'b0, sndb };
+        snd <= {snda[6], snda } + {sndb[6], sndb };
     end
 end
 
@@ -191,6 +191,8 @@ module jt007232_channel(
     output reg [ 6:0] snd
 );
 
+parameter [6:0] OFFSET=6'h40;
+
 reg  [11:0] cnt;
 wire        over;
 reg         busy, playl;
@@ -211,7 +213,7 @@ always @(posedge clk, posedge rst) begin
                 cnt      <= pre0;
                 rom_addr <= rom_addr + 1'd1;
                 if( busy ) begin
-                    snd <= rom_dout[6:0];
+                    snd <= rom_dout[6:0]-OFFSET;
                     if( rom_dout[7] ) begin
                         if( loop )
                             rom_addr <= rom_start;

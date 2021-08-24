@@ -54,7 +54,7 @@ wire                cen_fm, cen_fm2;
 wire                cpu_cen, irq_ack;
 reg                 mem_acc, mem_upper;
 wire        [ 7:0]  div_dout;
-wire        [ 7:0]  pcm_snd;
+wire signed [ 7:0]  pcm_snd;
 reg                 pcm_amsb; // ignored for now
 
 assign rom_addr  = A[14:0];
