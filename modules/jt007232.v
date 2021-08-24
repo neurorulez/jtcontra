@@ -193,7 +193,7 @@ module jt007232_channel(
 
 parameter [6:0] OFFSET='h40;
 
-localparam [6:0] ZERO=6'd0-OFFSET;
+localparam [6:0] ZERO=0;
 
 reg  [11:0] cnt;
 wire        over;
@@ -208,13 +208,14 @@ always @(posedge clk, posedge rst) begin
         cnt  <= 0;
         busy <= 0;
         snd  <= ZERO;
+        rom_addr <= 0;
     end else begin
         playl <= play;
         if( cen_q ) begin
             if( over ) begin
                 cnt      <= pre0;
-                rom_addr <= rom_addr + 1'd1;
                 if( busy ) begin
+                    rom_addr <= rom_addr + 1'd1;
                     snd <= rom_dout[6:0]-OFFSET;
                     if( rom_dout[7] ) begin
                         if( loop )

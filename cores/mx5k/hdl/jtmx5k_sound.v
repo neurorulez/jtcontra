@@ -196,7 +196,7 @@ jt007232 u_pcm(
     .dacs       ( dac_cs    ), // active high
     .cen_q      (           ),
     .cen_e      (           ),
-    .din        ( cpu_din   ),
+    .din        ( cpu_dout  ),
 
     // External memory - the original chip
     // only had one bus
