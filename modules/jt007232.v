@@ -107,16 +107,21 @@ end
 // Here, RAM access is done when E is high
 
 reg [1:0] cen_cnt;
+reg       div2, cen_div2;
 
 always @(posedge clk, posedge rst) begin
     if( rst ) begin
         cen_e   <= 0;
         cen_q   <= 0;
         cen_cnt <= 0;
+        cen_div2<= 0;
+        div2    <= 0;
     end else begin
         if(cen) cen_cnt <= cen_cnt+1'd1;
-        cen_e <= cen && cen_cnt==3;
-        cen_q <= cen && cen_cnt==1;
+        cen_e    <= cen && cen_cnt==3;
+        cen_q    <= cen && cen_cnt==1;
+        cen_div2 <= cen && cen_cnt==1 && div2;
+        if( cen_q ) div2 <= ~div2;
     end
 end
 
@@ -136,7 +141,7 @@ end
 jt007232_channel u_cha(
     .rst        ( rst       ),
     .clk        ( clk       ),
-    .cen_q      ( cen_q     ),
+    .cen_div2   ( cen_div2  ),
     // control from MMR
     .rom_start  ( cha_addr  ),
     .pre0       ( cha_pres  ),
@@ -154,7 +159,7 @@ jt007232_channel u_cha(
 jt007232_channel u_chb(
     .rst        ( rst       ),
     .clk        ( clk       ),
-    .cen_q      ( cen_q     ),
+    .cen_div2   ( cen_div2  ),
     // control from MMR
     .rom_start  ( chb_addr  ),
     .pre0       ( chb_pres  ),
@@ -176,7 +181,7 @@ endmodule
 module jt007232_channel(
     input             rst,
     input             clk,
-    input             cen_q,
+    input             cen_div2,
     // control from MMR
     input      [16:0] rom_start,
     input      [11:0] pre0,
@@ -211,7 +216,7 @@ always @(posedge clk, posedge rst) begin
         rom_addr <= 0;
     end else begin
         playl <= play;
-        if( cen_q ) begin
+        if( cen_div2 ) begin
             if( over ) begin
                 cnt      <= pre0;
                 if( busy ) begin
