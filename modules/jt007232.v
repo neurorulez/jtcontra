@@ -205,7 +205,7 @@ always @(posedge clk, posedge rst) begin
     if( rst ) begin
         cnt  <= 0;
         busy <= 0;
-        snd  <= 0;
+        snd  <= 0-OFFSET;
     end else begin
         playl <= play;
         if( cen_q ) begin
