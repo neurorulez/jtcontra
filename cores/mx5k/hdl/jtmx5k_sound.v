@@ -55,12 +55,15 @@ wire                cpu_cen, irq_ack;
 reg                 mem_acc, mem_upper;
 wire        [ 7:0]  div_dout;
 wire signed [ 7:0]  pcm_snd;
-reg                 pcm_msb;
 
 assign rom_addr  = A[14:0];
 assign irq_ack   = !m1_n && !iorq_n;
-assign pcma_addr[17] = 0;//pcm_msb;
-assign pcmb_addr[17] = 1;//pcm_msb;
+
+// This connection is done through the NE output
+// of the 007232 on the board by using a latch
+// I can simplify it here:
+assign pcma_addr[17] = 0;
+assign pcmb_addr[17] = 1;
 
 jtframe_cen3p57 #(.CLK24(1)) u_cen(
     .clk        ( clk       ),
@@ -73,12 +76,13 @@ always @(*) begin
     rom_cs   = mem_acc && !A[15] && !rd_n;
     // Devices
     mem_upper = mem_acc && A[15];
+    // the schematics show an IOCK output which
+    // isn't connected on the real PCB
     ram_cs    = mem_upper && A[14:12]==0; // 8xxx
     div_cs    = mem_upper && A[14:12]==1; // 9xxx
     latch_cs  = mem_upper && A[14:12]==2; // Axxx
     dac_cs    = mem_upper && A[14:12]==3; // Bxxx
     fm_cs     = mem_upper && A[14:12]==4; // Cxxx
-    iock      = mem_upper && A[14:12]==7; // Fxxx
 end
 
 always @(*) begin
@@ -90,14 +94,6 @@ always @(*) begin
         fm_cs:       cpu_din = fm_dout;
         default:     cpu_din = 8'hff;
     endcase
-end
-
-always @(posedge clk, posedge rst) begin
-    if( rst ) begin
-        pcm_msb <= 0;
-    end else begin
-        if(iock) pcm_msb <= cpu_dout[0];
-    end
 end
 
 jtframe_mixer #(.W0(16),.W1(16),.W2(8)) u_mixer(
