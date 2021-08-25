@@ -76,7 +76,7 @@ wire [ 3:0] chb_gain = !REG12A ? mmr[12][7:4] : mmr[12][3:0];
 
 wire [3:0] addrj = INVA0 ? (addr^4'b1) : addr; // addr LSB may be inverted
 
-reg [11:0] cha_amp, chb_amp;
+reg signed [11:0] cha_amp, chb_amp;
 
 always @(posedge clk, posedge rst) begin
     if( rst ) begin
