@@ -47,17 +47,15 @@ parameter GAME=0; // 0 = Contra, 1 = Combat School
 
 wire        pal_we = cpu_cen & ~cpu_rnw & pal_cs;
 wire [ 7:0] col_data;
-wire [ 7:0] col_addr;
-reg         gfx_aux, gfx_other; // signals to help in priority equations
+wire [AW-1:0] col_addr;
 reg         pal_half;
 reg  [14:0] pxl_aux;
 wire [14:0] col_out;
 reg  [14:0] col_in;
 
-assign col_addr = { gfx_pxl, ~pal_half };
+assign col_addr = { {AW-8{1'b0}}, gfx_pxl, ~pal_half };
 
-//assign { blue, green, red } = col_out;
-assign { blue, green, red } = {15{gfx_pxl[0]}};
+assign { blue, green, red } = col_out;
 
 jtframe_dual_ram #(.aw(AW)) u_ram(
     .clk0   ( clk24     ),
@@ -77,15 +75,9 @@ jtframe_dual_ram #(.aw(AW)) u_ram(
 always @(posedge clk) begin
     if( rst ) begin
         pal_half <= 0;
-        // red      <= 5'd0;
-        // green    <= 5'd0;
-        // blue     <= 5'd0;
     end else begin
         pxl_aux  <= { pxl_aux[6:0], col_data };
         if( pxl_cen ) begin
-            // LVBL_dly <= LVBL;
-            // LHBL_dly <= LHBL;
-            // { blue, green, red } <= (!LVBL || !LHBL) ? 15'd0 : pxl_aux;
             col_in <= pxl_aux;
             pal_half <= 1;
         end else
