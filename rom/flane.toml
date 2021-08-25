@@ -27,10 +27,7 @@ delete = [ "Unused", "Unknown" ]
 # or arguments passed to mame2mra
 regions = [
     { name="maincpu",       no_offset=true  },
-    { name="gfx1",          start=$GFX_START, width=16 },
-    { name="k007232_1" },
-    { name="k007232_2" },
-    { name="proms" }
+    { name="gfx1",          start=$GFX_START, width=16 }
 ]
 # { name="myregion", reorder=[3,2,1,0] } # reorder files inside a region
 order = [

@@ -71,7 +71,7 @@ module jtflane_game(
 );
 
 // SDRAM offsets.
-localparam GFX_OFFSET  =  'h2_0000>>1;
+localparam GFX_OFFSET  =  `GFX_START>>1;
 localparam PCM0_OFFSET =  'hA_0000>>1;
 localparam PCM1_OFFSET =  'hC_0000>>1;
 localparam PROM_START  =  'h140000;
