@@ -56,7 +56,8 @@ reg  [14:0] col_in;
 
 assign col_addr = { gfx_pxl, ~pal_half };
 
-assign { blue, green, red } = col_out;
+//assign { blue, green, red } = col_out;
+assign { blue, green, red } = {15{gfx_pxl[0]}};
 
 jtframe_dual_ram #(.aw(AW)) u_ram(
     .clk0   ( clk24     ),

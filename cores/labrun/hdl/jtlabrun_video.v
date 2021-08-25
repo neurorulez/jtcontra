@@ -113,6 +113,7 @@ jtcontra_gfx #(.BYPASS_VPROM(1)) u_gfx(
     .cpu_dout   ( cpu_dout      ),
     .dout       ( gfx_dout      ),
     .cpu_irqn   ( cpu_irqn      ),
+    .cpu_firqn  (               ),
     .cpu_nmin   ( cpu_nmin      ),
     .col_cs     ( gfx_palcs     ),
     // SDRAM interface
@@ -122,6 +123,7 @@ jtcontra_gfx #(.BYPASS_VPROM(1)) u_gfx(
     .rom_cs     ( gfx_romcs     ),
     .rom_ok     ( gfx_ok        ),
     .pxl_out    ( gfx_pxl       ),
+    .pxl_pal    (               ),
     // Test
     .gfx_en     ( gfx_en[1:0]   )
 );

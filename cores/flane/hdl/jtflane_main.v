@@ -161,6 +161,12 @@ always @(posedge clk) begin
     end
 end
 
+jtframe_cen3p57 #(.CLK24(1)) u_cen(
+    .clk        ( clk       ),
+    .cen_3p57   ( cen_fm    ),
+    .cen_1p78   (           )
+);
+
 jtframe_ff u_ff(
     .clk      ( clk         ),
     .rst      ( rst         ),
@@ -201,8 +207,8 @@ jtframe_sys6809 u_cpu(
 );
 
 jt051733 u_prot(
-    .clk    ( clk       ),
     .rst    ( rst       ),
+    .clk    ( clk       ),
     .cen    ( cpu_cen   ),
     .addr   ( A[4:0]    ),
     .wr_n   ( RnW       ),
@@ -217,20 +223,20 @@ jt007232 #(.INVA0(1)) u_pcm0(
     .clk        ( clk       ),
     .cen        ( cen_fm    ),
     .addr       ( A[3:0]    ),
-    .dacs       ( dac_cs    ), // active high
+    .dacs       ( pcm0_cs   ), // active high
     .cen_q      (           ),
     .cen_e      (           ),
-    .wr_n       ( wr_n      ),
+    .wr_n       ( RnW       ),
     .din        ( cpu_dout  ),
 
     // External memory - the original chip
     // only had one bus
-    .roma_addr  ( pcma_addr[16:0] ),
+    .roma_addr  ( pcma_addr ),
     .roma_dout  ( pcma_dout ),
     .roma_cs    ( pcma_cs   ),
     .roma_ok    ( pcma_ok   ),
 
-    .romb_addr  ( pcmb_addr[16:0] ),
+    .romb_addr  ( pcmb_addr ),
     .romb_dout  ( pcmb_dout ),
     .romb_cs    ( pcmb_cs   ),
     .romb_ok    ( pcmb_ok   ),
@@ -245,10 +251,10 @@ jt007232 #(.INVA0(1)) u_pcm1(
     .clk        ( clk       ),
     .cen        ( cen_fm    ),
     .addr       ( A[3:0]    ),
-    .dacs       ( dac_cs    ), // active high
+    .dacs       ( pcm1_cs   ), // active high
     .cen_q      (           ),
     .cen_e      (           ),
-    .wr_n       ( wr_n      ),
+    .wr_n       ( RnW       ),
     .din        ( cpu_dout  ),
 
     // External memory - the original chip

@@ -136,7 +136,8 @@ u_dwnld(
     .prog_mask      ( prog_mask     ), // active low
     .prog_we        ( prog_we       ),
     .prom_we        ( prom_we       ),
-    .sdram_ack      ( sdram_ack     )
+    .sdram_ack      ( sdram_ack     ),
+    .header         (               )
 );
 
 
@@ -169,6 +170,27 @@ jtflane_main u_main(
 
     .gfx_dout       ( gfx_dout      ),
     .pal_dout       ( pal_dout      ),
+
+    // PCM sound
+    .pcma_addr      ( pcma_addr     ),
+    .pcma_dout      ( pcma_dout     ),
+    .pcma_cs        ( pcma_cs       ),
+    .pcma_ok        ( pcma_ok       ),
+
+    .pcmb_addr      ( pcmb_addr     ),
+    .pcmb_dout      ( pcmb_dout     ),
+    .pcmb_cs        ( pcmb_cs       ),
+    .pcmb_ok        ( pcmb_ok       ),
+
+    .pcmc_addr      ( pcmc_addr     ),
+    .pcmc_dout      ( pcmc_dout     ),
+    .pcmc_cs        ( pcmc_cs       ),
+    .pcmc_ok        ( pcmc_ok       ),
+
+    .pcmd_addr      ( pcmd_addr     ),
+    .pcmd_dout      ( pcmd_dout     ),
+    .pcmd_cs        ( pcmd_cs       ),
+    .pcmd_ok        ( pcmd_ok       ),
 
     // DIP switches
     .dip_pause      ( dip_pause     ),
