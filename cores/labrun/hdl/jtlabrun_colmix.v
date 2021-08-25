@@ -43,8 +43,6 @@ module jtlabrun_colmix #(parameter AW=8) (
     output     [ 4:0]   blue
 );
 
-parameter GAME=0; // 0 = Contra, 1 = Combat School
-
 wire        pal_we = cpu_cen & ~cpu_rnw & pal_cs;
 wire [ 7:0] col_data;
 wire [AW-1:0] col_addr;
