@@ -55,7 +55,7 @@ wire                cen_fm, cen_fm2;
 wire                cpu_cen, irq_ack;
 reg                 mem_acc, mem_upper;
 wire        [ 7:0]  div_dout;
-wire signed [10:0]  pcm_snd;
+wire signed [11:0]  pcm_snd;
 
 assign rom_addr  = A[14:0];
 assign irq_ack   = !m1_n && !iorq_n;
@@ -101,14 +101,14 @@ reg [7:0] fxgain;
 
 always @(*) begin
     case( fxlevel )
-        0: fxgain = 8'h20;
-        1: fxgain = 8'h10;
-        2: fxgain = 8'h80;
-        3: fxgain = 8'h40;
+        0: fxgain = 8'h02;
+        1: fxgain = 8'h04;
+        2: fxgain = 8'h08;
+        3: fxgain = 8'h10;
     endcase
 end
 
-jtframe_mixer #(.W0(16),.W1(16),.W2(11)) u_mixer(
+jtframe_mixer #(.W0(16),.W1(16),.W2(12)) u_mixer(
     .rst    ( rst        ),
     .clk    ( clk        ),
     .cen    ( cen_fm     ),
