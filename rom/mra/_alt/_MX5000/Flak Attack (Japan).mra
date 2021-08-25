@@ -41,9 +41,7 @@
         <!-- gfx1 - starts at 0x20000 -->
         <part name="gx669f03.5e" crc="ff1d718b"/>
         <!-- k007232 - starts at 0xA0000 -->
-        <interleave output="16">
-            <part name="gx669f04.11a" crc="6d1ea61c" map="12"/>
-        </interleave>
+        <part name="gx669f04.11a" crc="6d1ea61c"/>
         <!-- Total 0xE0000 bytes - 896 kBytes -->
     </rom>
     <rom index="17" zip="jtbeta.zip" md5="None">

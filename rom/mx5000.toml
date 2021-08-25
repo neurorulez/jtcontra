@@ -29,7 +29,7 @@ regions = [
     { name="maincpu",       no_offset=true  },
     { name="audiocpu",      start=$SND_START },
     { name="gfx1",          start=$GFX_START, width=16 },
-    { name="k007232",       start=$PCM_START, width=16, reverse=true }
+    { name="k007232",       start=$PCM_START }
 ]
 # { name="myregion", reorder=[3,2,1,0] } # reorder files inside a region
 order = [

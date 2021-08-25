@@ -230,7 +230,7 @@ always @(posedge clk, posedge rst) begin
         playl <= play;
         if( cen_div2 ) begin
             if( over ) begin
-                cnt      <= pre0;
+                cnt <= pre0;
                 if( busy ) begin
                     if( pre_sel[1] ) begin
                         rom_addr[ 3: 0] <= rom_addr[ 3: 0] + 1'd1;
