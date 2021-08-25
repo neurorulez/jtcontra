@@ -36,7 +36,7 @@ module jtlabrun_video(
     input      [ 3:0]   prog_data,
     input               prom_we,
     // CPU      interface
-    inout               gfx_cs,
+    input               gfx_cs,
     inout               pal_cs,
     input               cpu_rnw,
     input               cpu_cen,
@@ -65,7 +65,10 @@ wire [ 8:0] vrender, vrender1, vdump, hdump;
 wire [ 6:0] gfx_pxl;
 wire        gfx_sel, nc, gfx_palcs;
 
-assign pal_cs = GAME==1 ? gfx_palcs : 1'bz;
+generate
+    if( GAME==1 )
+        assign pal_cs = gfx_palcs;
+endgenerate
 
 jtframe_cen48 u_cen(
     .clk        ( clk       ),    // 48 MHz
