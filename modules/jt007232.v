@@ -46,9 +46,9 @@ module jt007232(
     output            romb_cs,
     input             romb_ok,
     // sound output - raw
-    output     [ 6:0] snda,
-    output     [ 6:0] sndb,
-    output signed [11:0] snd       // snd_a + snd, scaled by register 12
+    output signed [ 7:0] snda,
+    output signed [ 7:0] sndb,
+    output reg signed [11:0] snd       // snd_a + snd, scaled by register 12
 );
 
 parameter REG12A=1, // location of CHA gain
@@ -76,26 +76,19 @@ wire [ 3:0] chb_gain = !REG12A ? mmr[12][7:4] : mmr[12][3:0];
 
 wire [3:0] addrj = INVA0 ? (addr^4'b1) : addr; // addr LSB may be inverted
 
-reg [11:0] mixdc;
-reg [10:0] cha_amp, chb_amp;
+reg [11:0] cha_amp, chb_amp;
 
 always @(posedge clk, posedge rst) begin
     if( rst ) begin
-        mixdc <= 0;
+        snd     <= 0;
+        cha_amp <= 0;
+        chb_amp <= 0;
     end else begin
         cha_amp <= snda * cha_gain;
         chb_amp <= sndb * chb_gain;
-        mixdc <= {1'b0, cha_amp } + {1'b0, chb_amp };
+        snd     <= cha_amp + chb_amp; // snda/b already had one filling bit
     end
 end
-
-jt49_dcrm2 #(.sw(12)) u_dcrm(
-    .rst    ( rst   ),
-    .clk    ( clk   ),
-    .cen    ( cen_q ),
-    .din    ( mixdc ),
-    .dout   ( snd   )
-);
 
 always @(posedge clk, posedge rst) begin
     if( rst ) begin
@@ -214,12 +207,10 @@ module jt007232_channel(
     output            rom_cs,
     input             rom_ok,
     input      [ 7:0] rom_dout,
-    output reg [ 6:0] snd
+    output reg signed [7:0] snd
 );
 
-parameter [6:0] OFFSET=0;//'h40;
-
-localparam [6:0] ZERO=0;
+parameter [7:0] OFFSET='h40;
 
 reg  [11:0] cnt;
 wire        over;
@@ -233,7 +224,7 @@ always @(posedge clk, posedge rst) begin
     if( rst ) begin
         cnt  <= 0;
         busy <= 0;
-        snd  <= ZERO;
+        snd  <= 0;
         rom_addr <= 0;
     end else begin
         playl <= play;
@@ -249,7 +240,7 @@ always @(posedge clk, posedge rst) begin
                     end else begin
                         rom_addr <= rom_addr + 1'd1;
                     end
-                    snd <= rom_dout[6:0]-OFFSET;
+                    snd <= {1'b0, rom_dout[6:0]}-OFFSET;
                     if( rom_dout[7] ) begin
                         if( loop )
                             rom_addr <= rom_start;
@@ -273,7 +264,7 @@ always @(posedge clk, posedge rst) begin
         if( load ) begin
             cnt <= pre0;
         end
-        if(!busy) snd <= ZERO;
+        if(!busy) snd <= 0;
     end
 end
 

@@ -16,9 +16,6 @@ set_global_assignment -name QIP_FILE [file join $::quartus(qip_path) ../../../mo
 # JT51 (YM2151)
 set_global_assignment -name QIP_FILE [file join $::quartus(qip_path) ../../../modules//jt51/hdl/jt51.qip   ]
 
-# DC Removal
-set_global_assignment -name VERILOG_FILE [file join $::quartus(qip_path) ../../../modules/jt12/jt49/hdl/filter/jt49_dcrm2.v ]
-
 set_global_assignment -name VERILOG_FILE [file join $::quartus(qip_path) ../../../modules/jtframe/hdl/sound/jtframe_mixer.v ]
 
 set_global_assignment -name VERILOG_FILE [file join $::quartus(qip_path) ../../contra/hdl/jtcontra_007452.v       ]

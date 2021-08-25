@@ -12,8 +12,11 @@ Contra          | contra  | HD63C09EP  | 68B09EP    | x2            | YM2151
 Combat School   | comsc   | 6309       | Z80        | x2            | YM2203 + UPD7759
 Haunted Castle  |         | KONAMI     | Z80        | x2            | YM3812 + K051649
 Fast Lane       |         | 6309       | -          | x1 + K051733  | K007232 x 2
-MX5000          |         | 6309       | Z80        | x2            | YM2151 + K007232
-Labyrinth Runner|         | 6309       | -          | x1 + K051733  | YM2203 x 2
+MX5000          | mx5k    | 6309       | Z80        | x2            | YM2151 + K007232
+Labyrinth Runner| labrun  | 6309       | -          | x1 + K051733  | YM2203 x 2
+
+MX5000 uses two K007121 but the second one is connected in such a way
+that it only serves to extract the 4-bit palette for the current pixel.
 
 # Supported FPGA Platforms
 
@@ -89,27 +92,9 @@ Pin Name | Number | I/O | Usage
 
 ## Register Map
 
-There are 8 programmable registers, most of them are 8-bit long, some have unused bits which
-do not connect to any physical register. Register cannot be read back.
-
-## Combat School
-
-Blank cells refer to 0/0.
-
-Id |Image                                   | 1-1 | 1-3 | 3-2 | 3-5 | 3-6 | ZURERAM 2
----|----------------------------------------|-----|-----|-----|-----|-----|-----------
- 1 |![](cores/comsc/ver/game/scene1/1.png)  |     | 1/1 | 1/1 | 1/1 |     |
- 2 |![](cores/comsc/ver/game/scene2/2.png)  |     | 1/1 | 1/1 | 1/1 |     |
- 3 |![](cores/comsc/ver/game/scene3/3.png)  |     | 1/1 | 1/1 | 1/1 |     |
- 4 |![](cores/comsc/ver/game/scene4/4.png)  |     | 1/1 | 1/1 | 1/1 | 1/1 |
- 5 |![](cores/comsc/ver/game/scene5/5.png)  |     | 1/1 | 1/1 | 1/1 | 1/1 |
- 6 |![](cores/comsc/ver/game/scene6/6.png)  |     | 1/1 | 1/1 | 1/1 | 1/1 |
- 7 |![](cores/comsc/ver/game/scene7/7.png)  |     | 1/1 | 1/1 | 1/1 | 1/1 |
- 8 |![](cores/comsc/ver/game/scene8/8.png)  | 1/0 | 1/1 | 1/1 | 1/1 | 1/1 |
- 9 |![](cores/comsc/ver/game/scene9/9.png)  |     | 1/1 | 1/1 | 1/1 | 1/1 |
-10 |![](cores/comsc/ver/game/scene10/10.png)|     | 1/1 | 1/1 | 1/1 |     |
-11 |![](cores/comsc/ver/game/scene11/11.png)| 1/1 | 1/1 | 1/1 | 1/1 | 1/1 | 00-12-48 / 00-14
-12 |![](cores/comsc/ver/game/scene12/12.png)|     |     | 1/1 | 1/1 |     | 00-d9-18-48 / 00-d9-18
+There are 8 programmable registers, most of them are 8-bit long, some
+have unused bits which do not connect to any physical register. Register
+cannot be read back.
 
 # Support
 
