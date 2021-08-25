@@ -37,7 +37,7 @@ module jtlabrun_video(
     input               prom_we,
     // CPU      interface
     inout               gfx_cs,
-    input               pal_cs,
+    inout               pal_cs,
     input               cpu_rnw,
     input               cpu_cen,
     input      [13:0]   cpu_addr,
@@ -59,9 +59,13 @@ module jtlabrun_video(
     input      [ 3:0]   gfx_en
 );
 
+parameter GAME=0; // 0=Labyrinth Runner, 1=Fast Lane
+
 wire [ 8:0] vrender, vrender1, vdump, hdump;
 wire [ 6:0] gfx_pxl;
-wire        gfx_sel, nc;
+wire        gfx_sel, nc, gfx_palcs;
+
+assign pal_cs = GAME==1 ? gfx_palcs : 1'bz;
 
 jtframe_cen48 u_cen(
     .clk        ( clk       ),    // 48 MHz
@@ -110,6 +114,7 @@ jtcontra_gfx #(.BYPASS_VPROM(1)) u_gfx(
     .dout       ( gfx_dout      ),
     .cpu_irqn   ( cpu_irqn      ),
     .cpu_nmin   ( cpu_nmin      ),
+    .col_cs     ( gfx_palcs     ),
     // SDRAM interface
     .rom_obj_sel( gfx_sel       ),
     .rom_addr   ( {nc, gfx_addr}),
@@ -122,7 +127,7 @@ jtcontra_gfx #(.BYPASS_VPROM(1)) u_gfx(
 );
 
 
-jtlabrun_colmix u_colmix(
+jtlabrun_colmix #(.AW(GAME?12:8)) u_colmix(
     .rst        ( rst           ),
     .clk        ( clk           ),
     .clk24      ( clk24         ),
@@ -136,7 +141,7 @@ jtlabrun_colmix u_colmix(
     // CPU      interface
     .pal_cs     ( pal_cs        ),
     .cpu_rnw    ( cpu_rnw       ),
-    .cpu_addr   ( cpu_addr[7:0] ),
+    .cpu_addr   ( cpu_addr[11:0]), // Fast Lane uses this as main RAM!
     .cpu_dout   ( cpu_dout      ),
     .pal_dout   ( pal_dout      ),
     // Colours
