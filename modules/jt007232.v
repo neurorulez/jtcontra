@@ -62,7 +62,7 @@ wire [16:0] cha_addr = { mmr[4][0], mmr[3], mmr[2] };
 wire [ 1:0] cha_presel = mmr[1][5:4];
 reg         cha_play, cha_load;
 wire        cha_loop = mmr[13][0];
-wire [ 3:0] cha_gain = REG12A ? mmr[12][7:4] : mmr[12][3:0];
+wire signed [4:0] cha_gain = {1'b0, REG12A ? mmr[12][7:4] : mmr[12][3:0] };
 
 // Channel B control
 wire [11:0] chb_pres = { mmr[7][3:0], mmr[6] };
@@ -70,7 +70,7 @@ wire [16:0] chb_addr = { mmr[10][0], mmr[9], mmr[8] };
 wire [ 1:0] chb_presel = mmr[7][5:4];
 reg         chb_play, chb_load;
 wire        chb_loop = mmr[13][1];
-wire [ 3:0] chb_gain = !REG12A ? mmr[12][7:4] : mmr[12][3:0];
+wire signed [4:0] chb_gain = {1'b0, !REG12A ? mmr[12][7:4] : mmr[12][3:0] };
 
 // assign cen_2m = 0;
 
@@ -149,10 +149,14 @@ end
 //     end
 // end
 
+// it looks like the clock isn't q/2 but q
+// contrary to Furrtek's RE
+
 jt007232_channel u_cha(
     .rst        ( rst       ),
     .clk        ( clk       ),
-    .cen_div2   ( cen_div2  ),
+    //.cen_div2   ( cen_div2  ),
+    .cen_div2   ( cen_q     ),
     // control from MMR
     .rom_start  ( cha_addr  ),
     .pre0       ( cha_pres  ),
@@ -171,7 +175,8 @@ jt007232_channel u_cha(
 jt007232_channel u_chb(
     .rst        ( rst       ),
     .clk        ( clk       ),
-    .cen_div2   ( cen_div2  ),
+    //.cen_div2   ( cen_div2  ),
+    .cen_div2   ( cen_q     ),
     // control from MMR
     .rom_start  ( chb_addr  ),
     .pre0       ( chb_pres  ),
