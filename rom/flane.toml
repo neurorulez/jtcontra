@@ -17,7 +17,7 @@ names = [
 ]
 
 [rbf]
-name="jtmx5k"
+name="jtflane"
 
 [dipsw]
 delete = [ "Unused", "Unknown" ]
