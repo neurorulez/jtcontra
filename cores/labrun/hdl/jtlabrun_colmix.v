@@ -18,7 +18,7 @@
 
 // Equivalent to KONAMI 007593
 
-module jtlabrun_colmix #(parameter AW=8) (
+module jtlabrun_colmix(
     input               rst,
     input               clk,
     input               clk24,
@@ -32,7 +32,7 @@ module jtlabrun_colmix #(parameter AW=8) (
     input               pal_cs,
     input               cpu_rnw,
     input               cpu_cen,
-    input    [AW-1:0]   cpu_addr,
+    input      [ 7:0]   cpu_addr,
     input      [ 7:0]   cpu_dout,
     output     [ 7:0]   pal_dout,
     // GFX colour requests
@@ -44,18 +44,17 @@ module jtlabrun_colmix #(parameter AW=8) (
 );
 
 wire        pal_we = cpu_cen & ~cpu_rnw & pal_cs;
-wire [ 7:0] col_data;
-wire [AW-1:0] col_addr;
+wire [ 7:0] col_data, col_addr;
 reg         pal_half;
 reg  [14:0] pxl_aux;
 wire [14:0] col_out;
 reg  [14:0] col_in;
 
-assign col_addr = { {AW-8{1'b0}}, gfx_pxl, ~pal_half };
+assign col_addr = { gfx_pxl, ~pal_half };
 
 assign { blue, green, red } = col_out;
 
-jtframe_dual_ram #(.aw(AW)) u_ram(
+jtframe_dual_ram #(.aw(8)) u_ram(
     .clk0   ( clk24     ),
     .clk1   ( clk       ),
     // Port 0

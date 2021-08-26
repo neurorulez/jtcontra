@@ -83,13 +83,11 @@ module jtflane_main(
     output               peak
 );
 
-localparam RAM_AW = 11;
-
-wire [ 7:0] prot_dout;
+wire [ 7:0] prot_dout, ram_dout;
 wire [15:0] A;
 wire        RnW, irq_n, irq_ack;
 wire        irq_trigger;
-reg         bank_cs, in_cs, io_cs, prot_cs, sys_cs;
+reg         bank_cs, in_cs, io_cs, prot_cs, sys_cs, ram_cs;
 reg  [ 1:0] bank;
 reg         pcm_msb, pcm0_cs, pcm1_cs;
 reg  [ 7:0] port_in, cpu_din, cabinet;
@@ -107,7 +105,8 @@ assign pcmd_addr[18:17] = {1'b1, pcm_msb};
 always @(*) begin
     rom_cs  = A[15:12] >= 4 && RnW && VMA;
     io_cs   = A[15:12] == 0 && A[11];
-    gfx_cs  = A[15:12] <  4 && ~io_cs;
+    ram_cs  = A[15:12] == 1 && A[11];
+    gfx_cs  = A[15:12] <  4 && !io_cs && !ram_cs;
 
     in_cs   = 0;
     sys_cs  = 0;
@@ -141,12 +140,13 @@ always @(posedge clk) begin
         2: cabinet <= {start_button[0],1'b1, joystick1[5:4], joystick1[2], joystick1[3], joystick1[0], joystick1[1]};
         3: cabinet <= { ~5'd0, service, coin_input };
     endcase
-    cpu_din <= rom_cs ? rom_data : (
-               pal_cs ? pal_dout : (    // pal_cs has priority over gfx_cs
-               gfx_cs ? gfx_dout : (
-               in_cs  ? cabinet  : (
-               sys_cs ? sys_dout :
-               prot_cs? prot_dout : 8'hff ))));
+    cpu_din <= rom_cs ? rom_data  :
+               ram_cs ? ram_dout  :
+               pal_cs ? pal_dout  :     // pal_cs has priority over gfx_cs
+               gfx_cs ? gfx_dout  :
+               in_cs  ? cabinet   :
+               sys_cs ? sys_dout  :
+               prot_cs? prot_dout : 8'hff;
 end
 
 always @(posedge clk) begin
@@ -179,7 +179,7 @@ jtframe_ff u_ff(
     .sigedge  ( irq_trigger )     // signal whose edge will trigger the FF
 );
 
-jtframe_sys6809 u_cpu(
+jtframe_sys6809 #(.RAM_AW(11)) u_cpu(
     .rstn       ( ~rst      ),
     .clk        ( clk       ),
     .cen        ( cen12     ),   // This is normally the input clock to the CPU
@@ -197,11 +197,11 @@ jtframe_sys6809 u_cpu(
     .A          ( A         ),
     .RnW        ( RnW       ),
     .VMA        ( VMA       ),
-    .ram_cs     ( 1'b0      ),  // The internal RAM is not used
+    .ram_cs     ( ram_cs    ),
     .rom_cs     ( rom_cs    ),
     .rom_ok     ( rom_ok    ),
     // Bus multiplexer is external
-    .ram_dout   (           ),
+    .ram_dout   ( ram_dout  ),
     .cpu_dout   ( cpu_dout  ),
     .cpu_din    ( cpu_din   )
 );

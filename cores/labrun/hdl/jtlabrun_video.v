@@ -137,7 +137,7 @@ jtcontra_gfx #(.BYPASS_VPROM(1)) u_gfx(
 );
 
 
-jtlabrun_colmix #(.AW(GAME?12:8)) u_colmix(
+jtlabrun_colmix u_colmix(
     .rst        ( rst           ),
     .clk        ( clk           ),
     .clk24      ( clk24         ),
@@ -151,7 +151,7 @@ jtlabrun_colmix #(.AW(GAME?12:8)) u_colmix(
     // CPU      interface
     .pal_cs     ( pal_cs        ),
     .cpu_rnw    ( cpu_rnw       ),
-    .cpu_addr   ( cpu_addr[11:0]), // Fast Lane uses this as main RAM!
+    .cpu_addr   ( cpu_addr[7:0] ),
     .cpu_dout   ( cpu_dout      ),
     .pal_dout   ( pal_dout      ),
     // Colours
