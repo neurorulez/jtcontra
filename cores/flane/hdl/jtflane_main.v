@@ -91,9 +91,9 @@ wire        RnW, irq_n, irq_ack;
 wire        irq_trigger;
 reg         bank_cs, in_cs, io_cs, prot_cs, sys_cs;
 reg  [ 1:0] bank;
-reg         pcm_msb, pcm0_cs, pcm1_cs, cen_fm;
+reg         pcm_msb, pcm0_cs, pcm1_cs;
 reg  [ 7:0] port_in, cpu_din, cabinet;
-wire        VMA;
+wire        VMA, cen_fm;
 wire signed [11:0] pcm0_snd, pcm1_snd;
 
 assign irq_trigger = ~gfx_irqn & dip_pause;
