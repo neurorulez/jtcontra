@@ -10,13 +10,32 @@ Name            | JT Core | Main CPU   | Sound CPU  | K007121 units | Audio
 ----------------|---------|------------|------------|---------------|-------------
 Contra          | contra  | HD63C09EP  | 68B09EP    | x2            | YM2151
 Combat School   | comsc   | 6309       | Z80        | x2            | YM2203 + UPD7759
-Haunted Castle  |         | KONAMI     | Z80        | x2            | YM3812 + K051649
+Haunted Castle  |         | KONAMI-2   | Z80        | x2            | YM3812 + K051649
 Fast Lane       | flane   | 6309       | -          | x1 + K051733  | K007232 x 2
 MX5000          | mx5k    | 6309       | Z80        | x2            | YM2151 + K007232
 Labyrinth Runner| labrun  | 6309       | -          | x1 + K051733  | YM2203 x 2
 
 MX5000 uses two K007121 but the second one is connected in such a way
 that it only serves to extract the 4-bit palette for the current pixel.
+
+Games using the KONAMI-2 CPU:
+
+* 88 Games
+* Aliens
+* Ajax
+* Block Hole
+* Chequered Flag
+* Crime Fighters
+* Escape Kids
+* Gang Busters
+* Haunted Castle
+* Parodius
+* Super Contra
+* Surprise Attack
+* Roller Games
+* The Simpsons
+* Thunder Cross
+* Vendetta
 
 # Supported FPGA Platforms
 

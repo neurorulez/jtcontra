@@ -1,7 +1,7 @@
 #!/bin/bash
 (cd $JTFRAME/cc; make) || exit $?
 
-MAKELIST=all
+MAKELIST=none
 
 while [ $# -gt 0 ]; do
     case $1 in
@@ -104,3 +104,6 @@ if [[ $MAKELIST = all ||  $MAKELIST = mx5000 ]]; then
     mame2mra -def $CORES/mx5k/hdl/jtmx5k.def -toml mx5000.toml -outdir mra
 fi
 
+if [[ $MAKELIST = all ||  $MAKELIST = flane ]]; then
+    mame2mra -def $CORES/flane/hdl/jtflane.def -toml flane.toml -outdir mra
+fi
