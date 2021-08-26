@@ -23,8 +23,8 @@
 // Q is 1/4th of wave advanced
 
 module jtflane_main(
-    input               clk,        // 24 MHz
     input               rst,
+    input               clk,        // 24 MHz
     input               cen12,
     input               cen3,
     output              cpu_cen,
@@ -56,27 +56,26 @@ module jtflane_main(
     input      [7:0]    dipsw_b,
     input      [3:0]    dipsw_c,
 
-
     // ADPCM ROM
-    output   [16:0] pcma_addr,
-    input    [ 7:0] pcma_dout,
-    output          pcma_cs,
-    input           pcma_ok,
+    output       [16:0] pcma_addr,
+    input        [ 7:0] pcma_dout,
+    output              pcma_cs,
+    input               pcma_ok,
 
-    output   [16:0] pcmb_addr,
-    input    [ 7:0] pcmb_dout,
-    output          pcmb_cs,
-    input           pcmb_ok,
-    // ADPCM ROM
-    output   [18:0] pcmc_addr,
-    input    [ 7:0] pcmc_dout,
-    output          pcmc_cs,
-    input           pcmc_ok,
+    output       [16:0] pcmb_addr,
+    input        [ 7:0] pcmb_dout,
+    output              pcmb_cs,
+    input               pcmb_ok,
 
-    output   [18:0] pcmd_addr,
-    input    [ 7:0] pcmd_dout,
-    output          pcmd_cs,
-    input           pcmd_ok,
+    output       [18:0] pcmc_addr,
+    input        [ 7:0] pcmc_dout,
+    output              pcmc_cs,
+    input               pcmc_ok,
+
+    output       [18:0] pcmd_addr,
+    input        [ 7:0] pcmd_dout,
+    output              pcmd_cs,
+    input               pcmd_ok,
 
     // Sound
     output signed [15:0] snd,

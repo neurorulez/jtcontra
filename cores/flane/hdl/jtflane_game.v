@@ -76,14 +76,13 @@ localparam PCM0_OFFSET =  'hA_0000>>1;
 localparam PCM1_OFFSET =  'hC_0000>>1;
 localparam PROM_START  =  'h140000;
 
-wire        main_cs, main_ok, gfx_ok;
+wire        main_cs, main_ok, gfx_cs, gfx_ok;
 wire [15:0] gfx_data;
-wire [16:0] gfx_addr;
+wire [17:0] gfx_addr;
 
 wire [ 7:0] main_data;
 wire [16:0] main_addr;
 wire        cen12, cen3, cen1p5, prom_we;
-wire        gfx_cs;
 
 wire [ 7:0] pcma_dout, pcmb_dout, pcmc_dout, pcmd_dout;
 wire        pcma_cs, pcma_ok,
@@ -253,7 +252,7 @@ u_video (
 `endif
 
 jtframe_rom #(
-    .SLOT0_AW    ( 17              ),
+    .SLOT0_AW    ( 18              ),
     .SLOT0_DW    ( 16              ),
     .SLOT0_OFFSET( GFX_OFFSET      ),
 

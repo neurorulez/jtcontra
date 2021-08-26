@@ -47,7 +47,7 @@ module jtlabrun_video(
     output              cpu_irqn,
     output              cpu_nmin,
     // SDRAM interface
-    output     [16:0]   gfx_addr,
+    output     [17:0]   gfx_addr,
     input      [15:0]   gfx_data,
     input               gfx_ok,
     output              gfx_romcs,
@@ -63,11 +63,16 @@ parameter GAME=0; // 0=Labyrinth Runner, 1=Fast Lane
 
 wire [ 8:0] vrender, vrender1, vdump, hdump;
 wire [ 6:0] gfx_pxl;
-wire        gfx_sel, nc, gfx_palcs;
+wire        gfx_sel, gfx_palcs;
+wire [17:0] pre_gfx_addr;
 
 generate
-    if( GAME==1 )
-        assign pal_cs = gfx_palcs;
+    if( GAME==1 ) begin
+        assign pal_cs   = gfx_palcs;
+        assign gfx_addr = pre_gfx_addr;
+    end else begin
+        assign gfx_addr = {1'b0, pre_gfx_addr[16:0]};
+    end
 endgenerate
 
 jtframe_cen48 u_cen(
@@ -121,7 +126,7 @@ jtcontra_gfx #(.BYPASS_VPROM(1)) u_gfx(
     .col_cs     ( gfx_palcs     ),
     // SDRAM interface
     .rom_obj_sel( gfx_sel       ),
-    .rom_addr   ( {nc, gfx_addr}),
+    .rom_addr   ( pre_gfx_addr  ),
     .rom_data   ( gfx_data      ),
     .rom_cs     ( gfx_romcs     ),
     .rom_ok     ( gfx_ok        ),
