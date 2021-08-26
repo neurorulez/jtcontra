@@ -136,9 +136,9 @@ wire [7:0] sys_dout = A[0] ? dipsw_b :dipsw_a;
 always @(posedge clk) begin
     case( A[1:0] )
         0: cabinet <= { 4'hf, dipsw_c };
-        1: cabinet <= {start_button[1],1'b1, joystick2[5:4], joystick2[2], joystick2[3], joystick2[0], joystick2[1]};
-        2: cabinet <= {start_button[0],1'b1, joystick1[5:4], joystick1[2], joystick1[3], joystick1[0], joystick1[1]};
-        3: cabinet <= { ~5'd0, service, coin_input };
+        1: cabinet <= {2'b11, joystick2[5:4], joystick2[2], joystick2[3], joystick2[0], joystick2[1]};
+        2: cabinet <= {2'b11, joystick1[5:4], joystick1[2], joystick1[3], joystick1[0], joystick1[1]};
+        3: cabinet <= { ~3'd0, start_button, service, coin_input };
     endcase
     cpu_din <= rom_cs ? rom_data  :
                ram_cs ? ram_dout  :
@@ -284,8 +284,8 @@ jtframe_mixer #(.W0(12),.W1(12)) u_mixer(
     .ch2    (           ),
     .ch3    (           ),
     // gain for each channel in 4.4 fixed point format
-    .gain0  ( 8'h08     ),
-    .gain1  ( 8'h08     ),
+    .gain0  ( 8'h10     ),
+    .gain1  ( 8'h10     ),
     .gain2  ( 8'h00     ),
     .gain3  ( 8'h00     ),
     .mixed  ( snd       ),
