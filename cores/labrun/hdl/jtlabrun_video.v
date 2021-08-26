@@ -61,9 +61,8 @@ module jtlabrun_video(
 
 parameter GAME=0; // 0=Labyrinth Runner, 1=Fast Lane
 
-wire [ 8:0] vrender, vrender1, vdump, hdump;
 wire [ 6:0] gfx_pxl;
-wire        gfx_sel, gfx_palcs;
+wire        gfx_palcs;
 wire [17:0] pre_gfx_addr;
 
 generate
@@ -109,10 +108,10 @@ jtcontra_gfx #(.BYPASS_VPROM(1)) u_gfx(
     .prog_addr  ( prog_addr[8:0]),
     .prog_data  ( prog_data[3:0]),
     // Screen position
-    .hdump      ( hdump         ),
-    .vdump      ( vdump         ),
-    .vrender    ( vrender       ),
-    .vrender1   ( vrender1      ),
+    .hdump      (               ),
+    .vdump      (               ),
+    .vrender    (               ),
+    .vrender1   (               ),
     .flip       ( flip          ),
     // CPU      interface
     .cs         ( gfx_cs        ),
@@ -125,7 +124,7 @@ jtcontra_gfx #(.BYPASS_VPROM(1)) u_gfx(
     .cpu_nmin   ( cpu_nmin      ),
     .col_cs     ( gfx_palcs     ),
     // SDRAM interface
-    .rom_obj_sel( gfx_sel       ),
+    .rom_obj_sel(               ),
     .rom_addr   ( pre_gfx_addr  ),
     .rom_data   ( gfx_data      ),
     .rom_cs     ( gfx_romcs     ),

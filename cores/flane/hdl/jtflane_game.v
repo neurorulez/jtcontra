@@ -139,11 +139,16 @@ u_dwnld(
     .header         (               )
 );
 
+reg rst24, rst24_aux;
+
+always @(posedge clk24 ) begin
+    { rst24, rst24_aux } <= { rst24_aux, rst};
+end
 
 `ifndef NOMAIN
 jtflane_main u_main(
     .clk            ( clk24         ),        // 24 MHz
-    .rst            ( rst           ),
+    .rst            ( rst24         ),
     .cen12          ( cen12         ),
     .cen3           ( cen3          ),
     .cpu_cen        ( cpu_cen       ),
