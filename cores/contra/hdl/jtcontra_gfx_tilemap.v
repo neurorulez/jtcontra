@@ -98,7 +98,7 @@ assign rom_addr   = { tile_msb, code, vn[2:0]^{3{vflip}}, hn[2]^hflip }; // 13+3
 assign scan_addr  = { txt_row, vn[7:3], hn[7:3] }; // 1 + 5 + 5 = 11
 assign strip_addr = strip_col ? hn_aux[7:3] : vrender[7:3];
 assign vpos_sum   = (strip_en && strip_col) ? {1'd0,strip_pos} : {1'd0,vpos};
-assign lyr_vn     = (vrender^{1'b0,{9{flip}}}) + (txt_row ? 9'd0 : vpos_sum);
+assign lyr_vn     = (vrender^{9{flip}}) + (txt_row ? 9'd0 : vpos_sum);
 assign hn         = txt_row ? hn_txt : hn_scr;
 
 always @(*) begin
@@ -138,7 +138,7 @@ always @(posedge clk) begin
                     hn_scr <= scr_hn0[8:0];
                     //hrender <= ( txt_en ? chr_dump_start : scr_dump_start )
                     //           - { 7'd0, scr_hn0[1:0] } - 9'd1;
-                    hrender <= scr_dump_start - 1'd1 - (txt_en ? 0 : { 7'd0, scr_hn0[1:0] });
+                    hrender <= scr_dump_start - 1'd1 - (txt_en ? 9'd0 : { 7'd0, scr_hn0[1:0] });
                     hend    <= RENDER_END;
                     if(!done) txt_his <= { txt_his[0], txt_row };
                 end
