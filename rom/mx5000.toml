@@ -4,7 +4,6 @@ mraauthor=["jotego"]
 
 [features]
 beta = true
-debug= true
 # nvram = 75777
 
 [parse]

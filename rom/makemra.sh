@@ -100,7 +100,7 @@ if [[ $MAKELIST = all ||  $MAKELIST = castle ]]; then
         -swapbytes maincpu
 fi
 
-if [[ $MAKELIST = all ||  $MAKELIST = mx5000 ]]; then
+if [[ $MAKELIST = all ||  $MAKELIST = mx5k ]]; then
     mame2mra -def $CORES/mx5k/hdl/jtmx5k.def -toml mx5000.toml -outdir mra
 fi
 
