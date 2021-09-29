@@ -19,6 +19,7 @@
 module jtflane_game(
     input           rst,
     input           clk,
+    input           rst24,
     input           clk24,
     output          pxl2_cen,   // 12   MHz
     output          pxl_cen,    //  6   MHz
@@ -138,12 +139,6 @@ u_dwnld(
     .sdram_ack      ( sdram_ack     ),
     .header         (               )
 );
-
-reg rst24, rst24_aux;
-
-always @(posedge clk24 ) begin
-    { rst24, rst24_aux } <= { rst24_aux, rst};
-end
 
 `ifndef NOMAIN
 jtflane_main u_main(

@@ -19,6 +19,7 @@
 module jtmx5k_game(
     input           rst,
     input           clk,
+    input           rst24,
     input           clk24,
     output          pxl2_cen,   // 12   MHz
     output          pxl_cen,    //  6   MHz
@@ -141,7 +142,7 @@ jtframe_dwnld #(.SWAB(1)) u_dwnld(
 `ifndef NOMAIN
 jtcontra_main #(.GAME(2)) u_main(
     .clk            ( clk24         ),        // 24 MHz
-    .rst            ( rst           ),
+    .rst            ( rst24         ),
     .cen12          ( cen12         ),
     .cpu_cen        ( cpu_cen       ),
     // communication with main CPU
@@ -232,7 +233,7 @@ jtmx5k_video u_video (
 
 `ifndef NOSOUND
 jtmx5k_sound u_sound(
-    .rst        ( rst           ),
+    .rst        ( rst24         ),
     .clk        ( clk24         ), // 24 MHz
     .fxlevel    ( dip_fxlevel   ),
     // communication with main CPU

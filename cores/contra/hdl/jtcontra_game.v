@@ -19,6 +19,7 @@
 module jtcontra_game(
     input           rst,
     input           clk,
+    input           rst24,
     input           clk24,
     output          pxl2_cen,   // 12   MHz
     output          pxl_cen,    //  6   MHz
@@ -151,7 +152,7 @@ u_dwnld(
 
 `ifdef GFX_ONLY
 jtcontra_simloader u_simloader(
-    .rst        ( rst           ),
+    .rst        ( rst24         ),
     .clk        ( clk24         ),
     .cpu_cen    ( cpu_cen       ),
     // GFX
@@ -168,7 +169,7 @@ jtcontra_simloader u_simloader(
 `ifndef NOMAIN
 jtcontra_main #(.GAME(GAME)) u_main(
     .clk            ( clk24         ),        // 24 MHz
-    .rst            ( rst           ),
+    .rst            ( rst24         ),
     .cen12          ( cen12         ),
     .cpu_cen        ( cpu_cen       ),
     // communication with main CPU
@@ -275,7 +276,7 @@ jtcontra_video #(.GAME(GAME)) u_video (
 `ifndef NOSOUND
 jtcontra_sound u_sound(
     .clk        ( clk24         ), // 24 MHz
-    .rst        ( rst           ),
+    .rst        ( rst24         ),
     .cen12      ( cen12         ),
     .cen3       ( cen3          ),
     .cen1p5     ( cen1p5        ),

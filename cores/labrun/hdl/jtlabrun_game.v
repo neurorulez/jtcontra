@@ -19,6 +19,7 @@
 module jtlabrun_game(
     input           rst,
     input           clk,
+    input           rst24,
     input           clk24,
     output          pxl2_cen,   // 12   MHz
     output          pxl_cen,    //  6   MHz
@@ -131,7 +132,7 @@ u_dwnld(
 
 `ifdef GFX_ONLY
 jtlabrun_simloader u_simloader(
-    .rst        ( rst           ),
+    .rst        ( rst24         ),
     .clk        ( clk24         ),
     .cpu_cen    ( cpu_cen       ),
     // GFX
@@ -145,7 +146,7 @@ jtlabrun_simloader u_simloader(
 `ifndef NOMAIN
 jtlabrun_main u_main(
     .clk            ( clk24         ),        // 24 MHz
-    .rst            ( rst           ),
+    .rst            ( rst24         ),
     .cen12          ( cen12         ),
     .cen3           ( cen3          ),
     .cpu_cen        ( cpu_cen       ),
