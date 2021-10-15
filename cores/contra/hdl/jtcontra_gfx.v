@@ -55,6 +55,8 @@ module jtcontra_gfx(
     output reg           cpu_irqn,
     output reg           cpu_nmin,
     output reg           cpu_firqn,
+    // External palette 007327
+    output               col_cs,
     // SDRAM interface
     output reg           rom_obj_sel,   // pin H2 of actual chip
     output reg [17:0]    rom_addr,
@@ -63,12 +65,15 @@ module jtcontra_gfx(
     output reg           rom_cs,
     // colour output
     output reg [ 6:0]    pxl_out,
+    output reg [ 3:0]    pxl_pal,
     // test
     input      [ 1:0]    gfx_en
 );
 
 parameter   H0 = 9'h75; // initial value of hdump after H blanking
-parameter   BYPASS_VPROM=0, VTIMER=1;
+parameter   BYPASS_VPROM=0, // bypass tile/char colour PROM (pins VCB/VCF/VCD)
+            BYPASS_OPROM=0, // bypass object colour PROM (pins OCF/OCD)
+            VTIMER=1;
 
 // Simulation files
 parameter   CFGFILE="gfx_cfg.hex",
@@ -120,7 +125,6 @@ wire        extra_en   = 1; // there must be a bit in the MMR that turns off all
                             // because Contra doesn't need them but seems to write to them
 
 assign      { code12_sel, code11_sel, code10_sel, code9_sel } = mmr[5];
-assign      gfx_we   = cpu_cen & ~cpu_rnw & vram_cs;
 // Other configuration
 reg  [8:0]  chr_render_start, scr_render_start;
 reg         obj_page_l;
@@ -128,15 +132,14 @@ reg         obj_page_l;
 // Scan
 wire [10:0] scan_addr;
 wire [10:0] ram_addr = { addr[11], addr[9:0] };
-wire        attr_we  = gfx_we & ~addr[10] & ~addr[12];
-wire        code_we  = gfx_we &  addr[10] & ~addr[12];
-wire        obj_we   = gfx_we &  addr[12];
+wire        attr_we, code_we, obj_we;
 wire [ 7:0] code_dout, attr_dout, obj_dout;
 wire [ 7:0] code_scan, attr_scan, obj_scan;
 
 reg  [ 7:0] vprom_addr;
 wire [ 7:0] oprom_addr;
-wire [ 3:0] vprom_data, oprom_data, obj_pxl;
+wire [ 3:0] vprom_data, oprom_data;
+wire [ 7:0] obj_pxl;
 
 wire [ 7:0] strip_pos;
 wire [ 4:0] strip_addr;
@@ -144,7 +147,7 @@ reg         txt_en;
 
 wire [9:0]  line_dump;
 
-wire        rom_obj_cs, rom_scr_cs;
+wire        rom_obj_cs, rom_scr_cs, zure_cs;
 wire [17:0] rom_scr_addr, rom_obj_addr;
 
 wire        LVBshort;
@@ -158,9 +161,20 @@ reg  [15:0] rom_scr_data, rom_obj_data;
 reg         ok_wait;
 reg  [ 1:0] last_cs;
 
+// Memory map
+// 3XXX -> OBJ
+// 2XXX -> Tiles
+// 1XXX -> Col CS
+// 0XXX -> CFG registers
+
 assign cfg_cs    = (addr < RCNT) && cs;
 assign zure_cs   = (addr>='h20 && addr<'h60 && cs);
 assign vram_cs   = addr[13] && cs;
+assign col_cs    = addr[13:12]=='b01 && cs;
+assign gfx_we    = cpu_cen & ~cpu_rnw & vram_cs;
+assign obj_we    = gfx_we &  addr[12];
+assign attr_we   = gfx_we & ~addr[12] & ~addr[10];
+assign code_we   = gfx_we & ~addr[12] &  addr[10];
 assign hpos      = { mmr[1][0], mmr[0] };
 assign strip_pos = zure[ strip_addr ];
 assign LVBshort  = LVBL || vdump==15;
@@ -342,7 +356,7 @@ end
 // Local colour mixer
 wire        txt_line;
 wire [ 7:0] scr_pxl_gated = scr_pxl[7:0];
-wire        obj_blank     = obj_pxl == 4'h0;
+wire        obj_blank     = obj_pxl[3:0] == 4'h0;
 wire        tile_blank    = vprom_data[3:0] == 4'h0;
 wire        border_narrow = (hdump<9'o30 || hdump>=9'o410) && narrow_en;
 wire        border_wide   = hdump<9'o20 || hdump>=9'o420;
@@ -353,21 +367,27 @@ wire        tile_prio     = &prio_en & scrwin & ~tile_blank;
 wire        no_obj        = layout && ( flip ? hdump>=9'o360 : hdump<8'o50);
 wire        scr_sel       = obj_blank || no_obj || tile_prio || txt_line;
 
+reg [7:0] vprom_addr1;
+
 always @(posedge clk, posedge rst) begin
     if( rst ) begin
         pxl_out    <= ~7'd0;
         vprom_addr <= 8'd0;
     end else begin
         vprom_addr <= scr_pxl_gated;
+        vprom_addr1<= vprom_addr;
         if(pxl_cen) begin
             if( blank_area )
                 pxl_out <= 7'd0;
             else begin
                 pxl_out[6:5] <= pal_bank;
-                if( scr_sel )
+                if( scr_sel ) begin
                     pxl_out[4:0] <= { 1'b1, vprom_data }; // Tilemap
-                else
-                    pxl_out[4:0] <= { 1'b0, obj_pxl }; // Object
+                    pxl_pal <= vprom_addr1[7:4];
+                end else begin
+                    pxl_out[4:0] <= { 1'b0, obj_pxl[3:0] }; // Object
+                    pxl_pal <= obj_pxl[7:4];
+                end
             end
         end
     end
@@ -393,6 +413,8 @@ jtcontra_gfx_tilemap u_tilemap(
     .txt_en             ( txt_en            ),
     .layout             ( layout            ),
     .txt_line           ( txt_line          ),
+    .hflip_en           ( hflip_en          ),
+    .vflip_en           ( vflip_en          ),
     // SDRAM
     .rom_cs             ( rom_scr_cs        ),
     .rom_addr           ( rom_scr_addr      ),
@@ -481,7 +503,7 @@ endgenerate
 
 generate
     if( BYPASS_VPROM ) begin : bypass_vprom
-        assign vprom_data = vprom_addr[3:0];
+        assign vprom_data = BYPASS_VPROM == 2 ? vprom_addr[7:4] : vprom_addr[3:0];
     end else begin : uses_vprom
         jtframe_prom #(.dw(4),.aw(8) ) u_vprom(
             .clk        ( clk                       ),
@@ -495,15 +517,21 @@ generate
     end
 endgenerate
 
-jtframe_prom #(.dw(4),.aw(8),.ASYNC(1) ) u_oprom(
-    .clk        ( clk                       ),
-    .cen        ( 1'b1                      ),
-    .data       ( prog_data                 ),
-    .rd_addr    ( oprom_addr                ),
-    .wr_addr    ( prog_addr[7:0]            ),
-    .we         ( prom_we & ~prog_addr[8]   ),
-    .q          ( oprom_data                )
-);
+generate
+    if( BYPASS_OPROM ) begin : bypass_oprom
+        assign oprom_data = BYPASS_OPROM==2 ? oprom_addr[7:4] : oprom_addr[3:0];
+    end else begin : uses_oprom
+        jtframe_prom #(.dw(4),.aw(8),.ASYNC(1) ) u_oprom(
+            .clk        ( clk                       ),
+            .cen        ( 1'b1                      ),
+            .data       ( prog_data                 ),
+            .rd_addr    ( oprom_addr                ),
+            .wr_addr    ( prog_addr[7:0]            ),
+            .we         ( prom_we & ~prog_addr[8]   ),
+            .q          ( oprom_data                )
+        );
+    end
+endgenerate
 
 jtframe_dual_ram #(.dw(9),.aw(10)) u_line_scr(
     .clk0   ( clk       ),

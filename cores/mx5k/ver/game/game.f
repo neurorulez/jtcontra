@@ -1,18 +1,18 @@
-jtlabrun_simloader.v
-../../hdl/jtlabrun_game.v
-../../hdl/jtlabrun_main.v
-../../hdl/jtlabrun_video.v
-../../hdl/jtlabrun_colmix.v
-$MODULES/jt051733.v
-$MODULES/divfunc.v
+../../hdl/jtmx5k_game.v
+../../hdl/jtmx5k_main_decoder.v
+../../hdl/jtmx5k_sound.v
+../../hdl/jtmx5k_video.v
+../../hdl/jtmx5k_colmix.v
+
+../../../contra/hdl/jtcontra_main.v
 ../../../contra/hdl/jtcontra_gfx.v
 ../../../contra/hdl/jtcontra_gfx_tilemap.v
 ../../../contra/hdl/jtcontra_gfx_obj.v
+../../../contra/hdl/jtcontra_007452.v
+$MODULES/jt007232.v
 
 $JTFRAME/hdl/video/jtframe_vtimer.v
 $JTFRAME/hdl/video/jtframe_blank.v
-$JTFRAME/hdl/video/jtframe_wirebw.v
-$JTFRAME/hdl/video/jtframe_scan2x.v
 $JTFRAME/hdl/jtframe_sh.v
 $JTFRAME/hdl/clocking/jtframe_cen24.v
 $JTFRAME/hdl/clocking/jtframe_cen48.v
@@ -27,5 +27,6 @@ $JTFRAME/hdl/sdram/jtframe_dwnld.v
 $JTFRAME/hdl/sound/jtframe_mixer.v
 $JTFRAME/hdl/jtframe_z80wait.v
 $JTFRAME/hdl/jtframe_ff.v
+
+
 -F $JTFRAME/hdl/sdram/jtframe_sdram64.f
-$MODULES/jt12/jt49/hdl/filter/jt49_dcrm2.v

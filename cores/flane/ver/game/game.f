@@ -1,10 +1,10 @@
-jtlabrun_simloader.v
-../../hdl/jtlabrun_game.v
-../../hdl/jtlabrun_main.v
-../../hdl/jtlabrun_video.v
-../../hdl/jtlabrun_colmix.v
+../../hdl/jtflane_game.v
+../../hdl/jtflane_main.v
 $MODULES/jt051733.v
+$MODULES/jt007232.v
 $MODULES/divfunc.v
+../../../labrun/hdl/jtlabrun_video.v
+../../../labrun/hdl/jtlabrun_colmix.v
 ../../../contra/hdl/jtcontra_gfx.v
 ../../../contra/hdl/jtcontra_gfx_tilemap.v
 ../../../contra/hdl/jtcontra_gfx_obj.v

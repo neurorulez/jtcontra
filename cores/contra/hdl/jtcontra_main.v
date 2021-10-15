@@ -38,8 +38,8 @@ module jtcontra_main(
     // cabinet I/O
     input       [ 1:0]  start_button,
     input       [ 1:0]  coin_input,
-    input       [ 5:0]  joystick1,
-    input       [ 5:0]  joystick2,
+    input       [ 6:0]  joystick1,
+    input       [ 6:0]  joystick2,
     input               service,
     // GFX
     output      [15:0]  cpu_addr,
@@ -49,7 +49,7 @@ module jtcontra_main(
     input               gfx_nmin,
     inout               gfx1_cs,
     inout               gfx2_cs,
-    output              pal_cs,
+    inout               pal_cs,
 
     output     [7:0]    video_bank,
     output              prio_latch,
@@ -103,8 +103,8 @@ generate
                 // cabinet I/O
                 .start_button   ( start_button  ),
                 .coin_input     ( coin_input    ),
-                .joystick1      ( joystick1     ),
-                .joystick2      ( joystick2     ),
+                .joystick1      ( joystick1[5:0]),
+                .joystick2      ( joystick2[5:0]),
                 .service        ( service       ),
                 // Data bus
                 .cpu_dout       ( cpu_dout      ),
@@ -149,8 +149,8 @@ generate
                 // cabinet I/O
                 .start_button   ( start_button  ),
                 .coin_input     ( coin_input    ),
-                .joystick1      ( joystick1     ),
-                .joystick2      ( joystick2     ),
+                .joystick1      ( joystick1[5:0]),
+                .joystick2      ( joystick2[5:0]),
                 .service        ( service       ),
                 // Data bus
                 .cpu_dout       ( cpu_dout      ),
@@ -165,6 +165,48 @@ generate
                 .dipsw_b        ( dipsw_b       ),
                 .dipsw_c        ( dipsw_c       )
             );
+        end
+        2: begin : genblk2 ////////////// MX5000
+            jtmx5k_main_decoder u_decoder(
+                .clk            ( clk           ),        // 24 MHz
+                .rst            ( rst           ),
+                .cpu_cen        ( cpu_cen       ),
+                .A              ( A             ),
+                .VMA            ( VMA           ),
+                .RnW            ( RnW           ),
+                .gfx1_cs        ( gfx1_cs       ),
+                .pal_cs         ( pal_cs        ),
+                // communication with sound CPU
+                .snd_irq        ( snd_irq       ),
+                .snd_latch      ( snd_latch     ),
+                // ROM
+                .rom_addr       ( rom_addr[15:0]),
+                .rom_cs         ( rom_cs        ),
+                .rom_data       ( rom_data      ),
+                .rom_ok         ( rom_ok        ),
+                // cabinet I/O
+                .start_button   ( start_button  ),
+                .coin_input     ( coin_input    ),
+                .joystick1      ( joystick1     ),
+                .joystick2      ( joystick2     ),
+                .service        ( service       ),
+                // Data bus
+                .cpu_dout       ( cpu_dout      ),
+                .pal_dout       ( pal_dout      ),
+                .gfx1_dout      ( gfx1_dout     ),
+                .ram_cs         ( ram_cs        ),
+                .cpu_din        ( cpu_din       ),
+                .ram_dout       ( ram_dout      ),
+                // DIP switches
+                .dipsw_a        ( dipsw_a       ),
+                .dipsw_b        ( dipsw_b       ),
+                .dipsw_c        ( dipsw_c       )
+            );
+            // Unused signals:
+            assign rom_addr[17:16] = 0;
+            assign prio_latch   = 0;
+            assign gfx2_cs      = 0;
+            assign video_bank   = 8'd0;
         end
     endcase
 endgenerate

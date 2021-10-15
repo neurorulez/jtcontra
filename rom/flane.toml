@@ -1,0 +1,35 @@
+[global]
+# info = [ {tag="mameversion", value="0229"} ]
+mraauthor=["jotego"]
+
+[features]
+beta = true
+# debug= true
+# nvram = 75777
+
+[parse]
+sourcefile="fastlane.cpp"
+
+[buttons]
+core=2 # max number of buttons supported by the core
+names = [
+    { names="Accelerate,Jump" }
+]
+
+[rbf]
+name="jtflane"
+
+[dipsw]
+delete = [ "Unused", "Unknown" ]
+
+[ROM]
+# values starting with $ refer to macro definitions in the .def file
+# or arguments passed to mame2mra
+regions = [
+    { name="maincpu",       no_offset=true  },
+    { name="gfx1",          start=$GFX_START, width=16 }
+]
+# { name="myregion", reorder=[3,2,1,0] } # reorder files inside a region
+order = [
+    "maincpu", "gfx1", "k007232_1", "k007232_2", "proms"
+]

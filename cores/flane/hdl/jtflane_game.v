@@ -14,9 +14,9 @@
 
     Author: Jose Tejada Gomez. Twitter: @topapate
     Version: 1.0
-    Date: 3-10-2020 */
+    Date: 25-8-2021 */
 
-module jtlabrun_game(
+module jtflane_game(
     input           rst,
     input           clk,
     input           rst24,
@@ -72,17 +72,26 @@ module jtlabrun_game(
 );
 
 // SDRAM offsets.
-localparam GFX_OFFSET =  22'h2_0000>>1;
-localparam PROM_START =  22'h6_0000;
+localparam GFX_OFFSET  =  `GFX_START>>1;
+localparam PCM0_OFFSET =  'hA_0000>>1;
+localparam PCM1_OFFSET =  'hC_0000>>1;
+localparam PROM_START  =  'h140000;
 
-wire        main_cs, main_ok, gfx_ok;
+wire        main_cs, main_ok, gfx_cs, gfx_ok;
 wire [15:0] gfx_data;
-wire [16:0] gfx_addr;
+wire [17:0] gfx_addr;
 
 wire [ 7:0] main_data;
 wire [16:0] main_addr;
 wire        cen12, cen3, cen1p5, prom_we;
-wire        gfx_cs, gfx2_cs;
+
+wire [ 7:0] pcma_dout, pcmb_dout, pcmc_dout, pcmd_dout;
+wire        pcma_cs, pcma_ok,
+            pcmb_cs, pcmb_ok,
+            pcmc_cs, pcmc_ok,
+            pcmd_cs, pcmd_ok;
+wire [16:0] pcma_addr, pcmb_addr;
+wire [18:0] pcmc_addr, pcmd_addr;
 
 wire [ 7:0] dipsw_a, dipsw_b;
 wire [ 3:0] dipsw_c;
@@ -115,7 +124,7 @@ jtframe_cen24 u_cen(
     .cen1p5b    (               )
 );
 
-jtframe_dwnld #(.PROM_START(PROM_START))
+jtframe_dwnld #(.PROM_START(PROM_START),.SWAB(1))
 u_dwnld(
     .clk            ( clk           ),
     .downloading    ( downloading   ),
@@ -127,24 +136,12 @@ u_dwnld(
     .prog_mask      ( prog_mask     ), // active low
     .prog_we        ( prog_we       ),
     .prom_we        ( prom_we       ),
-    .sdram_ack      ( sdram_ack     )
+    .sdram_ack      ( sdram_ack     ),
+    .header         (               )
 );
 
-`ifdef GFX_ONLY
-jtlabrun_simloader u_simloader(
-    .rst        ( rst24         ),
-    .clk        ( clk24         ),
-    .cpu_cen    ( cpu_cen       ),
-    // GFX
-    .cpu_addr   ( cpu_addr      ),
-    .cpu_dout   ( cpu_dout      ),
-    .cpu_rnw    ( cpu_rnw       ),
-    .gfx_cs     ( gfx_cs        ),
-    .pal_cs     ( pal_cs        )
-);
-`else
 `ifndef NOMAIN
-jtlabrun_main u_main(
+jtflane_main u_main(
     .clk            ( clk24         ),        // 24 MHz
     .rst            ( rst24         ),
     .cen12          ( cen12         ),
@@ -173,6 +170,27 @@ jtlabrun_main u_main(
     .gfx_dout       ( gfx_dout      ),
     .pal_dout       ( pal_dout      ),
 
+    // PCM sound
+    .pcma_addr      ( pcma_addr     ),
+    .pcma_dout      ( pcma_dout     ),
+    .pcma_cs        ( pcma_cs       ),
+    .pcma_ok        ( pcma_ok       ),
+
+    .pcmb_addr      ( pcmb_addr     ),
+    .pcmb_dout      ( pcmb_dout     ),
+    .pcmb_cs        ( pcmb_cs       ),
+    .pcmb_ok        ( pcmb_ok       ),
+
+    .pcmc_addr      ( pcmc_addr     ),
+    .pcmc_dout      ( pcmc_dout     ),
+    .pcmc_cs        ( pcmc_cs       ),
+    .pcmc_ok        ( pcmc_ok       ),
+
+    .pcmd_addr      ( pcmd_addr     ),
+    .pcmd_dout      ( pcmd_dout     ),
+    .pcmd_cs        ( pcmd_cs       ),
+    .pcmd_ok        ( pcmd_ok       ),
+
     // DIP switches
     .dip_pause      ( dip_pause     ),
     .dipsw_a        ( dipsw_a       ),
@@ -186,10 +204,10 @@ jtlabrun_main u_main(
 `else
 assign main_cs = 0;
 `endif
-`endif
 
 `ifndef NOVIDEO
-jtlabrun_video u_video (
+jtlabrun_video #(.GAME(1))
+u_video (
     .rst            ( rst           ),
     .clk            ( clk           ),
     .clk24          ( clk24         ),
@@ -234,9 +252,28 @@ jtlabrun_video u_video (
 `endif
 
 jtframe_rom #(
-    .SLOT0_AW    ( 17              ),
+    .SLOT0_AW    ( 18              ),
     .SLOT0_DW    ( 16              ),
     .SLOT0_OFFSET( GFX_OFFSET      ),
+
+    // PCM 0
+    .SLOT1_AW    ( 17              ),
+    .SLOT1_DW    (  8              ),
+    .SLOT1_OFFSET( PCM0_OFFSET     ),
+
+    .SLOT2_AW    ( 17              ),
+    .SLOT2_DW    (  8              ),
+    .SLOT2_OFFSET( PCM0_OFFSET     ),
+
+    // PCM 0
+    .SLOT3_AW    ( 19              ),
+    .SLOT3_DW    (  8              ),
+    .SLOT3_OFFSET( PCM1_OFFSET     ),
+
+    .SLOT4_AW    ( 19              ),
+    .SLOT4_DW    (  8              ),
+    .SLOT4_OFFSET( PCM1_OFFSET     ),
+
 
     .SLOT7_AW    ( 17              ),
     .SLOT7_DW    (  8              ),
@@ -246,40 +283,40 @@ jtframe_rom #(
     .clk         ( clk           ),
 
     .slot0_cs    ( gfx_romcs     ),
-    .slot1_cs    ( 1'b0          ),
-    .slot2_cs    ( 1'b0          ),
-    .slot3_cs    ( 1'b0          ), // unused
-    .slot4_cs    ( 1'b0          ), // unused
+    .slot1_cs    ( pcma_cs       ),
+    .slot2_cs    ( pcmb_cs       ),
+    .slot3_cs    ( pcmc_cs       ), // unused
+    .slot4_cs    ( pcmd_cs       ), // unused
     .slot5_cs    ( 1'b0          ), // unused
     .slot6_cs    ( 1'b0          ),
     .slot7_cs    ( main_cs       ),
     .slot8_cs    ( 1'b0          ),
 
     .slot0_ok    ( gfx_ok        ),
-    .slot1_ok    (               ),
-    .slot2_ok    (               ),
-    .slot3_ok    (               ),
-    .slot4_ok    (               ),
+    .slot1_ok    ( pcma_ok       ),
+    .slot2_ok    ( pcmb_ok       ),
+    .slot3_ok    ( pcmc_ok       ),
+    .slot4_ok    ( pcmd_ok       ),
     .slot5_ok    (               ),
     .slot6_ok    (               ),
     .slot7_ok    ( main_ok       ),
     .slot8_ok    (               ),
 
     .slot0_addr  ( gfx_addr      ),
-    .slot1_addr  (               ),
-    .slot2_addr  (               ),
-    .slot3_addr  (               ),
-    .slot4_addr  (               ),
+    .slot1_addr  ( pcma_addr     ),
+    .slot2_addr  ( pcmb_addr     ),
+    .slot3_addr  ( pcmc_addr     ),
+    .slot4_addr  ( pcmd_addr     ),
     .slot5_addr  (               ),
     .slot6_addr  (               ),
     .slot7_addr  ( main_addr     ),
     .slot8_addr  (               ),
 
     .slot0_dout  ( gfx_data      ),
-    .slot1_dout  (               ),
-    .slot2_dout  (               ),
-    .slot3_dout  (               ),
-    .slot4_dout  (               ),
+    .slot1_dout  ( pcma_dout     ),
+    .slot2_dout  ( pcmb_dout     ),
+    .slot3_dout  ( pcmc_dout     ),
+    .slot4_dout  ( pcmd_dout     ),
     .slot5_dout  (               ),
     .slot6_dout  (               ),
     .slot7_dout  ( main_data     ),

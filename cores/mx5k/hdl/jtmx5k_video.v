@@ -14,9 +14,9 @@
 
     Author: Jose Tejada Gomez. Twitter: @topapate
     Version: 1.0
-    Date: 3-10-2020 */
+    Date: 02-05-2020 */
 
-module jtlabrun_video(
+module jtmx5k_video(
     input               rst,
     input               clk,
     input               clk24,
@@ -29,28 +29,22 @@ module jtlabrun_video(
     output              HS,
     output              VS,
     output              flip,
-    input               dip_pause,
-    input               start_button,
-    // PROMs
-    input      [ 9:0]   prog_addr,
-    input      [ 3:0]   prog_data,
-    input               prom_we,
     // CPU      interface
-    input               gfx_cs,
-    inout               pal_cs,
+    input               gfx1_cs,
+    output              pal_cs,
     input               cpu_rnw,
     input               cpu_cen,
-    input      [13:0]   cpu_addr,
+    input      [15:0]   cpu_addr,
     input      [ 7:0]   cpu_dout,
-    output     [ 7:0]   gfx_dout,
+    output     [ 7:0]   gfx1_dout,
     output     [ 7:0]   pal_dout,
     output              cpu_irqn,
     output              cpu_nmin,
     // SDRAM interface
-    output     [17:0]   gfx_addr,
-    input      [15:0]   gfx_data,
-    input               gfx_ok,
-    output              gfx_romcs,
+    output reg [17:0]   gfx1_addr,
+    input      [15:0]   gfx1_data,
+    input               gfx1_ok,
+    output              gfx1_romcs,
     // Colours
     output     [ 4:0]   red,
     output     [ 4:0]   green,
@@ -59,20 +53,31 @@ module jtlabrun_video(
     input      [ 3:0]   gfx_en
 );
 
-parameter GAME=0; // 0=Labyrinth Runner, 1=Fast Lane
+parameter GAME=0;
 
-wire [ 6:0] gfx_pxl;
-wire        gfx_palcs;
-wire [17:0] pre_gfx_addr;
+wire [ 8:0] vrender, vrender1, vdump, hdump;
+wire [ 6:0] gfx1_pxl, gfx2_pxl;
+reg  [13:0] gfx_addr_in;
+wire [17:0] pre_gfx1_addr;
+wire        gfx1_sel, gfx2_sel;
+wire        post2_cs;
+wire [ 3:0] gfx1_pal;
 
-generate
-    if( GAME==1 ) begin
-        assign pal_cs   = gfx_palcs;
-        assign gfx_addr = pre_gfx_addr;
-    end else begin
-        assign gfx_addr = {1'b0, pre_gfx_addr[16:0]};
-    end
-endgenerate
+//assign post2_cs = gfx1_sel && !cpu_rnw; // only writes
+assign post2_cs = 0;
+
+always @(*) begin
+    gfx_addr_in[11:0] = cpu_addr[11:0];
+    casez( cpu_addr[15:10] )
+        6'b0000_1?: gfx_addr_in[13:12]=1; // palette
+        6'b0001_??: gfx_addr_in[13:12]=3; // objects
+        6'b0010_??: gfx_addr_in[13:12]=2;
+        default: gfx_addr_in[13:12]=0;
+    endcase
+    // Logic external to the K007121, chips 15D and 16D
+    gfx1_addr = pre_gfx1_addr;
+    if( pre_gfx1_addr[13:10]==0 && !gfx1_sel ) gfx1_addr[17:14]=0;
+end
 
 jtframe_cen48 u_cen(
     .clk        ( clk       ),    // 48 MHz
@@ -85,6 +90,7 @@ jtframe_cen48 u_cen(
     .cen3       (           ),
     .cen3q      (           ), // 1/4 advanced with respect to cen3
     .cen1p5     (           ),
+    .cen16b     (           ),
     .cen12b     (           ),
     .cen6b      (           ),
     .cen3b      (           ),
@@ -92,7 +98,14 @@ jtframe_cen48 u_cen(
     .cen1p5b    (           )
 );
 
-jtcontra_gfx #(.BYPASS_VPROM(1)) u_gfx(
+jtcontra_gfx #(
+    .CFGFILE("gfx1_cfg.hex" ),
+    .SIMATTR("gfx1_attr.bin"),
+    .SIMCODE("gfx1_code.bin"),
+    .SIMOBJ ("gfx1_obj.bin" ),
+    .BYPASS_VPROM( 1        ),
+    .BYPASS_OPROM( 1        )
+) u_gfx1(
     .rst        ( rst           ),
     .clk        ( clk           ),
     .clk24      ( clk24         ),
@@ -104,39 +117,58 @@ jtcontra_gfx #(.BYPASS_VPROM(1)) u_gfx(
     .HS         ( HS            ),
     .VS         ( VS            ),
     // PROMs
-    .prom_we    ( prom_we       ),
-    .prog_addr  ( prog_addr[8:0]),
-    .prog_data  ( prog_data[3:0]),
+    .prom_we    (               ),
+    .prog_addr  (               ),
+    .prog_data  (               ),
     // Screen position
-    .hdump      (               ),
-    .vdump      (               ),
-    .vrender    (               ),
-    .vrender1   (               ),
+    .hdump      ( hdump         ),
+    .vdump      ( vdump         ),
+    .vrender    ( vrender       ),
+    .vrender1   ( vrender1      ),
     .flip       ( flip          ),
     // CPU      interface
-    .cs         ( gfx_cs        ),
+    .cs         ( gfx1_cs       ),
+    .col_cs     ( pal_cs        ),
     .cpu_rnw    ( cpu_rnw       ),
-    .addr       ( cpu_addr      ),
+    .addr       ( gfx_addr_in   ),
     .cpu_dout   ( cpu_dout      ),
-    .dout       ( gfx_dout      ),
+    .dout       ( gfx1_dout     ),
     .cpu_irqn   ( cpu_irqn      ),
     .cpu_firqn  (               ),
     .cpu_nmin   ( cpu_nmin      ),
-    .col_cs     ( gfx_palcs     ),
     // SDRAM interface
-    .rom_obj_sel(               ),
-    .rom_addr   ( pre_gfx_addr  ),
-    .rom_data   ( gfx_data      ),
-    .rom_cs     ( gfx_romcs     ),
-    .rom_ok     ( gfx_ok        ),
-    .pxl_out    ( gfx_pxl       ),
-    .pxl_pal    (               ),
+    .rom_obj_sel( gfx1_sel      ),
+    .rom_addr   ( pre_gfx1_addr ),
+    .rom_data   ( gfx1_data     ),
+    .rom_cs     ( gfx1_romcs    ),
+    .rom_ok     ( gfx1_ok       ),
+    .pxl_out    ( gfx1_pxl      ),
+    .pxl_pal    ( gfx1_pal      ),
     // Test
     .gfx_en     ( gfx_en[1:0]   )
 );
 
+// The second K007121 is only used to
+// extract the palette bits using a
+// funny connection:
+// The VRAM is shared with the 1st one
+// Pixel data from ROM is zero'ed but
+// when reading through the palette PROM
+// interface, the palette bits (4 MSBs of
+// address) is recorded so that is the
+// information that is dumped.
+// Note that the logic gates 13F and 14F
+// in the schematics use the object and
+// tile blank information so the second
+// K007121 selects between object and
+// sprite correctly
+// This second K007121 has been removed
+// from the FPGA core and instead the
+// palette bits are directly dumped by
+// the first one without any
+// accuracy loss
 
-jtlabrun_colmix u_colmix(
+jtmx5k_colmix u_colmix(
     .rst        ( rst           ),
     .clk        ( clk           ),
     .clk24      ( clk24         ),
@@ -150,11 +182,12 @@ jtlabrun_colmix u_colmix(
     // CPU      interface
     .pal_cs     ( pal_cs        ),
     .cpu_rnw    ( cpu_rnw       ),
-    .cpu_addr   ( cpu_addr[7:0] ),
+    .cpu_addr   ( cpu_addr[9:0] ),
     .cpu_dout   ( cpu_dout      ),
     .pal_dout   ( pal_dout      ),
     // Colours
-    .gfx_pxl    ( gfx_pxl       ),
+    .gfx1_pxl   ( gfx1_pxl      ),
+    .gfx1_pal   ( gfx1_pal      ),
     .red        ( red           ),
     .green      ( green         ),
     .blue       ( blue          )

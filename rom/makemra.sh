@@ -1,7 +1,7 @@
 #!/bin/bash
 (cd $JTFRAME/cc; make) || exit $?
 
-MAKELIST=all
+MAKELIST=none
 
 while [ $# -gt 0 ]; do
     case $1 in
@@ -100,17 +100,10 @@ if [[ $MAKELIST = all ||  $MAKELIST = castle ]]; then
         -swapbytes maincpu
 fi
 
-if [[ $MAKELIST = all ||  $MAKELIST = mx5000 ]]; then
-    mame2dip mx5000.xml -rbf jtmx5000 \
-        -frac gfx1 2 \
-        -frac gfx2 2 \
-        -ignore plds \
-        -ignore upd \
-        -swapbytes audiocpu \
-        -start audiocpu 0x30000 \
-        -start gfx1     0x40000 \
-        -start gfx2     0x140000 \
-        -start proms    0x240000 \
-        -swapbytes maincpu
+if [[ $MAKELIST = all ||  $MAKELIST = mx5k ]]; then
+    mame2mra -def $CORES/mx5k/hdl/jtmx5k.def -toml mx5000.toml -outdir mra
 fi
 
+if [[ $MAKELIST = all ||  $MAKELIST = flane ]]; then
+    mame2mra -def $CORES/flane/hdl/jtflane.def -toml flane.toml -outdir mra
+fi

@@ -14,11 +14,13 @@
 
     Author: Jose Tejada Gomez. Twitter: @topapate
     Version: 1.0
-    Date: 03-10-2020 */
+    Date: 03-05-2020 */
 
-// Equivalent to KONAMI 007593
+// Equivalent to KONAMI 007327
+// Plus priority decoding selected for each game
+// with parameter GAME
 
-module jtlabrun_colmix(
+module jtmx5k_colmix(
     input               rst,
     input               clk,
     input               clk24,
@@ -32,11 +34,12 @@ module jtlabrun_colmix(
     input               pal_cs,
     input               cpu_rnw,
     input               cpu_cen,
-    input      [ 7:0]   cpu_addr,
+    input      [ 9:0]   cpu_addr,
     input      [ 7:0]   cpu_dout,
     output     [ 7:0]   pal_dout,
     // GFX colour requests
-    input      [ 6:0]   gfx_pxl,
+    input      [ 6:0]   gfx1_pxl,
+    input      [ 3:0]   gfx1_pal,
     // Colours
     output     [ 4:0]   red,
     output     [ 4:0]   green,
@@ -44,17 +47,24 @@ module jtlabrun_colmix(
 );
 
 wire        pal_we = cpu_cen & ~cpu_rnw & pal_cs;
-wire [ 7:0] col_data, col_addr;
+wire [ 7:0] col_data;
+wire [ 9:0] col_addr;
+reg         gfx_sel;
+reg         gfx_aux, gfx_other; // signals to help in priority equations
 reg         pal_half;
 reg  [14:0] pxl_aux;
+reg  [ 6:0] gfx_mux;
 wire [14:0] col_out;
 reg  [14:0] col_in;
+wire        gfx1_blank = gfx1_pxl[3:0]==4'h0;
 
-assign col_addr = { gfx_pxl, ~pal_half };
+
+assign col_addr = { gfx1_pxl[4],  gfx1_pal[3:0], gfx1_pxl[3:0], pal_half };
+
 
 assign { blue, green, red } = col_out;
 
-jtframe_dual_ram #(.aw(8)) u_ram(
+jtframe_dual_ram #(.aw(10)) u_ram(
     .clk0   ( clk24     ),
     .clk1   ( clk       ),
     // Port 0
@@ -82,7 +92,7 @@ always @(posedge clk) begin
     end
 end
 
-jtframe_blank #(.DLY(2),.DW(15)) u_blank(
+jtframe_blank #(.DLY(3),.DW(15)) u_blank(
     .clk        ( clk       ),
     .pxl_cen    ( pxl_cen   ),
     .LHBL       ( LHBL      ),

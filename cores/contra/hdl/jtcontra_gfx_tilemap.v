@@ -63,7 +63,9 @@ module jtcontra_gfx_tilemap(
     input       [ 1:0]   code9_sel,
     input       [ 1:0]   code10_sel,
     input       [ 1:0]   code11_sel,
-    input       [ 1:0]   code12_sel
+    input       [ 1:0]   code12_sel,
+    input                hflip_en,
+    input                vflip_en
 );
 
 localparam [8:0] RENDER_END = 9'o500;
@@ -82,20 +84,21 @@ reg  [ 4:0] bank;
 reg  [ 2:0] dump_cnt;
 reg  [15:0] pxl_data;
 reg  [8:0]  hrender;
-wire        txt_row;
+wire        txt_row;    // signal whether the current row being rendered is text or graphics
 wire [ 9:0] scr_hn0, hn;
 reg         scores;
+reg         hflip, vflip;
 
 assign txt_line   = txt_his[1];
 assign txt_row    = txt_en || scores;
 assign scr_hn0    = (strip_en && !strip_col)? {1'b0,strip_pos} : hpos;
 assign line_addr  = { line, flip ? 9'h117-hrender  : hrender };
 assign scr_we     = line_we;
-assign rom_addr   = { tile_msb, code, vn[2:0], hn[2] }; // 13+3+1 = 17!
+assign rom_addr   = { tile_msb, code, vn[2:0]^{3{vflip}}, hn[2]^hflip }; // 13+3+1 = 17!
 assign scan_addr  = { txt_row, vn[7:3], hn[7:3] }; // 1 + 5 + 5 = 11
 assign strip_addr = strip_col ? hn_aux[7:3] : vrender[7:3];
 assign vpos_sum   = (strip_en && strip_col) ? {1'd0,strip_pos} : {1'd0,vpos};
-assign lyr_vn     = (vrender^{1'b0,{9{flip}}}) + (txt_row ? 9'd0 : vpos_sum);
+assign lyr_vn     = (vrender^{9{flip}}) + (txt_row ? 9'd0 : vpos_sum);
 assign hn         = txt_row ? hn_txt : hn_scr;
 
 always @(*) begin
@@ -135,7 +138,7 @@ always @(posedge clk) begin
                     hn_scr <= scr_hn0[8:0];
                     //hrender <= ( txt_en ? chr_dump_start : scr_dump_start )
                     //           - { 7'd0, scr_hn0[1:0] } - 9'd1;
-                    hrender <= scr_dump_start - 1'd1 - (txt_en ? 0 : { 7'd0, scr_hn0[1:0] });
+                    hrender <= scr_dump_start - 1'd1 - (txt_en ? 9'd0 : { 7'd0, scr_hn0[1:0] });
                     hend    <= RENDER_END;
                     if(!done) txt_his <= { txt_his[0], txt_row };
                 end
@@ -146,6 +149,8 @@ always @(posedge clk) begin
                     code   <= { bank, code_scan };
                     pal    <= { pal_msb & attr_scan[3], attr_scan[2:0] };
                     scrwin <= (attr_scan[6] && scrwin_en);
+                    hflip  <= ~txt_row & hflip_en & attr_scan[4];
+                    vflip  <= ~txt_row & vflip_en & attr_scan[5];
                     rom_cs <= 1;
                 end
                 5: begin
@@ -158,9 +163,9 @@ always @(posedge clk) begin
                 6: begin // dumps 4 pixels
                     if( dump_cnt[0] ) st<=st;
                     dump_cnt <= dump_cnt>>1;
-                    pxl_data <= pxl_data << 4;
+                    pxl_data <= hflip ? pxl_data >> 4 : pxl_data << 4;
                     hrender  <= hrender + 9'd1;
-                    line_din <= { scrwin, pal, pxl_data[15:12] };
+                    line_din <= { scrwin, pal, hflip ? pxl_data[3:0] : pxl_data[15:12] };
                     line_we  <= 1;
                 end
                 7: begin

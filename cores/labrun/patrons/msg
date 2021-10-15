@@ -1,5 +1,5 @@
   \BTrick Trap\W FPGA by \RJotego\W
-  http://patreon.com/topapate
+      patreon.com/topapate
 
 
       October 2020 (beta)
@@ -10,70 +10,81 @@
 
         DIRECTORS
 
-  Purple Tinker    Atrac17
+    Purple Tinker  Atrac17
 
-  F. Mahe          C. Gelatt
+    F. Mahe        C. Gelatt
 
-  DJ Qbert         SID
+    DJ Qbert       SID
 
          DJ Hard Rich
 
-  Ben01623       Manuel Antoni
+    Ben01623     Manuel Antoni
 
-  C. D'Aoust     John Williams
+    C. D'Aoust   John Williams
 
 
 _______________________________
       \RSpecial Thanks to\W
 
-  Cohge     \BArcadexpress.com\W
-
+        \BArcadexpress.com\W
+      Cohge
         Brian Sallee
 
-  Lionel Lenoble  Daniel Bauza
-
-  Phillip McMahon  Jo Tomiyori
+      Lionel Lenoble
+        Daniel Bauza
+      Phillip McMahon
+        Jo Tomiyori
 _______________________________
-
-
-
 
        \RAnd thanks to\W
 
-  Adam Davis    Kitsuake
-  A. Rensberg   Kyle Good
-  A. Francomb   Leslie Law
-  Andrew Moore  Marcus Hogue
-  Andyways      Matthew Young
-  Arjan de Lang Michele Zilli
-  Chris Jardine nullobject
-  Christian     Oliver Jaksch
-  Chris Harvey  Oliver Wndmth
-  David Ashby   Oscar
-  Don Gafford   Per Sweden
-  Ed Balan      PsyFX
-  Edward Rana   RetroDriven
-  Gus D.        R. MacLean
-  Henrik N.     Roman Buser
-  Joeri         Steven Wilson
-  John Casey    Toby Boreham
-  J. Slowfret   Ulf Skutnabba
-  RetroFPGA     Victor
-  Juan Gayon    Xzarian
+      Adam Davis
+           Kitsuake
+      A. Rensberg
+           Kyle Good
+      A. Francomb
+           Leslie Law
+      Andrew Moore
+           Marcus Hogue
+      Andyways
+           Matthew Young
+      Arjan de Lang
+           Michele Zilli
+      Chris Jardine
+           nullobject
+      Christian
+           Oliver Jaksch
+      Chris Harvey
+           Oliver Wndmth
+      David Ashby
+           Oscar
+      Don Gafford
+           Per Sweden
+      Ed Balan
+           PsyFX
+      Edward Rana
+           RetroDriven
+      Gus D.
+           R. MacLean
+      Henrik N.
+           Roman Buser
+      Joeri
+           Steven Wilson
+      John Casey
+           Toby Boreham
+      J. Slowfret
+           Ulf Skutnabba
+      RetroFPGA
+           Victor
+      Juan Gayon
+           Xzarian
       Ultrarobotninja
 _______________________________
 
+    This core is possible
+    thanks to Furrtek's work
+    on the Konami K007121
 
-
-  This core has been possible
-  thanks to the work of Furrtek
-  on the Konami chip K007121
-
-  Please follow him in:
-
-  twitter: @furrtek
-  www.patreon.com/furrtek
-
-
-
+     twitter: @furrtek
+     www.patreon.com/furrtek
 _______________________________
